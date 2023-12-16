@@ -1,48 +1,52 @@
 ---
-import { Image } from "astro:assets";
-
 import PageLayout from "@/layouts/Base";
-import aboutImg from "@/assets/about-astro.png";
+import {Icon} from "astro-icon";
+import { Image } from "astro:assets";
+import Netease from "@/assets/netease.png"
+import Megaease from "@/assets/megaease.webp"
 
 const meta = {
-	title: "About",
-	description: "I'm a starter theme for Astro.build",
+  title: "About",
+  description: "The blog of Loki'Wager",
 };
 ---
 
 <PageLayout meta={meta}>
-	<div class="space-y-6">
-		<h1 class="title">About</h1>
-		<p>
-			Hi, I’m a starter Astro. I’m particularly great for getting you started with your own blogging
-			website.
-		</p>
-		<div class="flex justify-center">
-			<Image
-				src={aboutImg}
-				alt="A cartoon cactus looking at the 'Astro.build' logo"
-				loading="eager"
-				fetchpriority="high"
-			/>
-		</div>
-		<p>Here are my some of my awesome built in features:</p>
-		<ul class="list-inside list-disc">
-			<li>I'm ultra fast as I'm a static site</li>
-			<li>I'm fully responsive</li>
-			<li>I come with a light and dark mode</li>
-			<li>I'm easy to customise and add additional content</li>
-			<li>I have Tailwind CSS styling</li>
-			<li>Shiki code syntax highlighting</li>
-			<li>Satori for auto generating OG images for blog posts</li>
-		</ul>
-		<p>
-			Clone or fork my <a
-				class="cactus-link inline-block"
-				href="https://github.com/chrismwilliams/astro-cactus"
-				target="_blank"
-				rel="noopener noreferrer"
-				aria-label="github repository">repo</a
-			> if you like me!
-		</p>
-	</div>
+  <div class="space-y-6">
+    <h1 class="title">About</h1>
+    <p>
+      Hi, I’m Loki's Wager.
+    </p>
+    <p>
+      A professional software developer/software engineer/programmer <Icon class="h-6 w-6 inline" name="emojione-v1:laptop-computer" aria-hidden="true" focusable="false"/>.
+    </p>
+    <p>
+      The Software Architecture Expert in Netease <Image src={Netease} alt="logo" class="h-6 w-6 inline" aria-hidden="true" focusable="false"/>.
+    </p>
+    <p>
+      The Business Partner in Megaease <Image src={Megaease} alt="logo" class="h-6 w-6 inline" aria-hidden="true" focusable="false"/>.
+    </p>
+    <p>
+      An Open Source Contributor <Icon class="h-6 w-6 inline" name="ri:open-arm-fill" aria-hidden="true" focusable="false"/>.
+    </p>
+    <p>
+      Cloud Native & Observability & Big Data <Icon class="h-6 w-6 inline" name="cib:skillshare" aria-hidden="true" focusable="false"/>.
+    </p>
+    <p>
+      <Icon class="h-6 w-6 inline" name="logos:go" aria-hidden="true" focusable="false"/>
+      <Icon class="h-6 w-6 inline" name="logos:python" aria-hidden="true" focusable="false"/>
+      <Icon class="h-6 w-6 inline" name="logos:java" aria-hidden="true" focusable="false"/>
+      <Icon class="h-6 w-6 inline" name="logos:c" aria-hidden="true" focusable="false"/>
+      <Icon class="h-6 w-6 inline" name="logos:rust" aria-hidden="true" focusable="false"/>.
+    </p>
+    <p>
+      A poor-handed gamer <Icon class="h-6 w-6 inline" name="emojione-v1:video-game" aria-hidden="true" focusable="false"/>.
+    </p>
+    <p>
+      A lifelong leaner <Icon class="h-6 w-6 inline" name="eos-icons:machine-learning-outlined" aria-hidden="true" focusable="false"/>.
+    </p>
+    <p>
+      RainBow boy <Icon class="h-6 w-6 inline" name="noto-v1:rainbow" aria-hidden="true" focusable="false"/>.
+    </p>
+  </div>
 </PageLayout>
