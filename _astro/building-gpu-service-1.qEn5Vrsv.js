@@ -1,4 +1,4 @@
-import{c as t,r as a,m as s}from"./render-template.teAzdjd_.js";import{u as n}from"./hoisted.KeRB7VkP.js";const o=`<h2 id="building-a-gpu-saas-platform">Building a GPU SaaS Platform</h2>
+import{c as t,r as a,m as s}from"./render-template.SddDYDpB.js";import{u as n}from"./hoisted.iW066mOG.js";import"./astro/assets-service.1mn5GyWb.js";const o=`<h2 id="building-a-gpu-saas-platform">Building a GPU SaaS Platform</h2>
 <h3 id="our-driving-example">Our Driving Example</h3>
 <p>Nowadays, GPUs are widely used in many fields, such as deep learning, drawing, and video processing. Especially when OpenAI released ChatGPT, our
 daily life has been influenced by AI technology more than ever. However, the cost of GPU is still high, and it is not easy to get a GPU server.
@@ -42,7 +42,7 @@ Therefore, we want to build a GPU SaaS platform to provide GPU services.</p>
 <li>write the code of the platform, and test it.</li>
 <li>observe the status of the platform, and statistics the usage of the platform.</li>
 <li>improve the performance of the platform.</li>
-</ul>`,r={title:"Building your own GPU SaaS Platform - Getting Started",publishDate:"18 December 2023",description:"In this series of articles, I will share my experience of building a GPU SaaS platform from scratch. ",tags:["GPU","SaaS","Kubernetes","Ceph"],minutesRead:"3 min read"},i="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-1.md",l=void 0;function p(){return`
+</ul>`,r={title:"Building your own GPU SaaS Platform - Getting Started",publishDate:"18 December 2023",description:"In this series of articles, I will share my experience of building a GPU SaaS platform from scratch. ",tags:["GPU","SaaS","Kubernetes","Ceph"],minutesRead:"3 min read"},i="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-1.md",l=void 0;function g(){return`
 ## Building a GPU SaaS Platform
 
 ### Our Driving Example
@@ -93,4 +93,4 @@ In the next series of articles, we will discuss the following topics:
 * write the code of the platform, and test it.
 * observe the status of the platform, and statistics the usage of the platform.
 * improve the performance of the platform.
-`}function g(){return o}function w(){return[{depth:2,slug:"building-a-gpu-saas-platform",text:"Building a GPU SaaS Platform"},{depth:3,slug:"our-driving-example",text:"Our Driving Example"},{depth:3,slug:"what-should-our-gpu-saas-platform-do",text:"What should our GPU SaaS platform do?"},{depth:3,slug:"coming-up-next",text:"Coming Up Next"}]}const b=t((h,u,d)=>{const{layout:c,...e}=r;return e.file=i,e.url=l,a`${s()}${n(o)}`});export{b as Content,g as compiledContent,b as default,i as file,r as frontmatter,w as getHeadings,p as rawContent,l as url};
+`}function w(){return o}function b(){return[{depth:2,slug:"building-a-gpu-saas-platform",text:"Building a GPU SaaS Platform"},{depth:3,slug:"our-driving-example",text:"Our Driving Example"},{depth:3,slug:"what-should-our-gpu-saas-platform-do",text:"What should our GPU SaaS platform do?"},{depth:3,slug:"coming-up-next",text:"Coming Up Next"}]}const y=t((h,u,d)=>{const{layout:c,...e}=r;return e.file=i,e.url=l,a`${s()}${n(o)}`});export{y as Content,w as compiledContent,y as default,i as file,r as frontmatter,b as getHeadings,g as rawContent,l as url};

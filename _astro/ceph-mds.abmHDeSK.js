@@ -1,4 +1,4 @@
-import{c as a,r as s,m as o}from"./render-template.teAzdjd_.js";import{u as t}from"./hoisted.KeRB7VkP.js";const e=`<h2 id="background">Background</h2>
+import{c as a,r as s,m as o}from"./render-template.SddDYDpB.js";import{u as t}from"./hoisted.iW066mOG.js";import"./astro/assets-service.1mn5GyWb.js";const e=`<h2 id="background">Background</h2>
 <p>As a developer of a GPU SaaS platform relying on Kubernetes with Ceph as the storage backend. Recently, I encountered performance issues with CephFS, notably the extended execution time of commands like <code>import torch</code>, taking around 180 seconds. Investigating further, it became evident that the CephFS performance was constrained by a single MDS (Metadata Server) running by default.</p>
 <p>However, I found that there is no clear documentation about how to configure multiple active MDS daemons. So I write this article to record the process of configuring multiple active MDS daemons.</p>
 <h2 id="what-is-mds">What is MDS</h2>
@@ -72,7 +72,7 @@ import{c as a,r as s,m as o}from"./render-template.teAzdjd_.js";import{u as t}fr
 <span class="line"><span>up	{0=14232,1=6103278,2=6110459}</span></span>
 <span class="line"><span>...</span></span>
 <span class="line"><span>standby_count_wanted	1</span></span>
-<span class="line"><span>...</span></span></code></pre>`,p={title:"Ceph multiple active MDS Daemons",publishDate:"16 December 2023",description:"Enhancing CephFS Performance by Configuring Multiple Active MDS Daemons.",tags:["ceph","mds","devops"],minutesRead:"3 min read"},i="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/ceph-mds.md",l=void 0;function f(){return`
+<span class="line"><span>...</span></span></code></pre>`,p={title:"Ceph multiple active MDS Daemons",publishDate:"16 December 2023",description:"Enhancing CephFS Performance by Configuring Multiple Active MDS Daemons.",tags:["ceph","mds","devops"],minutesRead:"3 min read"},i="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/ceph-mds.md",l=void 0;function g(){return`
 ## Background
 
 As a developer of a GPU SaaS platform relying on Kubernetes with Ceph as the storage backend. Recently, I encountered performance issues with CephFS, notably the extended execution time of commands like \`import torch\`, taking around 180 seconds. Investigating further, it became evident that the CephFS performance was constrained by a single MDS (Metadata Server) running by default.
@@ -168,4 +168,4 @@ up	{0=14232,1=6103278,2=6110459}
 standby_count_wanted	1
 ...
 \`\`\`
-`}function g(){return e}function M(){return[{depth:2,slug:"background",text:"Background"},{depth:2,slug:"what-is-mds",text:"What is MDS"},{depth:2,slug:"when-to-use-multiple-active-mds-daemons",text:"When to Use Multiple Active MDS Daemons"},{depth:2,slug:"configuring-multiple-active-mds-daemons",text:"Configuring Multiple Active MDS Daemons"}]}const S=a((d,r,c)=>{const{layout:m,...n}=p;return n.file=i,n.url=l,s`${o()}${t(e)}`});export{S as Content,g as compiledContent,S as default,i as file,p as frontmatter,M as getHeadings,f as rawContent,l as url};
+`}function M(){return e}function S(){return[{depth:2,slug:"background",text:"Background"},{depth:2,slug:"what-is-mds",text:"What is MDS"},{depth:2,slug:"when-to-use-multiple-active-mds-daemons",text:"When to Use Multiple Active MDS Daemons"},{depth:2,slug:"configuring-multiple-active-mds-daemons",text:"Configuring Multiple Active MDS Daemons"}]}const b=a((d,r,c)=>{const{layout:m,...n}=p;return n.file=i,n.url=l,s`${o()}${t(e)}`});export{b as Content,M as compiledContent,b as default,i as file,p as frontmatter,S as getHeadings,g as rawContent,l as url};
