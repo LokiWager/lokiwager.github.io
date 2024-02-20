@@ -37,8 +37,7 @@ characters in the URL.
 
 ![architecture](./img/golang-http-url/architecture.png)
 
-The architecture of the server is shown in the figure. In front of the server, there is an open-source gateway called [easegress](https://github.
-com/easegress-io/easegress) and a self-developed reverse proxy.
+The architecture of the server is shown in the figure. In front of the server, there is an open-source gateway called [easegress](https://github.com/easegress-io/easegress) and a self-developed reverse proxy.
 
 * The gateway is responsible for handling the request from the client and forwarding the request to the different server, like terminal server, console
   server, etc.
