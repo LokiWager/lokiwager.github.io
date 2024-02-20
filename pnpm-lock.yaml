@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -2085,7 +2085,7 @@ packages:
       '@astrojs/compiler': '>=0.27.0'
     dependencies:
       '@astrojs/compiler': 2.3.2
-      synckit: 0.8.5
+      synckit: 0.8.8
     dev: true
 
   /asynciterator.prototype@1.0.0:
