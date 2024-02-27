@@ -49,8 +49,8 @@ In the next series of articles, we will discuss the following topics:
 * write the code of the platform, and test it.
 * observe the status of the platform, and statistics the usage of the platform.
 * improve the performance of the platform.
-`,s={title:"Building your own GPU SaaS Platform - Getting Started",description:"In this series of articles, I will share my experience of building a GPU SaaS platform from scratch. ",publishDate:new Date(17028576e5),draft:!1,tags:["gpu","saas","kubernetes","ceph"]},n={type:"content",filePath:"/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-1.md",rawData:`
-title: "Building your own GPU SaaS Platform - Getting Started"
+`,s={title:"Building a GPU SaaS Platform - Getting Started",description:"In this series of articles, I will share my experience of building a GPU SaaS platform from scratch. ",publishDate:new Date(17028576e5),draft:!1,tags:["gpu","saas","kubernetes","ceph"]},n={type:"content",filePath:"/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-1.md",rawData:`
+title: "Building a GPU SaaS Platform - Getting Started"
 publishDate: "18 December 2023"
 description: "In this series of articles, I will share my experience of building a GPU SaaS platform from scratch. "
 tags: [ "GPU", "SaaS", "Kubernetes", "Ceph" ]`};export{n as _internal,a as body,t as collection,s as data,e as id,o as slug};

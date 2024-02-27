@@ -1,4 +1,4 @@
-import{c as t,r as a,m as s}from"./render-template.uNzKMew4.js";import{u as n}from"./hoisted.-_B7TnmE.js";import"./astro/assets-service.1mn5GyWb.js";const o=`<h2 id="building-a-gpu-saas-platform">Building a GPU SaaS Platform</h2>
+import{c as t,r as a,m as s}from"./render-template.mrhESvQ5.js";import{u as n}from"./hoisted.5ITtbDzT.js";import"./astro/assets-service.1mn5GyWb.js";const o=`<h2 id="building-a-gpu-saas-platform">Building a GPU SaaS Platform</h2>
 <h3 id="our-driving-example">Our Driving Example</h3>
 <p>Nowadays, GPUs are widely used in many fields, such as deep learning, drawing, and video processing. Especially when OpenAI released ChatGPT, our
 daily life has been influenced by AI technology more than ever. However, the cost of GPU is still high, and it is not easy to get a GPU server.
@@ -42,7 +42,7 @@ Therefore, we want to build a GPU SaaS platform to provide GPU services.</p>
 <li>write the code of the platform, and test it.</li>
 <li>observe the status of the platform, and statistics the usage of the platform.</li>
 <li>improve the performance of the platform.</li>
-</ul>`,r={title:"Building your own GPU SaaS Platform - Getting Started",publishDate:"18 December 2023",description:"In this series of articles, I will share my experience of building a GPU SaaS platform from scratch. ",tags:["GPU","SaaS","Kubernetes","Ceph"],minutesRead:"3 min read"},i="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-1.md",l=void 0;function g(){return`
+</ul>`,r={title:"Building a GPU SaaS Platform - Getting Started",publishDate:"18 December 2023",description:"In this series of articles, I will share my experience of building a GPU SaaS platform from scratch. ",tags:["GPU","SaaS","Kubernetes","Ceph"],minutesRead:"3 min read"},i="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-1.md",l=void 0;function g(){return`
 ## Building a GPU SaaS Platform
 
 ### Our Driving Example
