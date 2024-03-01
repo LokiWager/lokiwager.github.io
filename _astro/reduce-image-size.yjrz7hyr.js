@@ -316,8 +316,4 @@ else
   build_services "$@"
 fi
 \`\`\`
-`,r={title:"How to reduce the Nvidia Docker image size",description:"The Nvidia Docker image is too large for Kubernetes to extract. How to reduce the image size?",publishDate:new Date(170856e7),draft:!1,tags:["docker","kubernetes","image","gpu"]},i={type:"content",filePath:"/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/reduce-image-size.md",rawData:`
-title: "How to reduce the Nvidia Docker image size"
-publishDate: "22 February 2024"
-description: "The Nvidia Docker image is too large for Kubernetes to extract. How to reduce the image size?"
-tags: [ "Docker", "Kubernetes", "Image", "GPU" ]`};export{i as _internal,a as body,n as collection,r as data,e as id,t as slug};
+`,r={title:"How to reduce the Nvidia Docker image size",description:"The Nvidia Docker image is too large for Kubernetes to extract. How to reduce the image size?",publishDate:new Date(170856e7),draft:!1,tags:["docker","kubernetes","image","gpu"]},i={type:"content",filePath:"/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/reduce-image-size.md",rawData:void 0};export{i as _internal,a as body,n as collection,r as data,e as id,t as slug};

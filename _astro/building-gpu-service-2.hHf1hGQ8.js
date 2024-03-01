@@ -126,8 +126,4 @@ It is a good practice to write a requirement document before starting to write t
 the developers understand what they should do. It should also be flexible enough to let the developers have some space to design the architecture
 and choose the technologies. In the next article, we will discuss the architecture of the platform, and choose the technologies, and write a
 design spec. **However, the article is a demo, not enough detailed to be a real requirement spec.**
-`,s={title:"Building a GPU SaaS Platform - The requirement spec",description:"How to write a requirement document for a GPU SaaS platform, and what should be included in the document.",publishDate:new Date(17089056e5),draft:!1,tags:["gpu","saas","kubernetes","ceph"]},i={type:"content",filePath:"/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-2.md",rawData:`
-title: "Building a GPU SaaS Platform - The requirement spec"
-publishDate: "26 February 2024"
-description: "How to write a requirement document for a GPU SaaS platform, and what should be included in the document."
-tags: [ "GPU", "SaaS", "Kubernetes", "Ceph" ]`};export{i as _internal,a as body,n as collection,s as data,e as id,t as slug};
+`,s={title:"Building a GPU SaaS Platform - The requirement spec",description:"How to write a requirement document for a GPU SaaS platform, and what should be included in the document.",publishDate:new Date(17089056e5),draft:!1,tags:["gpu","saas","kubernetes","ceph"]},i={type:"content",filePath:"/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-2.md",rawData:void 0};export{i as _internal,a as body,n as collection,s as data,e as id,t as slug};
