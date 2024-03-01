@@ -1,4 +1,4 @@
-import{s as g,g as l}from"./_astro_assets.VCKgNiXa.js";import{c as u,r as m,m as d}from"./render-template.rxe33S1b.js";import{u as p}from"./hoisted.KACxtpMN.js";import"./astro/assets-service.wdzbVTWi.js";const f={src:"/_astro/part2-stock.LXGy3miQ.png",width:3457,height:1706,format:"png"},v={src:"/_astro/part2-user.O9Ternjq.png",width:3002,height:2319,format:"png"},P={src:"/_astro/part2-storage.ADlGkIpz.png",width:2975,height:1028,format:"png"},U=async function(a){const t={};{const i=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part2-stock\\.png[^"]*)"',"g");let s,e=0;for(;(s=i.exec(a))!==null;){const n="./img/gpu-service/part2-stock.png_"+e,r=JSON.parse(s[1].replace(/&#x22;/g,'"')),{src:c,...o}=r;t[n]=await l({src:f,...o}),e++}}{const i=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part2-user\\.png[^"]*)"',"g");let s,e=0;for(;(s=i.exec(a))!==null;){const n="./img/gpu-service/part2-user.png_"+e,r=JSON.parse(s[1].replace(/&#x22;/g,'"')),{src:c,...o}=r;t[n]=await l({src:v,...o}),e++}}{const i=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part2-storage\\.png[^"]*)"',"g");let s,e=0;for(;(s=i.exec(a))!==null;){const n="./img/gpu-service/part2-storage.png_"+e,r=JSON.parse(s[1].replace(/&#x22;/g,'"')),{src:c,...o}=r;t[n]=await l({src:P,...o}),e++}}return t};async function G(a){return U(a).then(t=>a.replaceAll(/__ASTRO_IMAGE_="([^"]+)"/gm,(i,s)=>{const e=JSON.parse(s.replace(/&#x22;/g,'"')),n=e.src+"_"+e.index;t[n].srcSet&&t[n].srcSet.values.length>0&&(t[n].attributes.srcset=t[n].srcSet.attribute);const{index:r,...c}=t[n].attributes;return g({src:t[n].src,...c})}))}const h=await G(`<h2 id="building-a-gpu-saas-platform">Building a GPU SaaS Platform</h2>
+import{s as o,g as n}from"./_astro_assets.htesYFOm.js";import{c as l,r as c,m as h}from"./render-template.mrhESvQ5.js";import{u as g}from"./hoisted.5ITtbDzT.js";import"./astro/assets-service.1mn5GyWb.js";const u={src:"/_astro/part2-stock.LXGy3miQ.png",width:3457,height:1706,format:"png"},m={src:"/_astro/part2-user.O9Ternjq.png",width:3002,height:2319,format:"png"},d={src:"/_astro/part2-storage.ADlGkIpz.png",width:2975,height:1028,format:"png"},p=async function(){return{"./img/gpu-service/part2-stock.png":await n({src:u}),"./img/gpu-service/part2-user.png":await n({src:m}),"./img/gpu-service/part2-storage.png":await n({src:d})}};async function f(s){return p().then(e=>s.replaceAll(/__ASTRO_IMAGE_="([^"]+)"/gm,(r,t)=>o({src:e[t].src,...e[t].attributes})))}const i=await f(`<h2 id="building-a-gpu-saas-platform">Building a GPU SaaS Platform</h2>
 <p>As we discussed in the previous article, we will write a requirement document for our Stable Diffusion WebUI SaaS. This article is not a complete requirement document, but a guide to write a requirement document.</p>
 <h3 id="background">Background</h3>
 <p>AI drawing technology has been widely used in many fields, such as game design, animation, video processing, etc. However, it is really hard for
@@ -46,7 +46,7 @@ size and the price.</li>
 <ul>
 <li><strong>user operation flow</strong></li>
 </ul>
-<img __ASTRO_IMAGE_="{&#x22;src&#x22;:&#x22;./img/gpu-service/part2-stock.png&#x22;,&#x22;alt&#x22;:&#x22;stock requirements&#x22;,&#x22;index&#x22;:0}">
+<img alt="stock requirements" __ASTRO_IMAGE_="./img/gpu-service/part2-stock.png">
 <ol>
 <li>The administrator can add a new GPU specification.</li>
 <li>The administrator can delete a GPU specification.</li>
@@ -70,7 +70,7 @@ specification and the stock. The runtime plane should manage the real stock reso
 <ul>
 <li><strong>user operation flow</strong></li>
 </ul>
-<img __ASTRO_IMAGE_="{&#x22;src&#x22;:&#x22;./img/gpu-service/part2-user.png&#x22;,&#x22;alt&#x22;:&#x22;gpu requirements&#x22;,&#x22;index&#x22;:0}">
+<img alt="gpu requirements" __ASTRO_IMAGE_="./img/gpu-service/part2-user.png">
 <ol>
 <li>The user can create a GPU instance with a GPU specification, stable diffusion webui version, and storage.</li>
 <li>The user can delete a GPU instance.</li>
@@ -94,7 +94,7 @@ resources, reporting the GPU status to the GPU management plane and starting the
 <ul>
 <li><strong>user operation flow</strong></li>
 </ul>
-<img __ASTRO_IMAGE_="{&#x22;src&#x22;:&#x22;./img/gpu-service/part2-storage.png&#x22;,&#x22;alt&#x22;:&#x22;storage requirements&#x22;,&#x22;index&#x22;:0}">
+<img alt="storage requirements" __ASTRO_IMAGE_="./img/gpu-service/part2-storage.png">
 <ol>
 <li>The user can create a storage with a storage specification.</li>
 <li>The user can delete a storage.</li>
@@ -116,7 +116,7 @@ resources, reporting the GPU status to the GPU management plane and starting the
 <p>It is a good practice to write a requirement document before starting to write the code. The requirement document should be detailed enough to let
 the developers understand what they should do. It should also be flexible enough to let the developers have some space to design the architecture
 and choose the technologies. In the next article, we will discuss the architecture of the platform, and choose the technologies, and write a
-design spec. <strong>However, the article is a demo, not enough detailed to be a real requirement spec.</strong></p>`),b={title:"Building a GPU SaaS Platform - The requirement spec",publishDate:"26 February 2024",description:"How to write a requirement document for a GPU SaaS platform, and what should be included in the document.",tags:["GPU","SaaS","Kubernetes","Ceph"],minutesRead:"5 min read"},w="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-2.md",T=void 0;function I(){return`
+design spec. <strong>However, the article is a demo, not enough detailed to be a real requirement spec.</strong></p>`),v={title:"Building a GPU SaaS Platform - The requirement spec",publishDate:"26 February 2024",description:"How to write a requirement document for a GPU SaaS platform, and what should be included in the document.",tags:["GPU","SaaS","Kubernetes","Ceph"],minutesRead:"5 min read"},U="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-2.md",P=void 0;function k(){return`
 ## Building a GPU SaaS Platform
 
 As we discussed in the previous article, we will write a requirement document for our Stable Diffusion WebUI SaaS. This article is not a complete requirement document, but a guide to write a requirement document.
@@ -244,4 +244,4 @@ It is a good practice to write a requirement document before starting to write t
 the developers understand what they should do. It should also be flexible enough to let the developers have some space to design the architecture
 and choose the technologies. In the next article, we will discuss the architecture of the platform, and choose the technologies, and write a
 design spec. **However, the article is a demo, not enough detailed to be a real requirement spec.**
-`}function _(){return h}function q(){return[{depth:2,slug:"building-a-gpu-saas-platform",text:"Building a GPU SaaS Platform"},{depth:3,slug:"background",text:"Background"},{depth:4,slug:"game-materials",text:"Game materials"},{depth:4,slug:"lora-training",text:"Lora training"},{depth:3,slug:"description-of-the-project",text:"Description of the project"},{depth:4,slug:"overall-description",text:"Overall description"},{depth:4,slug:"concept-definition",text:"Concept definition"},{depth:3,slug:"specific-requirements",text:"Specific requirements"},{depth:4,slug:"stock-management",text:"stock management"},{depth:4,slug:"gpu-service-management",text:"GPU service management"},{depth:4,slug:"storage-service-management",text:"Storage service management"},{depth:3,slug:"overall",text:"Overall"}]}const A=u((a,t,i)=>{const{layout:s,...e}=b;return e.file=w,e.url=T,m`${d()}${p(h)}`});export{A as Content,_ as compiledContent,A as default,w as file,b as frontmatter,q as getHeadings,I as rawContent,T as url};
+`}function S(){return i}function y(){return[{depth:2,slug:"building-a-gpu-saas-platform",text:"Building a GPU SaaS Platform"},{depth:3,slug:"background",text:"Background"},{depth:4,slug:"game-materials",text:"Game materials"},{depth:4,slug:"lora-training",text:"Lora training"},{depth:3,slug:"description-of-the-project",text:"Description of the project"},{depth:4,slug:"overall-description",text:"Overall description"},{depth:4,slug:"concept-definition",text:"Concept definition"},{depth:3,slug:"specific-requirements",text:"Specific requirements"},{depth:4,slug:"stock-management",text:"stock management"},{depth:4,slug:"gpu-service-management",text:"GPU service management"},{depth:4,slug:"storage-service-management",text:"Storage service management"},{depth:3,slug:"overall",text:"Overall"}]}const I=l((s,e,r)=>{const{layout:t,...a}=v;return a.file=U,a.url=P,c`${h()}${g(i)}`});export{I as Content,S as compiledContent,I as default,U as file,v as frontmatter,y as getHeadings,k as rawContent,P as url};

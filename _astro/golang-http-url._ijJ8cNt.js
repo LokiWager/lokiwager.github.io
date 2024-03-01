@@ -153,4 +153,8 @@ decoded. The important thing is that the \`Path\` documentation doesn't mention 
 improved. In my opinion, the reason why Golang decodes the URL is that it is convenient for the developer, in most cases, the developer doesn't
 need the original encoding of the URL.
 
-`,o={title:`A Fun "Bug" with Golang's http.URL`,description:"Documenting an interesting Online issue troubleshooting journey",publishDate:new Date(17083872e5),draft:!1,tags:["golang","network"]},s={type:"content",filePath:"/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/golang-http-url.md",rawData:void 0};export{s as _internal,r as body,t as collection,o as data,e as id,n as slug};
+`,o={title:`A Fun "Bug" with Golang's http.URL`,description:"Documenting an interesting Online issue troubleshooting journey",publishDate:new Date(17083872e5),draft:!1,tags:["golang","network"]},s={type:"content",filePath:"/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/golang-http-url.md",rawData:`
+title: "A Fun \\"Bug\\" with Golang's http.URL"
+publishDate: "20 February 2024"
+description: "Documenting an interesting Online issue troubleshooting journey"
+tags: [ "Golang", "Network" ]`};export{s as _internal,r as body,t as collection,o as data,e as id,n as slug};
