@@ -1,56 +1,9 @@
-<!DOCTYPE html><html lang="en-GB"> <head><meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title>A Fun &quot;Bug&quot; with Golang&#39;s http.URL • Loki&#39;s Wager</title>  <link rel="icon" href="/logo.png" sizes="any"> <!--<link rel="icon" href="/icon.svg" type="image/svg+xml" />--> <!--<link rel="apple-touch-icon" href="/apple-touch-icon.png" />--> <!--<link rel="manifest" href="/manifest.webmanifest" />--> <!--<link rel="canonical" href={canonicalURL} />-->  <meta name="title" content="A Fun &#34;Bug&#34; with Golang's http.URL • Loki's Wager"> <meta name="description" content="Documenting an interesting Online issue troubleshooting journey"> <meta name="author" content="Loki's Wager">  <meta name="theme-color" content="">  <meta property="og:type" content="article"> <meta property="og:title" content="A Fun &#34;Bug&#34; with Golang's http.URL"> <meta property="og:description" content="Documenting an interesting Online issue troubleshooting journey"> <meta property="og:url" content="https://astro-cactus.chriswilliams.dev/posts/golang-http-url/"> <meta property="og:site_name" content="Loki's Wager"> <meta property="og:locale" content="en_GB"> <!--<meta property="og:image" content={socialImageURL} />--> <meta property="og:image:width" content="1200"> <meta property="og:image:height" content="630">  <meta property="article:author" content="Loki's Wager"> <meta property="article:published_time" content="2024-02-20T00:00:00.000Z">   <meta property="twitter:card" content="summary_large_image"> <meta property="twitter:url" content="https://astro-cactus.chriswilliams.dev/posts/golang-http-url/"> <meta property="twitter:title" content="A Fun &#34;Bug&#34; with Golang's http.URL"> <meta property="twitter:description" content="Documenting an interesting Online issue troubleshooting journey"> <!--<meta property="twitter:image" content={socialImageURL} />-->  <link rel="sitemap" href="/sitemap-index.xml">  <link rel="alternate" type="application/rss+xml" title="Loki's Wager" href="/rss.xml">   <link rel="webmention" href="https://webmention.io/astro-cactus.chriswilliams.dev/webmention">  <meta name="generator" content="Astro v4.4.6"><link rel="stylesheet" href="/_astro/_slug_.ZNsgX_AZ.css" /><script type="module" src="/_astro/hoisted.xdqHMZhn.js"></script>
-<script type="module" src="/_astro/page.tdlkyGlf.js"></script></head> <body> <script>
-	function getUserPref() {
-		const storedTheme = typeof localStorage !== "undefined" && localStorage.getItem("theme");
-		return (
-			storedTheme || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
-		);
-	}
-
-	function setTheme(newTheme) {
-		if (!newTheme || (newTheme !== "light" && newTheme !== "dark")) {
-			return console.warn(
-				`Incorrect theme value received. Expected 'light' or 'dark', received ${newTheme}`,
-			);
-		}
-
-		const root = document.documentElement;
-
-		// class already set to newTheme, exit early
-		if (
-			(newTheme === "dark" && root.classList.contains("dark")) ||
-			(newTheme === "light" && !root.classList.contains("dark"))
-		) {
-			return;
-		}
-
-		const colorThemeMetaTag = document.querySelector("meta[name='theme-color']");
-		document.documentElement.classList.toggle("dark", newTheme === "dark");
-		const bgColour = getComputedStyle(document.body).getPropertyValue("--theme-bg");
-
-		colorThemeMetaTag.setAttribute("content", `hsl(${bgColour})`);
-		if (typeof localStorage !== "undefined") {
-			localStorage.setItem("theme", newTheme);
-		}
-	}
-
-	// initial setup
-	setTheme(getUserPref());
-
-	// View Transitions hook to restore theme
-	document.addEventListener("astro:after-swap", () => setTheme(getUserPref()));
-
-	// listen for theme-change custom event, fired in src/components/ThemeToggle.astro
-	document.addEventListener("theme-change", (e) => {
-		setTheme(e.detail.theme);
-	});
-</script> <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:start-1 focus:top-1.5">skip to content
-</a> <header id="main-header" class="group relative mb-2 flex items-center sm:ps-[4.5rem]"> <div class="flex sm:flex-col"> <a href="/" class="inline-flex items-center grayscale hover:filter-none sm:relative sm:inline-block"> <img src="/_astro/logo.5KInvHpf_ZOK7lA.webp" alt="logo" class="me-3 w-6 sm:absolute sm:start-[-4.5rem] sm:me-0 sm:w-12" width="543" height="700" loading="lazy" decoding="async"> <span class="text-xl font-bold sm:text-2xl">Loki's Wager</span> </a> <nav id="navigation-menu" class="absolute -inset-x-4 top-14 hidden flex-col items-end gap-y-4 rounded-md bg-bgColor/[.85] py-4 text-accent shadow backdrop-blur group-[.menu-open]:z-50 group-[.menu-open]:flex sm:static sm:z-auto sm:-ms-4 sm:mt-1 sm:flex sm:flex-row sm:items-center sm:divide-x sm:divide-dashed sm:divide-accent sm:rounded-none sm:bg-transparent sm:py-0 sm:shadow-none sm:backdrop-blur-none" aria-label="Main menu"> <a href="/" class="px-4 py-4 sm:py-0 sm:hover:underline" data-astro-prefetch> Home </a><a href="/about/" class="px-4 py-4 sm:py-0 sm:hover:underline" data-astro-prefetch> About </a><a href="/posts/" class="px-4 py-4 sm:py-0 sm:hover:underline" data-astro-prefetch> Blog </a> </nav> </div> <!--<SocialList/>--> <site-search id="search" class="ms-auto" data-astro-cid-otpdt6jm> <button data-open-modal disabled class="flex h-9 w-9 items-center justify-center rounded-md ring-zinc-400 transition-all hover:ring-2" data-astro-cid-otpdt6jm> <svg aria-label="search" class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" data-astro-cid-otpdt6jm> <path stroke="none" d="M0 0h24v24H0z" data-astro-cid-otpdt6jm></path> <path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" data-astro-cid-otpdt6jm></path> </svg> </button> <dialog aria-label="search" class="h-full max-h-full w-full max-w-full border border-zinc-400 bg-bgColor shadow backdrop:backdrop-blur sm:mx-auto sm:mb-auto sm:mt-16 sm:h-max sm:max-h-[calc(100%-8rem)] sm:min-h-[15rem] sm:w-5/6 sm:max-w-[48rem] sm:rounded-md" data-astro-cid-otpdt6jm> <div class="dialog-frame flex flex-col gap-4 p-6 pt-12 sm:pt-6" data-astro-cid-otpdt6jm> <button data-close-modal class="ms-auto cursor-pointer rounded-md bg-zinc-200 p-2 font-semibold dark:bg-zinc-700" data-astro-cid-otpdt6jm>Close</button> <div class="search-container" data-astro-cid-otpdt6jm> <div id="cactus__search" data-astro-cid-otpdt6jm></div> </div> </div> </dialog> </site-search>    <theme-toggle class="ms-2 sm:ms-4"> <button type="button" id="toggle-theme" class="relative h-9 w-9 rounded-md p-2 ring-zinc-400 transition-all hover:ring-2" aria-label="Toggle Dark Mode"> <svg id="sun-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-100 opacity-100 transition-all dark:scale-0 dark:opacity-0" aria-hidden="true" focusable="false" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg id="moon-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100" aria-hidden="true" focusable="false" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path> <path d="M19 11h2m-1 -1v2"></path> </svg> </button> </theme-toggle>  <mobile-button> <button id="toggle-navigation-menu" class="group relative ms-4 h-7 w-7 sm:invisible sm:hidden" type="button" aria-label="Open main menu" aria-expanded="false" aria-haspopup="menu"> <svg id="line-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transition-all group-aria-expanded:scale-0 group-aria-expanded:opacity-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"></path> </svg> <svg id="cross-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 text-accent opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100" class="text-accent" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path> </svg> </button> </mobile-button> </header>  <main id="main">  <div class="gap-x-10 lg:flex lg:items-start"> <aside class="sticky top-20 order-2 -me-32 hidden basis-64 lg:block"> <h2 class="font-semibold">Table of Contents</h2> <ul class="mt-4 text-xs"> <li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#a-fun-bug-with-golangs-httpurl" aria-label="Scroll to section: A Fun “Bug” with Golang’s http.URL"><span class="me-0.5">#</span>A Fun “Bug” with Golang’s http.URL</a> <ul> <li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#prepare-the-minimal-environment" aria-label="Scroll to section: Prepare the minimal environment"><span class="me-0.5">#</span>Prepare the minimal environment</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#the-root-cause" aria-label="Scroll to section: The root cause"><span class="me-0.5">#</span>The root cause</a>  </li> </ul> </li> </ul> </aside> <article class="flex-grow break-words" data-pagefind-body> <div id="blog-hero"><h1 class="title mb-3 sm:mb-1"> A Fun &quot;Bug&quot; with Golang&#39;s http.URL </h1> <div class="flex flex-wrap items-center gap-x-3 gap-y-2"> <p class="font-semibold"> <time datetime="2024-02-20T00:00:00.000Z"> 20 February 2024 </time> /  4 min read </p>  </div> <div class="mt-3"> <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" class="me-1 inline-block h-6 w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z"></path> <path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116"></path> <path d="M6 9h-.01"></path> </svg>  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag golang" href="/tags/golang/" data-pagefind-filter="tag"> golang </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag network" href="/tags/network/" data-pagefind-filter="tag"> network </a>  </div></div> <div class="prose max-w-none prose-sm prose-cactus mt-12 prose-headings:font-semibold prose-headings:text-accent-2 prose-headings:before:absolute prose-headings:before:-ms-4 prose-headings:before:text-accent prose-headings:before:content-['#'] prose-th:before:content-none">  <h2 id="a-fun-bug-with-golangs-httpurl">A Fun “Bug” with Golang’s http.URL</h2>
+import{s as F,g as c}from"./_astro_assets.BTCpSAT0.js";import{c as y,r as h,m as d}from"./render-template.WhahChSq.js";import{u}from"./hoisted.t8dwiz7O.js";import"./astro/assets-service.wdzbVTWi.js";const f={src:"/_astro/Phenomenon.T5BBGCJ2.png",width:946,height:644,format:"png"},g={src:"/_astro/architecture.RS8kTfPP.png",width:2032,height:737,format:"png"},m=async function(t){const s={};{const o=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/golang-http-url/Phenomenon\\.png[^"]*)"',"g");let a,n=0;for(;(a=o.exec(t))!==null;){const e="./img/golang-http-url/Phenomenon.png_"+n,l=JSON.parse(a[1].replace(/&#x22;/g,'"')),{src:r,...p}=l;s[e]=await c({src:f,...p}),n++}}{const o=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/golang-http-url/architecture\\.png[^"]*)"',"g");let a,n=0;for(;(a=o.exec(t))!==null;){const e="./img/golang-http-url/architecture.png_"+n,l=JSON.parse(a[1].replace(/&#x22;/g,'"')),{src:r,...p}=l;s[e]=await c({src:g,...p}),n++}}return s};async function C(t){return m(t).then(s=>t.replaceAll(/__ASTRO_IMAGE_="([^"]+)"/gm,(o,a)=>{const n=JSON.parse(a.replace(/&#x22;/g,'"')),e=n.src+"_"+n.index;s[e].srcSet&&s[e].srcSet.values.length>0&&(s[e].attributes.srcset=s[e].srcSet.attribute);const{index:l,...r}=s[e].attributes;return F({src:s[e].src,...r})}))}const i=await C(`<h2 id="a-fun-bug-with-golangs-httpurl">A Fun “Bug” with Golang’s http.URL</h2>
 <p>I recently encountered an interesting issue that I thought the steps I took to troubleshoot might be worth sharing. I use an open-source project
 called <a href="https://github.com/sigoden/dufs" rel="nofollow, noopener, noreferrer" target="_blank">dufs</a> as a file server for my users. I found that I can’t operate a file which name contains <code>#</code> and <code>?</code>,
 and I am sure that I’ve encoded the URL correctly.</p>
 <h3 id="prepare-the-minimal-environment">Prepare the minimal environment</h3>
-<img  src="/_astro/Phenomenon.T5BBGCJ2_2eeNcx.webp" alt="Phenomenon" width="946" height="644" loading="lazy" decoding="async">
+<img __ASTRO_IMAGE_="{&#x22;src&#x22;:&#x22;./img/golang-http-url/Phenomenon.png&#x22;,&#x22;alt&#x22;:&#x22;Phenomenon&#x22;,&#x22;index&#x22;:0}">
 <p>First, I queried the server logs</p>
 <pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>2024-02-20T01:53:41Z INFO - 10.233.64.42 "HEAD /files/qsdizt-1703128686-ca6addedebab4017/sd-train.json" 404</span></span>
 <span class="line"><span>2024-02-20T01:53:41Z INFO - 10.233.64.42 "MOVE /files/qsdizt-1703128686-ca6addedebab4017/sd-tra" 404</span></span></code></pre>
@@ -67,7 +20,7 @@ works. But the server is running in a container with MUSL. So I need to prepare 
 issue. And I’ve found it is ok to use other non-ASCII characters in the file name. Suddenly, I realized that the <code>#</code> and <code>?</code> are special
 characters in the URL.</p>
 <h3 id="the-root-cause">The root cause</h3>
-<img  src="/_astro/architecture.RS8kTfPP_ZbCUzo.webp" alt="architecture" width="2032" height="737" loading="lazy" decoding="async">
+<img __ASTRO_IMAGE_="{&#x22;src&#x22;:&#x22;./img/golang-http-url/architecture.png&#x22;,&#x22;alt&#x22;:&#x22;architecture&#x22;,&#x22;index&#x22;:0}">
 <p>The architecture of the server is shown in the figure. In front of the server, there is an open-source gateway called <a href="https://github.com/easegress-io/easegress" rel="nofollow, noopener, noreferrer" target="_blank">easegress</a> and a self-developed reverse proxy.</p>
 <ul>
 <li>The gateway is responsible for handling the request from the client and forwarding the request to the different server, like terminal server, console
@@ -156,5 +109,159 @@ something contains <code>escape</code> or <code>unescape</code> in the code. So 
 <p>So the issue is in the gateway. The <code>Path</code> method decodes the URL. But why Golang decodes the URL? In rust and python Flask, the URL is not
 decoded. The important thing is that the <code>Path</code> documentation doesn’t mention it. I think the documentation should be
 improved. In my opinion, the reason why Golang decodes the URL is that it is convenient for the developer, in most cases, the developer doesn’t
-need the original encoding of the URL.</p>   </div> </article> </div> <button id="to-top-btn" class="z-90 fixed bottom-8 end-4 flex h-10 w-10 translate-y-28 items-center justify-center rounded-full border-2 border-transparent bg-zinc-200 text-3xl opacity-0 transition-all duration-300 hover:border-zinc-400 data-[show=true]:translate-y-0 data-[show=true]:opacity-100 dark:bg-zinc-700 sm:end-8 sm:h-12 sm:w-12" aria-label="Back to Top" data-show="false"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6"> <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path> </svg> </button>  </main> <footer class="mt-auto flex w-full flex-col items-center justify-center gap-y-2 pb-4 pt-20 text-center align-top font-semibold text-gray-600 dark:text-gray-400 sm:flex-row sm:justify-between sm:text-xs"> <div class="me-0 sm:me-4">
-Copyright &copy; 2024  Loki&#39;s Wager </div> <nav aria-label="More on this site" class="flex gap-x-2 sm:gap-x-0 sm:divide-x sm:divide-gray-500"> <!--{--> <!--	menuLinks.map((link) => (--> <!--		<a--> <!--			href={link.path}--> <!--			class="px-4 py-2 sm:px-2 sm:py-0 sm:hover:text-textColor sm:hover:underline"--> <!--		>--> <!--			{link.title}--> <!--		</a>--> <!--	))--> <!--}--> <div class="flex flex-wrap items-end gap-x-4"> <!--<p>Find me on</p>--> <ul class="flex flex-1 items-center gap-x-2 sm:flex-initial"> <li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://github.com/LokiWager" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:github"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg> <span class="sr-only">Github</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://twitter.com/loki66118227" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:twitter"><path fill="currentColor" d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/></svg> <span class="sr-only">Twitter</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="mailto:lokitingyi@gmail.com" target="_blank" rel="noopener noreferrer me authn"> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:email"><path fill="currentColor" d="m20 8-8 5-8-5V6l8 5 8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/></svg> <span class="sr-only">email</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://space.bilibili.com/4810234" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="ri:bilibili-fill"><path fill="currentColor" d="M18.223 3.086a1.25 1.25 0 0 1 0 1.768L17.08 5.996h1.17A3.75 3.75 0 0 1 22 9.747v7.5a3.75 3.75 0 0 1-3.75 3.75H5.75A3.75 3.75 0 0 1 2 17.247v-7.5a3.75 3.75 0 0 1 3.75-3.75h1.166L5.775 4.855a1.25 1.25 0 1 1 1.767-1.768l2.652 2.652c.079.079.145.165.198.257h3.213c.053-.092.12-.18.199-.258l2.651-2.652a1.25 1.25 0 0 1 1.768 0zm.027 5.42H5.75a1.25 1.25 0 0 0-1.247 1.157l-.003.094v7.5c0 .659.51 1.199 1.157 1.246l.093.004h12.5a1.25 1.25 0 0 0 1.247-1.157l.003-.093v-7.5c0-.69-.56-1.25-1.25-1.25zm-10 2.5c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25zm7.5 0c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25z"/></svg> <span class="sr-only">Bilibili</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://www.instagram.com/lokitingyi/" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:instagram"><path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg> <span class="sr-only">Instagram</span> </a> </li> </ul> </div> </nav> </footer> </body></html> 
+need the original encoding of the URL.</p>`),w={title:`A Fun "Bug" with Golang's http.URL`,publishDate:"20 February 2024",description:"Documenting an interesting Online issue troubleshooting journey",tags:["Golang","Network"],minutesRead:"4 min read"},B="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/golang-http-url.md",x=void 0;function D(){return`
+## A Fun "Bug" with Golang's http.URL
+
+I recently encountered an interesting issue that I thought the steps I took to troubleshoot might be worth sharing. I use an open-source project
+called [dufs](https://github.com/sigoden/dufs) as a file server for my users. I found that I can't operate a file which name contains \`#\` and \`?\`,
+and I am sure that I've encoded the URL correctly.
+
+### Prepare the minimal environment
+
+![Phenomenon](./img/golang-http-url/Phenomenon.png)
+
+First, I queried the server logs
+
+\`\`\`text
+2024-02-20T01:53:41Z INFO - 10.233.64.42 "HEAD /files/qsdizt-1703128686-ca6addedebab4017/sd-train.json" 404
+2024-02-20T01:53:41Z INFO - 10.233.64.42 "MOVE /files/qsdizt-1703128686-ca6addedebab4017/sd-tra" 404
+\`\`\`
+
+The first log is a \`HEAD\` request which represents whether the destination file exists. The second log is a \`MOVE\` request which represents moving
+the source file to the destination file. It is obvious that the request URL is wrong. I run the same request in my local environment(MacOS) and it
+works. But the server is running in a container with MUSL. So I need to prepare a minimal environment to make sure whether it is a MUSL issue.
+
+\`\`\`rust
+pub type Request = hyper::Request<Incoming>;
+
+pub async fn handle(self: Arc<Self>, req: Request) -> Result<Response> {
+  let req_path = req.uri().path();
+  ...
+}
+\`\`\`
+
+I wrote a simple Rust program to simulate the server. The server will print the request URL and the request URL is correct. So it is not a MUSL
+issue. And I've found it is ok to use other non-ASCII characters in the file name. Suddenly, I realized that the \`#\` and \`?\` are special
+characters in the URL.
+
+### The root cause
+
+![architecture](./img/golang-http-url/architecture.png)
+
+The architecture of the server is shown in the figure. In front of the server, there is an open-source gateway called [easegress](https://github.com/easegress-io/easegress) and a self-developed reverse proxy.
+
+* The gateway is responsible for handling the request from the client and forwarding the request to the different server, like terminal server, console
+  server, etc.
+* The reverse proxy is responsible for authenticating the request and finding the real pod to handle the request.
+
+Both of them are written in Golang. So I need to find which part decodes the URL.
+
+In the reverse proxy, I found the following code:
+
+\`\`\`go
+func buildReverseProxyCallback(resp http.ResponseWriter, req *http.Request, wcap *model.WebConsoleAccessParams) tunnel.SSHTunnelCallback {
+	director := func(req *http.Request) {
+		req.URL.Scheme = wcap.Protocol
+		req.URL.Host = fmt.Sprintf("%s:%d", wcap.Host.HostIP, wcap.Port)
+	}
+	var proxyError error = nil
+	errorHandler := func(resp http.ResponseWriter, req *http.Request, err error) {
+		proxyError = err
+		log.Printf("[GPUConsole] http: proxy error: %v", err)
+		resp.WriteHeader(http.StatusBadGateway)
+	}
+	return func(dia tunnel.Dial, sshClient *ssh.Client) error {
+		reverseProxy := &httputil.ReverseProxy{Director: director, ErrorHandler: errorHandler}
+		myTransport := http.DefaultTransport.(*http.Transport).Clone()
+		myTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		if dia != nil {
+			myTransport.DialContext = nil
+			myTransport.Dial = dia
+		}
+		reverseProxy.Transport = myTransport
+		reverseProxy.ServeHTTP(resp, req)
+		return proxyError
+	}
+}
+\`\`\`
+
+The \`director\` function is responsible for setting the \`req.URL.Scheme\` and \`req.URL.Host\`. It doesn't decode the URL. So the issue is not in the
+reverse proxy.
+
+So I checked the gateway. The gateway is a bit complex. It has a lot of features, like rate limiting, authentication, etc. And I couldn't find
+something contains \`escape\` or \`unescape\` in the code. So I decided to deploy a minimal http server to mock the production environment.
+
+\`\`\`yaml
+- https: false
+  keepAlive: true
+  keepAliveTimeout: 75s
+  kind: HTTPServer
+  maxConnections: 10240
+  name: http-server-gpu-proxy
+  port: 80
+  rules:
+    - paths:
+        - backend: web-console-proxy
+          clientMaxBodySize: -1
+          pathPrefix: /
+  version: easegress.megaease.com/v2
+- filters:
+    - kind: Proxy
+      name: proxy
+      pools:
+        - loadBalance:
+            policy: roundRobin
+          serverMaxBodySize: -1
+          servers:
+            - url: http://10.108.162.15:38801
+  flow:
+    - filter: proxy
+  kind: Pipeline
+  name: web-console-proxy
+\`\`\`
+
+Then I executed the following command:
+
+\`\`\`bash
+curl http://localhost/files/qsdizt-1703128686-ca6addedebab4017/sd-tr%23ain.json
+\`\`\`
+
+The server printed the following log:
+
+\`\`\`text
+Feb 19 17:12:31 ds15 easegress-server[309509]: 2024-02-19T17:12:31.999Z        INFO Get /files/qsdizt-1703128686-ca6addedebab4017/sd-tr#ain.json
+\`\`\`
+
+The URL is decoded, so I read the source code of the gateway again. I found the following code:
+
+\`\`\`go
+func (spCtx *serverPoolContext) prepareRequest(svr *Server, ctx stdcontext.Context, mirror bool) error {
+	req := spCtx.req
+
+	url := svr.URL + req.Path()
+	if rq := req.Std().URL.RawQuery; rq != "" {
+		url += "?" + rq
+	}
+  ...
+}
+
+// Path returns path.
+func (r *Request) Path() string {
+	return r.Std().URL.Path
+}
+\`\`\`
+
+And I read the [document](https://pkg.go.dev/net/url#URL) of the \`http.URL\`
+
+\`\`\`text
+Note that the Path field is stored in decoded form: /%47%6f%2f becomes /Go/. A consequence is that it is impossible to tell which slashes in the Path were slashes in the raw URL and which were %2f. This distinction is rarely important, but when it is, the code should use the URL.EscapedPath method, which preserves the original encoding of Path.
+
+The RawPath field is an optional field which is only set when the default encoding of Path is different from the escaped path. See the EscapedPath method for more details.
+\`\`\`
+
+So the issue is in the gateway. The \`Path\` method decodes the URL. But why Golang decodes the URL? In rust and python Flask, the URL is not
+decoded. The important thing is that the \`Path\` documentation doesn't mention it. I think the documentation should be
+improved. In my opinion, the reason why Golang decodes the URL is that it is convenient for the developer, in most cases, the developer doesn't
+need the original encoding of the URL.
+
+`}function I(){return i}function q(){return[{depth:2,slug:"a-fun-bug-with-golangs-httpurl",text:"A Fun “Bug” with Golang’s http.URL"},{depth:3,slug:"prepare-the-minimal-environment",text:"Prepare the minimal environment"},{depth:3,slug:"the-root-cause",text:"The root cause"}]}const A=y((t,s,o)=>{const{layout:a,...n}=w;return n.file=B,n.url=x,h`${d()}${u(i)}`});export{A as Content,I as compiledContent,A as default,B as file,w as frontmatter,q as getHeadings,D as rawContent,x as url};
