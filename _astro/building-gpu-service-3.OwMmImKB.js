@@ -1,4 +1,4 @@
-import{s as l,g as e}from"./_astro_assets.jouYF5Ke.js";import{c,r as i,m as p}from"./render-template.OhhDDSMG.js";import{u}from"./hoisted.g1Y7Y87Y.js";import"./astro/assets-service.1mn5GyWb.js";const h={src:"/_astro/part3-fn-architecture.jOYa06ad.png",width:1837,height:1091,format:"png"},d={src:"/_astro/part3-tech-arc.U0xEjxfs.png",width:1780,height:988,format:"png"},g={src:"/_astro/part3-runtime-plane.yUZV-GV2.png",width:1688,height:1015,format:"png"},m={src:"/_astro/part3-state.4OeNYZMT.png",width:1117,height:1068,format:"png"},y=async function(){return{"./img/gpu-service/part3-fn-architecture.png":await e({src:h}),"./img/gpu-service/part3-tech-arc.png":await e({src:d}),"./img/gpu-service/part3-runtime-plane.png":await e({src:g}),"./img/gpu-service/part3-state.png":await e({src:m})}};async function F(s){return y().then(t=>s.replaceAll(/__ASTRO_IMAGE_="([^"]+)"/gm,(r,n)=>l({src:t[n].src,...t[n].attributes})))}const o=await F(`<h1 id="building-a-gpu-saas-platform">Building a GPU SaaS Platform</h1>
+import{s as i,g as n}from"./_astro_assets.Uyj6bBK5.js";import{c,r as l,m as p}from"./render-template._6r_y0Sf.js";import{u}from"./hoisted.WEX_2Tmk.js";import"./astro/assets-service.1mn5GyWb.js";const h={src:"/_astro/part3-fn-architecture.jOYa06ad.png",width:1837,height:1091,format:"png"},g={src:"/_astro/part3-tech-arc.U0xEjxfs.png",width:1780,height:988,format:"png"},d={src:"/_astro/part3-runtime-plane.yUZV-GV2.png",width:1688,height:1015,format:"png"},m={src:"/_astro/part3-state.4OeNYZMT.png",width:1117,height:1068,format:"png"},w={src:"/_astro/part3-stocks.0W0CarbZ.png",width:722,height:353,format:"png"},f={src:"/_astro/part3-gpu.wTWFlx9t.png",width:811,height:515,format:"png"},y={src:"/_astro/part3-access.JkgUpke1.png",width:796,height:343,format:"png"},S=async function(){return{"./img/gpu-service/part3-fn-architecture.png":await n({src:h}),"./img/gpu-service/part3-tech-arc.png":await n({src:g}),"./img/gpu-service/part3-runtime-plane.png":await n({src:d}),"./img/gpu-service/part3-state.png":await n({src:m}),"./img/gpu-service/part3-stocks.png":await n({src:w}),"./img/gpu-service/part3-gpu.png":await n({src:f}),"./img/gpu-service/part3-access.png":await n({src:y})}};async function P(t){return S().then(e=>t.replaceAll(/__ASTRO_IMAGE_="([^"]+)"/gm,(r,s)=>i({src:e[s].src,...e[s].attributes})))}const o=await P(`<h1 id="building-a-gpu-saas-platform">Building a GPU SaaS Platform</h1>
 <p>Depending on the requirements of the application, the container technology would be a good choice for us. We could choose Docker or Kubernetes. We
 could also use Block Storage, Object Storage, or File Storage, such as OpenEBS, MinIO, or Ceph. We could also use a cloud provider, such as AWS,
 Azure, or GCP. So, how do we choose the right technology for our GPU SaaS platform? Let’s discuss it.</p>
@@ -131,28 +131,82 @@ when we need to scale out, I will discuss how to manage multiple clusters. So, l
 <li>running: the readiness probe is ready, the user can access the instance</li>
 </ul>
 <h4 id="create-stocks-of-gpu-instances">Create Stocks of GPU instances</h4>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">sequenceDiagram</span></span>
-<span class="line"><span style="color:#FF79C6">title:</span><span style="color:#F1FA8C"> Create stocks</span></span>
-<span class="line"></span>
-<span class="line"><span style="color:#F8F8F2">mgmt service</span><span style="color:#FF79C6">->></span><span style="color:#F8F8F2">dispatcher</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> create stocks</span></span>
-<span class="line"><span style="color:#F8F8F2">dispatcher</span><span style="color:#FF79C6">->></span><span style="color:#F8F8F2">distributed lock</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> require lock</span></span>
-<span class="line"><span style="color:#F8F8F2">distributed lock</span><span style="color:#FF79C6">-->></span><span style="color:#F8F8F2">dispatcher</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> auth lock</span></span>
-<span class="line"><span style="color:#F8F8F2">dispatcher</span><span style="color:#FF79C6">->></span><span style="color:#F8F8F2">status center</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> require remaining resources</span></span>
-<span class="line"><span style="color:#F8F8F2">status center</span><span style="color:#FF79C6">-->></span><span style="color:#F8F8F2">dispatcher</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> remaining resources</span></span>
-<span class="line"><span style="color:#F8F8F2">dispatcher</span><span style="color:#FF79C6">->></span><span style="color:#F8F8F2">operator</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> create stocks</span></span>
-<span class="line"><span style="color:#F8F8F2">dispatcher</span><span style="color:#FF79C6">->></span><span style="color:#F8F8F2">distributed lock</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> release lock</span></span>
-<span class="line"><span style="color:#F8F8F2">operator</span><span style="color:#FF79C6">-->></span><span style="color:#F8F8F2">status center</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> stock statistic &#x26; remain resouces</span></span>
-<span class="line"><span style="color:#F8F8F2">operator</span><span style="color:#FF79C6">-->></span><span style="color:#F8F8F2">dispatcher</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> stocks event</span></span>
-<span class="line"><span style="color:#F8F8F2">dispatcher</span><span style="color:#FF79C6">-->></span><span style="color:#F8F8F2">mgmt service</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> response event</span></span></code></pre>
+<img alt="Create Stocks of GPU instances" __ASTRO_IMAGE_="./img/gpu-service/part3-stocks.png">
 <h4 id="user-starts-the-gpu-instance-with-the-storage">User starts the GPU instance with the storage</h4>
+<img alt="User starts the GPU instance with the storage" __ASTRO_IMAGE_="./img/gpu-service/part3-gpu.png">
+<h4 id="user-access-the-gpu-instance">User access the GPU instance</h4>
+<img alt="User access the GPU instance" __ASTRO_IMAGE_="./img/gpu-service/part3-access.png">
 <h4 id="operator-api">Operator API</h4>
 <ul>
 <li>Create Stocks</li>
+</ul>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>POST /stocks</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>{</span></span>
+<span class="line"><span>  "number":      int,</span></span>
+<span class="line"><span>  "operationID": string,</span></span>
+<span class="line"><span>  "specName":    string,</span></span>
+<span class="line"><span>  "cpu":         resource.Quantity,</span></span>
+<span class="line"><span>  "memory":      resource.Quantity,</span></span>
+<span class="line"><span>  "gpuType":     string,</span></span>
+<span class="line"><span>  "gpuNum":      int,</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<ul>
 <li>Delete Stocks</li>
+</ul>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>DELETE /stocks</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>{</span></span>
+<span class="line"><span>  "number":       int,</span></span>
+<span class="line"><span>  "operationID":  string,</span></span>
+<span class="line"><span>  "specName":	    string,</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span></code></pre>
+<ul>
 <li>Start GPU instance</li>
+</ul>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>POST /gpu-instances</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>{</span></span>
+<span class="line"><span>  "instanceID":   string,</span></span>
+<span class="line"><span>  "tenantID":     string,</span></span>
+<span class="line"><span>  "tenantName":   string,</span></span>
+<span class="line"><span>  "image":        string,</span></span>
+<span class="line"><span>  "storageID":    string,</span></span>
+<span class="line"><span>  "specName":     string,</span></span>
+<span class="line"><span>  "template": {</span></span>
+<span class="line"><span>    "ports": []{</span></span>
+<span class="line"><span>      "port": int,</span></span>
+<span class="line"><span>      "protocol": corev1.Protocol,</span></span>
+<span class="line"><span>      "isPublic": bool,</span></span>
+<span class="line"><span>      "isProbe": bool,</span></span>
+<span class="line"><span>      "baseUrl": string,</span></span>
+<span class="line"><span>    },</span></span>
+<span class="line"><span>    "envs": []{</span></span>
+<span class="line"><span>      "name": string,</span></span>
+<span class="line"><span>      "value": string,</span></span>
+<span class="line"><span>    },</span></span>
+<span class="line"><span>    "cmd": string,</span></span>
+<span class="line"><span>    "volumes": []{</span></span>
+<span class="line"><span>      "name": string,</span></span>
+<span class="line"><span>      "mountPath": string,</span></span>
+<span class="line"><span>      "readOnly": bool,</span></span>
+<span class="line"><span>    },</span></span>
+<span class="line"><span>  }</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<ul>
 <li>Stop GPU instance</li>
+</ul>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>DELETE /gpu-instances/{instanceID}</span></span></code></pre>
+<ul>
 <li>GPU instance state</li>
 </ul>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>GET /gpu-instances/{instanceID}</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>response:</span></span>
+<span class="line"><span>{</span></span>
+<span class="line"><span>  "state": string,</span></span>
+<span class="line"><span>}</span></span></code></pre>
 <h4 id="storage-service-api">Storage Service API</h4>
 <p>I would not discuss the design of the storage service in this article. However, I would list the API of the storage service.</p>
 <ul>
@@ -161,7 +215,7 @@ when we need to scale out, I will discuss how to manage multiple clusters. So, l
 <li>Update Storage</li>
 <li>Create Storage Accessor</li>
 <li>Delete Storage Accessor</li>
-</ul>`),f={title:"Building a GPU SaaS Platform - The design spec",publishDate:"3 March 2024",description:"Let's write down the design spec for our GPU SaaS platform.",tags:["GPU","SaaS","Kubernetes","Ceph"],minutesRead:"3 min read"},w="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-3.md",S=void 0;function A(){return`
+</ul>`),b={title:"Building a GPU SaaS Platform - The design spec",publishDate:"3 March 2024",description:"Let's write down the design spec for our GPU SaaS platform.",tags:["GPU","SaaS","Kubernetes","Ceph"],minutesRead:"3 min read"},I="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-3.md",v=void 0;function _(){return`
 # Building a GPU SaaS Platform
 
 Depending on the requirements of the application, the container technology would be a good choice for us. We could choose Docker or Kubernetes. We
@@ -254,31 +308,97 @@ when we need to scale out, I will discuss how to manage multiple clusters. So, l
 
 #### Create Stocks of GPU instances
 
-\`\`\`mermaid
-sequenceDiagram
-title: Create stocks
-
-mgmt service->>dispatcher: create stocks
-dispatcher->>distributed lock: require lock
-distributed lock-->>dispatcher: auth lock
-dispatcher->>status center: require remaining resources
-status center-->>dispatcher: remaining resources
-dispatcher->>operator: create stocks
-dispatcher->>distributed lock: release lock
-operator-->>status center: stock statistic & remain resouces
-operator-->>dispatcher: stocks event
-dispatcher-->>mgmt service: response event
-\`\`\`
+![Create Stocks of GPU instances](./img/gpu-service/part3-stocks.png)
 
 #### User starts the GPU instance with the storage
+
+![User starts the GPU instance with the storage](./img/gpu-service/part3-gpu.png)
+
+#### User access the GPU instance
+
+![User access the GPU instance](./img/gpu-service/part3-access.png)
 
 #### Operator API
 
 - Create Stocks
+
+\`\`\`text
+POST /stocks
+
+{
+  "number":      int,
+  "operationID": string,
+  "specName":    string,
+  "cpu":         resource.Quantity,
+  "memory":      resource.Quantity,
+  "gpuType":     string,
+  "gpuNum":      int,
+}
+\`\`\`
+
 - Delete Stocks
+
+\`\`\`text
+DELETE /stocks
+
+{
+  "number":       int,
+  "operationID":  string,
+  "specName":	    string,
+}
+
+\`\`\`
+
 - Start GPU instance
+
+\`\`\`text
+POST /gpu-instances
+
+{
+  "instanceID":   string,
+  "tenantID":     string,
+  "tenantName":   string,
+  "image":        string,
+  "storageID":    string,
+  "specName":     string,
+  "template": {
+    "ports": []{
+      "port": int,
+      "protocol": corev1.Protocol,
+      "isPublic": bool,
+      "isProbe": bool,
+      "baseUrl": string,
+    },
+    "envs": []{
+      "name": string,
+      "value": string,
+    },
+    "cmd": string,
+    "volumes": []{
+      "name": string,
+      "mountPath": string,
+      "readOnly": bool,
+    },
+  }
+}
+\`\`\`
+
 - Stop GPU instance
+
+\`\`\`text
+DELETE /gpu-instances/{instanceID}
+\`\`\`
+
 - GPU instance state
+
+\`\`\`text
+GET /gpu-instances/{instanceID}
+
+response:
+{
+  "state": string,
+}
+\`\`\`
 
 #### Storage Service API
 
@@ -290,4 +410,4 @@ I would not discuss the design of the storage service in this article. However, 
 - Create Storage Accessor
 - Delete Storage Accessor
 
-`}function v(){return o}function I(){return[{depth:1,slug:"building-a-gpu-saas-platform",text:"Building a GPU SaaS Platform"},{depth:2,slug:"technology-choices",text:"Technology Choices"},{depth:3,slug:"container-technology",text:"Container Technology"},{depth:4,slug:"docker",text:"Docker"},{depth:4,slug:"kubernetes",text:"Kubernetes"},{depth:3,slug:"storage-technology",text:"Storage Technology"},{depth:3,slug:"other-technology",text:"Other Technology"},{depth:2,slug:"design-spec",text:"Design Spec"},{depth:3,slug:"architecture",text:"Architecture"},{depth:4,slug:"functional-architecture",text:"Functional Architecture"},{depth:4,slug:"technical-architecture",text:"Technical Architecture"},{depth:3,slug:"runtime-plane",text:"Runtime Plane"},{depth:4,slug:"gpu-instance-state",text:"GPU instance state"},{depth:4,slug:"create-stocks-of-gpu-instances",text:"Create Stocks of GPU instances"},{depth:4,slug:"user-starts-the-gpu-instance-with-the-storage",text:"User starts the GPU instance with the storage"},{depth:4,slug:"operator-api",text:"Operator API"},{depth:4,slug:"storage-service-api",text:"Storage Service API"}]}const G=c((s,t,r)=>{const{layout:n,...a}=f;return a.file=w,a.url=S,i`${p()}${u(o)}`});export{G as Content,v as compiledContent,G as default,w as file,f as frontmatter,I as getHeadings,A as rawContent,S as url};
+`}function x(){return o}function C(){return[{depth:1,slug:"building-a-gpu-saas-platform",text:"Building a GPU SaaS Platform"},{depth:2,slug:"technology-choices",text:"Technology Choices"},{depth:3,slug:"container-technology",text:"Container Technology"},{depth:4,slug:"docker",text:"Docker"},{depth:4,slug:"kubernetes",text:"Kubernetes"},{depth:3,slug:"storage-technology",text:"Storage Technology"},{depth:3,slug:"other-technology",text:"Other Technology"},{depth:2,slug:"design-spec",text:"Design Spec"},{depth:3,slug:"architecture",text:"Architecture"},{depth:4,slug:"functional-architecture",text:"Functional Architecture"},{depth:4,slug:"technical-architecture",text:"Technical Architecture"},{depth:3,slug:"runtime-plane",text:"Runtime Plane"},{depth:4,slug:"gpu-instance-state",text:"GPU instance state"},{depth:4,slug:"create-stocks-of-gpu-instances",text:"Create Stocks of GPU instances"},{depth:4,slug:"user-starts-the-gpu-instance-with-the-storage",text:"User starts the GPU instance with the storage"},{depth:4,slug:"user-access-the-gpu-instance",text:"User access the GPU instance"},{depth:4,slug:"operator-api",text:"Operator API"},{depth:4,slug:"storage-service-api",text:"Storage Service API"}]}const T=c((t,e,r)=>{const{layout:s,...a}=b;return a.file=I,a.url=v,l`${p()}${u(o)}`});export{T as Content,x as compiledContent,T as default,I as file,b as frontmatter,C as getHeadings,_ as rawContent,v as url};
