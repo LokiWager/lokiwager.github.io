@@ -97,31 +97,97 @@ when we need to scale out, I will discuss how to manage multiple clusters. So, l
 
 #### Create Stocks of GPU instances
 
-```mermaid
-sequenceDiagram
-title: Create stocks
-
-mgmt service->>dispatcher: create stocks
-dispatcher->>distributed lock: require lock
-distributed lock-->>dispatcher: auth lock
-dispatcher->>status center: require remaining resources
-status center-->>dispatcher: remaining resources
-dispatcher->>operator: create stocks
-dispatcher->>distributed lock: release lock
-operator-->>status center: stock statistic & remain resouces
-operator-->>dispatcher: stocks event
-dispatcher-->>mgmt service: response event
-```
+![Create Stocks of GPU instances](./img/gpu-service/part3-stocks.png)
 
 #### User starts the GPU instance with the storage
+
+![User starts the GPU instance with the storage](./img/gpu-service/part3-gpu.png)
+
+#### User access the GPU instance
+
+![User access the GPU instance](./img/gpu-service/part3-access.png)
 
 #### Operator API
 
 - Create Stocks
+
+```text
+POST /stocks
+
+{
+  "number":      int,
+  "operationID": string,
+  "specName":    string,
+  "cpu":         resource.Quantity,
+  "memory":      resource.Quantity,
+  "gpuType":     string,
+  "gpuNum":      int,
+}
+```
+
 - Delete Stocks
+
+```text
+DELETE /stocks
+
+{
+  "number":       int,
+  "operationID":  string,
+  "specName":	    string,
+}
+
+```
+
 - Start GPU instance
+
+```text
+POST /gpu-instances
+
+{
+  "instanceID":   string,
+  "tenantID":     string,
+  "tenantName":   string,
+  "image":        string,
+  "storageID":    string,
+  "specName":     string,
+  "template": {
+    "ports": []{
+      "port": int,
+      "protocol": corev1.Protocol,
+      "isPublic": bool,
+      "isProbe": bool,
+      "baseUrl": string,
+    },
+    "envs": []{
+      "name": string,
+      "value": string,
+    },
+    "cmd": string,
+    "volumes": []{
+      "name": string,
+      "mountPath": string,
+      "readOnly": bool,
+    },
+  }
+}
+```
+
 - Stop GPU instance
+
+```text
+DELETE /gpu-instances/{instanceID}
+```
+
 - GPU instance state
+
+```text
+GET /gpu-instances/{instanceID}
+
+response:
+{
+  "state": string,
+}
+```
 
 #### Storage Service API
 
