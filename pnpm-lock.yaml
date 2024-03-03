@@ -7,7 +7,7 @@ settings:
 dependencies:
   '@astrojs/mdx':
     specifier: 2.0.0
-    version: 2.0.0(astro@4.4.6)
+    version: 2.0.0(astro@4.4.9)
   '@astrojs/rss':
     specifier: 4.0.5
     version: 4.0.5
@@ -16,10 +16,10 @@ dependencies:
     version: 3.1.1
   '@astrojs/tailwind':
     specifier: 5.1.0
-    version: 5.1.0(astro@4.4.6)(tailwindcss@3.3.6)
+    version: 5.1.0(astro@4.4.9)(tailwindcss@3.3.6)
   astro:
-    specifier: 4.4.6
-    version: 4.4.6(typescript@5.3.3)
+    specifier: 4.4.9
+    version: 4.4.9(typescript@5.3.3)
   astro-icon:
     specifier: ^0.8.2
     version: 0.8.2
@@ -208,13 +208,13 @@ packages:
       - typescript
     dev: true
 
-  /@astrojs/markdown-remark@4.0.0(astro@4.4.6):
+  /@astrojs/markdown-remark@4.0.0(astro@4.4.9):
     resolution: {integrity: sha512-JSrn49fJGuH/0S2TTGxLK7bNDspOakJWZVFHeP+IDFjWdghT4HtsTShS2EiISNx3zfOFBAwy5Cj4xT4U5BWNeA==}
     peerDependencies:
       astro: ^4.0.0-beta.0
     dependencies:
       '@astrojs/prism': 3.0.0
-      astro: 4.4.6(typescript@5.3.3)
+      astro: 4.4.9(typescript@5.3.3)
       github-slugger: 2.0.0
       import-meta-resolve: 4.0.0
       mdast-util-definitions: 6.0.0
@@ -253,16 +253,16 @@ packages:
       - supports-color
     dev: false
 
-  /@astrojs/mdx@2.0.0(astro@4.4.6):
+  /@astrojs/mdx@2.0.0(astro@4.4.9):
     resolution: {integrity: sha512-VT5HnnOETk2gmdlheSlSBtYIsS0PQF/bEgZDjhc0VngdZstR90kt1NVns/Jj8q7G5lMZp8/9ZOHwwBbAhVk2zA==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
       astro: ^4.0.0-beta.0
     dependencies:
-      '@astrojs/markdown-remark': 4.0.0(astro@4.4.6)
+      '@astrojs/markdown-remark': 4.0.0(astro@4.4.9)
       '@mdx-js/mdx': 3.0.0
       acorn: 8.11.2
-      astro: 4.4.6(typescript@5.3.3)
+      astro: 4.4.9(typescript@5.3.3)
       es-module-lexer: 1.4.1
       estree-util-visit: 2.0.0
       github-slugger: 2.0.0
@@ -300,13 +300,13 @@ packages:
       zod: 3.22.4
     dev: false
 
-  /@astrojs/tailwind@5.1.0(astro@4.4.6)(tailwindcss@3.3.6):
+  /@astrojs/tailwind@5.1.0(astro@4.4.9)(tailwindcss@3.3.6):
     resolution: {integrity: sha512-BJoCDKuWhU9FT2qYg+fr6Nfb3qP4ShtyjXGHKA/4mHN94z7BGcmauQK23iy+YH5qWvTnhqkd6mQPQ1yTZTe9Ig==}
     peerDependencies:
       astro: ^3.0.0 || ^4.0.0
       tailwindcss: ^3.0.24
     dependencies:
-      astro: 4.4.6(typescript@5.3.3)
+      astro: 4.4.9(typescript@5.3.3)
       autoprefixer: 10.4.16(postcss@8.4.35)
       postcss: 8.4.35
       postcss-load-config: 4.0.2(postcss@8.4.35)
@@ -1989,8 +1989,8 @@ packages:
       svgo: 2.8.0
     dev: false
 
-  /astro@4.4.6(typescript@5.3.3):
-    resolution: {integrity: sha512-kns2TtiMYTyDPgcvtaQjMfBhY/F/2+O3eSX4XWH13FFQW1hp7AcTXfGwq8SvJ14JNoU4bsKeJbaB9CxUN9ZQlQ==}
+  /astro@4.4.9(typescript@5.3.3):
+    resolution: {integrity: sha512-FTWhzKjao7rHHiF/CqPqPS18AFad+fmUcYUFhWWIsYETHcc9g0IIIiv6cHXUE7g6mEZf7ycAa+WdboeEHUhraQ==}
     engines: {node: '>=18.14.1', npm: '>=6.14.0'}
     hasBin: true
     dependencies:
