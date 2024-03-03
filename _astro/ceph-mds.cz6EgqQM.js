@@ -1,4 +1,4 @@
-import{c as a,r as s,m as o}from"./render-template.mrhESvQ5.js";import{u as t}from"./hoisted.5ITtbDzT.js";import"./astro/assets-service.1mn5GyWb.js";const e=`<h2 id="background">Background</h2>
+import{c as a,r as s,m as o}from"./render-template.OhhDDSMG.js";import{u as t}from"./hoisted.g1Y7Y87Y.js";import"./astro/assets-service.1mn5GyWb.js";const e=`<h2 id="background">Background</h2>
 <p>As a developer of a GPU SaaS platform relying on Kubernetes with Ceph as the storage backend. Recently, I encountered performance issues with CephFS, notably the extended execution time of commands like <code>import torch</code>, taking around 180 seconds. Investigating further, it became evident that the CephFS performance was constrained by a single MDS (Metadata Server) running by default.</p>
 <p>However, I found that there is no clear documentation about how to configure multiple active MDS daemons. So I write this article to record the process of configuring multiple active MDS daemons.</p>
 <h2 id="what-is-mds">What is MDS</h2>
