@@ -1,4 +1,4 @@
-import{c as a,r as p,m as e}from"./render-template.vCGsTJQP.js";import{u as l}from"./hoisted.zYdNPQFr.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<h2 id="how-to-reduce-the-nvidia-docker-image-size">How to reduce the Nvidia Docker image size</h2>
+import{c as a,r as e,m as p}from"./render-template.lJP2fRET.js";import{u as l}from"./hoisted.kO0M7P_y.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<h2 id="how-to-reduce-the-nvidia-docker-image-size">How to reduce the Nvidia Docker image size</h2>
 <h3 id="the-problem">The problem</h3>
 <p>Kubernetes has an extraction timeout, which means there is a upper limit for the image size, approximately around 15GB. In my GPU SaaS platform, I
 use the Nvidia Docker image to provide GPU services. In the case of Stable Diffusion WebUI</p>
@@ -270,7 +270,21 @@ merged it like this:</p>
 <span class="line"><span style="color:#FF79C6">else</span></span>
 <span class="line"><span style="color:#6272A4">  # Build specific services</span></span>
 <span class="line"><span style="color:#50FA7B">  build_services</span><span style="color:#E9F284"> "</span><span style="color:#FFB86C;font-style:italic">$@</span><span style="color:#E9F284">"</span></span>
-<span class="line"><span style="color:#FF79C6">fi</span></span></code></pre>`,o={title:"How to reduce the Nvidia Docker image size",publishDate:"22 February 2024",description:"The Nvidia Docker image is too large for Kubernetes to extract. How to reduce the image size?",tags:["Docker","Kubernetes","Image","GPU"],minutesRead:"6 min read"},t="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/reduce-image-size.md",r=void 0;function m(){return`
+<span class="line"><span style="color:#FF79C6">fi</span></span></code></pre>
+<h3 id="conclusion">Conclusion</h3>
+<p>The image size looks like this:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>REPOSITORY                        TAG                                         IMAGE ID       CREATED         SIZE</span></span>
+<span class="line"><span>cuda-11.8-cudnn8-ubuntu22.04      builder                                     85145614cc65   2 months ago    12GB</span></span>
+<span class="line"><span>cuda-11.8-cudnn8-ubuntu22.04      builder-torch201                            6e66a33cfa69   2 months ago    16.5GB</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>cuda-11.8-cudnn8-ubuntu22.04      slim                                        f94fffa6243e   2 months ago    4.52GB</span></span>
+<span class="line"><span>cuda-11.8-cudnn8-ubuntu22.04      slim-torch201                               a80ffa1fecf0   2 months ago    4.13GB</span></span></code></pre>
+<ul>
+<li>The <code>/usr/lib/x86_64-linux-gnu</code> is around 4GB, but I can’t remove it because it contains the shared libraries. However, If your service doesn’t
+require additional packages at runtime, you can also remove the <code>x86_64-linux-gnu</code> directory. After removing it, the image size will be reduced
+to only 200MB. I suggest you not to remove it because it may cause some problems when you run it in the kubernetes environment.</li>
+<li>When we push the <code>slim</code> image to Dockerhub or your private repository, the size is only 2.27GB after compressing it.</li>
+</ul>`,o={title:"How to reduce the Nvidia Docker image size",publishDate:"22 February 2024",description:"The Nvidia Docker image is too large for Kubernetes to extract. How to reduce the image size?",tags:["Docker","Kubernetes","Image","GPU"],minutesRead:"6 min read"},t="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/reduce-image-size.md",r=void 0;function m(){return`
 ## How to reduce the Nvidia Docker image size
 
 ### The problem
@@ -588,4 +602,22 @@ else
   build_services "$@"
 fi
 \`\`\`
-`}function b(){return n}function v(){return[{depth:2,slug:"how-to-reduce-the-nvidia-docker-image-size",text:"How to reduce the Nvidia Docker image size"},{depth:3,slug:"the-problem",text:"The problem"},{depth:3,slug:"the-solution",text:"The solution"},{depth:3,slug:"make-it-a-little-bit-automatic",text:"Make it a little bit automatic"}]}const g=a((c,i,d)=>{const{layout:F,...s}=o;return s.file=t,s.url=r,p`${e()}${l(n)}`});export{g as Content,b as compiledContent,g as default,t as file,o as frontmatter,v as getHeadings,m as rawContent,r as url};
+
+### Conclusion
+
+The image size looks like this:
+
+\`\`\`text
+REPOSITORY                        TAG                                         IMAGE ID       CREATED         SIZE
+cuda-11.8-cudnn8-ubuntu22.04      builder                                     85145614cc65   2 months ago    12GB
+cuda-11.8-cudnn8-ubuntu22.04      builder-torch201                            6e66a33cfa69   2 months ago    16.5GB
+
+cuda-11.8-cudnn8-ubuntu22.04      slim                                        f94fffa6243e   2 months ago    4.52GB
+cuda-11.8-cudnn8-ubuntu22.04      slim-torch201                               a80ffa1fecf0   2 months ago    4.13GB
+\`\`\`
+
+* The \`/usr/lib/x86_64-linux-gnu\` is around 4GB, but I can't remove it because it contains the shared libraries. However, If your service doesn't
+  require additional packages at runtime, you can also remove the \`x86_64-linux-gnu\` directory. After removing it, the image size will be reduced
+  to only 200MB. I suggest you not to remove it because it may cause some problems when you run it in the kubernetes environment.
+* When we push the \`slim\` image to Dockerhub or your private repository, the size is only 2.27GB after compressing it.
+`}function b(){return n}function v(){return[{depth:2,slug:"how-to-reduce-the-nvidia-docker-image-size",text:"How to reduce the Nvidia Docker image size"},{depth:3,slug:"the-problem",text:"The problem"},{depth:3,slug:"the-solution",text:"The solution"},{depth:3,slug:"make-it-a-little-bit-automatic",text:"Make it a little bit automatic"},{depth:3,slug:"conclusion",text:"Conclusion"}]}const g=a((c,i,d)=>{const{layout:F,...s}=o;return s.file=t,s.url=r,e`${p()}${l(n)}`});export{g as Content,b as compiledContent,g as default,t as file,o as frontmatter,v as getHeadings,m as rawContent,r as url};
