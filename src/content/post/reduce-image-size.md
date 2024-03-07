@@ -322,3 +322,21 @@ else
   build_services "$@"
 fi
 ```
+
+### Conclusion
+
+The image size looks like this:
+
+```text
+REPOSITORY                        TAG                                         IMAGE ID       CREATED         SIZE
+cuda-11.8-cudnn8-ubuntu22.04      builder                                     85145614cc65   2 months ago    12GB
+cuda-11.8-cudnn8-ubuntu22.04      builder-torch201                            6e66a33cfa69   2 months ago    16.5GB
+
+cuda-11.8-cudnn8-ubuntu22.04      slim                                        f94fffa6243e   2 months ago    4.52GB
+cuda-11.8-cudnn8-ubuntu22.04      slim-torch201                               a80ffa1fecf0   2 months ago    4.13GB
+```
+
+* The `/usr/lib/x86_64-linux-gnu` is around 4GB, but I can't remove it because it contains the shared libraries. However, If your service doesn't
+  require additional packages at runtime, you can also remove the `x86_64-linux-gnu` directory. After removing it, the image size will be reduced
+  to only 200MB. I suggest you not to remove it because it may cause some problems when you run it in the kubernetes environment.
+* When we push the `slim` image to Dockerhub or your private repository, the size is only 2.27GB after compressing it.
