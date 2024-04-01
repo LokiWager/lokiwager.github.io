@@ -1,4 +1,4 @@
-import{c as a,r as s,m as o}from"./render-template.lJP2fRET.js";import{u as t}from"./hoisted.kO0M7P_y.js";import"./astro/assets-service.wdzbVTWi.js";const e=`<h2 id="background">Background</h2>
+import{c as a,r as s,m as o}from"./render-template.5GvZ_d9G.js";import{u as t}from"./hoisted.S6KN3Rcg.js";import"./astro/assets-service.3__6wVx0.js";const e=`<h2 id="background">Background</h2>
 <p>As a developer of a GPU SaaS platform relying on Kubernetes with Ceph as the storage backend. Recently, I encountered performance issues with CephFS, notably the extended execution time of commands like <code>import torch</code>, taking around 180 seconds. Investigating further, it became evident that the CephFS performance was constrained by a single MDS (Metadata Server) running by default.</p>
 <p>However, I found that there is no clear documentation about how to configure multiple active MDS daemons. So I write this article to record the process of configuring multiple active MDS daemons.</p>
 <h2 id="what-is-mds">What is MDS</h2>
@@ -19,12 +19,14 @@ import{c as a,r as s,m as o}from"./render-template.lJP2fRET.js";import{u as t}fr
 <li>List MDS daemon.</li>
 </ol>
 <p>Identify existing MDS daemons in your environment.</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> ceph orch ps --daemon_type=mds</span></span></code></pre>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> ceph orch ps --daemon_type=mds</span></span>
+<span class="line"></span></code></pre>
 <ol start="2">
 <li>Create new MDS instances.</li>
 </ol>
 <p>Add new MDS instances across desired host (example: node01, node02, etc.).</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> ceph orch apply mds </span><span style="color:#FF79C6">&#x3C;</span><span style="color:#F8F8F2">FS_NAME</span><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> --placement=</span><span style="color:#E9F284">"</span><span style="color:#F1FA8C">node01,node02,node03,node04,node05,node04</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">  --dry-run</span></span></code></pre>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> ceph orch apply mds </span><span style="color:#FF79C6">&#x3C;</span><span style="color:#F8F8F2">FS_NAME</span><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> --placement=</span><span style="color:#E9F284">"</span><span style="color:#F1FA8C">node01,node02,node03,node04,node05,node04</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">  --dry-run</span></span>
+<span class="line"></span></code></pre>
 <ol start="3">
 <li>Enable standby replay.</li>
 </ol>
@@ -33,12 +35,14 @@ import{c as a,r as s,m as o}from"./render-template.lJP2fRET.js";import{u as t}fr
 <blockquote>
 <p>Even with multiple active MDS daemons, a highly available system still requires standby daemons to take over if any of the servers running an active daemon fail.</p>
 </blockquote>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> ceph fs set </span><span style="color:#FF79C6">&#x3C;</span><span style="color:#F8F8F2">FS_NAME</span><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> allow_standby_replay 1</span></span></code></pre>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> ceph fs set </span><span style="color:#FF79C6">&#x3C;</span><span style="color:#F8F8F2">FS_NAME</span><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> allow_standby_replay 1</span></span>
+<span class="line"></span></code></pre>
 <ol start="4">
 <li>Increase the number of active MDS daemons.</li>
 </ol>
 <p>Augment the number of active MDS daemons.</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> ceph fs set </span><span style="color:#FF79C6">&#x3C;</span><span style="color:#F8F8F2">FS_NAME</span><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> max_mds 3</span></span></code></pre>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> ceph fs set </span><span style="color:#FF79C6">&#x3C;</span><span style="color:#F8F8F2">FS_NAME</span><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> max_mds 3</span></span>
+<span class="line"></span></code></pre>
 <p>Note: Total MDS daemons = Active MDS daemons + (Standby MDS daemons * Active MDS daemons).</p>
 <ol start="5">
 <li>Check the status of MDS daemons.</li>
@@ -72,7 +76,8 @@ import{c as a,r as s,m as o}from"./render-template.lJP2fRET.js";import{u as t}fr
 <span class="line"><span>up	{0=14232,1=6103278,2=6110459}</span></span>
 <span class="line"><span>...</span></span>
 <span class="line"><span>standby_count_wanted	1</span></span>
-<span class="line"><span>...</span></span></code></pre>`,p={title:"Ceph multiple active MDS Daemons",publishDate:"16 December 2023",description:"Enhancing CephFS Performance by Configuring Multiple Active MDS Daemons.",tags:["ceph","mds","devops"],minutesRead:"3 min read"},i="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/ceph-mds.md",l=void 0;function g(){return`
+<span class="line"><span>...</span></span>
+<span class="line"><span></span></span></code></pre>`,p={title:"Ceph multiple active MDS Daemons",publishDate:"16 December 2023",description:"Enhancing CephFS Performance by Configuring Multiple Active MDS Daemons.",tags:["ceph","mds","devops"],minutesRead:"3 min read"},i="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/ceph-mds.md",l=void 0;function g(){return`
 ## Background
 
 As a developer of a GPU SaaS platform relying on Kubernetes with Ceph as the storage backend. Recently, I encountered performance issues with CephFS, notably the extended execution time of commands like \`import torch\`, taking around 180 seconds. Investigating further, it became evident that the CephFS performance was constrained by a single MDS (Metadata Server) running by default.

@@ -1,4 +1,4 @@
-import{s as u,g as l}from"./_astro_assets.tMyGFUSa.js";import{c as g,r as h,m as d}from"./render-template.lJP2fRET.js";import{u as m}from"./hoisted.kO0M7P_y.js";import"./astro/assets-service.wdzbVTWi.js";const x={src:"/_astro/part3-fn-architecture.jOYa06ad.png",width:1837,height:1091,format:"png"},w={src:"/_astro/part3-tech-arc.U0xEjxfs.png",width:1780,height:988,format:"png"},f={src:"/_astro/part3-runtime-plane.yUZV-GV2.png",width:1688,height:1015,format:"png"},y={src:"/_astro/part3-state.4OeNYZMT.png",width:1117,height:1068,format:"png"},S={src:"/_astro/part3-stocks.0W0CarbZ.png",width:722,height:353,format:"png"},P={src:"/_astro/part3-gpu.wTWFlx9t.png",width:811,height:515,format:"png"},b={src:"/_astro/part3-access.JkgUpke1.png",width:796,height:343,format:"png"},_=async function(c){const t={};{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-fn-architecture\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-fn-architecture.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:x,...o}),e++}}{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-tech-arc\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-tech-arc.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:w,...o}),e++}}{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-runtime-plane\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-runtime-plane.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:f,...o}),e++}}{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-state\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-state.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:y,...o}),e++}}{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-stocks\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-stocks.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:S,...o}),e++}}{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-gpu\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-gpu.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:P,...o}),e++}}{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-access\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-access.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:b,...o}),e++}}return t};async function I(c){return _(c).then(t=>c.replaceAll(/__ASTRO_IMAGE_="([^"]+)"/gm,(a,n)=>{const e=JSON.parse(n.replace(/&#x22;/g,'"')),s=e.src+"_"+e.index;t[s].srcSet&&t[s].srcSet.values.length>0&&(t[s].attributes.srcset=t[s].srcSet.attribute);const{index:r,...i}=t[s].attributes;return u({src:t[s].src,...i})}))}const p=await I(`<h1 id="building-a-gpu-saas-platform">Building a GPU SaaS Platform</h1>
+import{s as u,g as l}from"./_astro_assets.etwaO0x1.js";import{c as g,r as h,m as d}from"./render-template.5GvZ_d9G.js";import{u as m}from"./hoisted.S6KN3Rcg.js";import"./astro/assets-service.3__6wVx0.js";const x={src:"/_astro/part3-fn-architecture.jOYa06ad.png",width:1837,height:1091,format:"png"},w={src:"/_astro/part3-tech-arc.U0xEjxfs.png",width:1780,height:988,format:"png"},f={src:"/_astro/part3-runtime-plane.yUZV-GV2.png",width:1688,height:1015,format:"png"},y={src:"/_astro/part3-state.4OeNYZMT.png",width:1117,height:1068,format:"png"},S={src:"/_astro/part3-stocks.0W0CarbZ.png",width:722,height:353,format:"png"},P={src:"/_astro/part3-gpu.wTWFlx9t.png",width:811,height:515,format:"png"},b={src:"/_astro/part3-access.JkgUpke1.png",width:796,height:343,format:"png"},_=async function(c){const t={};{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-fn-architecture\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-fn-architecture.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:x,...o}),e++}}{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-tech-arc\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-tech-arc.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:w,...o}),e++}}{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-runtime-plane\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-runtime-plane.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:f,...o}),e++}}{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-state\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-state.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:y,...o}),e++}}{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-stocks\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-stocks.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:S,...o}),e++}}{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-gpu\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-gpu.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:P,...o}),e++}}{const a=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/gpu-service/part3-access\\.png[^"]*)"',"g");let n,e=0;for(;(n=a.exec(c))!==null;){const s="./img/gpu-service/part3-access.png_"+e,r=JSON.parse(n[1].replace(/&#x22;/g,'"')),{src:i,...o}=r;t[s]=await l({src:b,...o}),e++}}return t};async function I(c){return _(c).then(t=>c.replaceAll(/__ASTRO_IMAGE_="([^"]+)"/gm,(a,n)=>{const e=JSON.parse(n.replace(/&#x22;/g,'"')),s=e.src+"_"+e.index;t[s].srcSet&&t[s].srcSet.values.length>0&&(t[s].attributes.srcset=t[s].srcSet.attribute);const{index:r,...i}=t[s].attributes;return u({src:t[s].src,...i})}))}const p=await I(`<h1 id="building-a-gpu-saas-platform">Building a GPU SaaS Platform</h1>
 <p>Depending on the requirements of the application, the container technology would be a good choice for us. We could choose Docker or Kubernetes. We
 could also use Block Storage, Object Storage, or File Storage, such as OpenEBS, MinIO, or Ceph. We could also use a cloud provider, such as AWS,
 Azure, or GCP. So, how do we choose the right technology for our GPU SaaS platform? Let’s discuss it.</p>
@@ -150,7 +150,8 @@ when we need to scale out, I will discuss how to manage multiple clusters. So, l
 <span class="line"><span>  "memory":      resource.Quantity,</span></span>
 <span class="line"><span>  "gpuType":     string,</span></span>
 <span class="line"><span>  "gpuNum":      int,</span></span>
-<span class="line"><span>}</span></span></code></pre>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span></code></pre>
 <ul>
 <li>Delete Stocks</li>
 </ul>
@@ -161,6 +162,7 @@ when we need to scale out, I will discuss how to manage multiple clusters. So, l
 <span class="line"><span>  "operationID":  string,</span></span>
 <span class="line"><span>  "specName":	    string,</span></span>
 <span class="line"><span>}</span></span>
+<span class="line"><span></span></span>
 <span class="line"><span></span></span></code></pre>
 <ul>
 <li>Start GPU instance</li>
@@ -193,11 +195,13 @@ when we need to scale out, I will discuss how to manage multiple clusters. So, l
 <span class="line"><span>      "readOnly": bool,</span></span>
 <span class="line"><span>    },</span></span>
 <span class="line"><span>  }</span></span>
-<span class="line"><span>}</span></span></code></pre>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span></code></pre>
 <ul>
 <li>Stop GPU instance</li>
 </ul>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>DELETE /gpu-instances/{instanceID}</span></span></code></pre>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>DELETE /gpu-instances/{instanceID}</span></span>
+<span class="line"><span></span></span></code></pre>
 <ul>
 <li>GPU instance state</li>
 </ul>
@@ -206,7 +210,8 @@ when we need to scale out, I will discuss how to manage multiple clusters. So, l
 <span class="line"><span>response:</span></span>
 <span class="line"><span>{</span></span>
 <span class="line"><span>  "state": string,</span></span>
-<span class="line"><span>}</span></span></code></pre>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span></code></pre>
 <h4 id="storage-service-api">Storage Service API</h4>
 <p>I would not discuss the design of the storage service in this article. However, I would list the API of the storage service.</p>
 <ul>
