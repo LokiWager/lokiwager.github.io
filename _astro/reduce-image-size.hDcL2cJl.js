@@ -1,4 +1,4 @@
-import{c as a,r as e,m as p}from"./render-template._TO8NSu6.js";import{u as l}from"./hoisted.GdkjGORY.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<h2 id="how-to-reduce-the-nvidia-docker-image-size">How to reduce the Nvidia Docker image size</h2>
+import{c as a,r as e,m as p}from"./render-template.lJP2fRET.js";import{u as l}from"./hoisted.kO0M7P_y.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<h2 id="how-to-reduce-the-nvidia-docker-image-size">How to reduce the Nvidia Docker image size</h2>
 <h3 id="the-problem">The problem</h3>
 <p>Kubernetes has an extraction timeout, which means there is a upper limit for the image size, approximately around 15GB. In my GPU SaaS platform, I
 use the Nvidia Docker image to provide GPU services. In the case of Stable Diffusion WebUI</p>
