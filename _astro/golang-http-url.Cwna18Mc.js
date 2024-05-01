@@ -1,0 +1,2 @@
+const __vite__fileDeps=["_astro/golang-http-url.Bp9POWck.js","_astro/_astro_assets.D_IwRenL.js","_astro/hoisted.CD8WJph8.js","_astro/astro/assets-service.Cg1E-ILE.js","_astro/render-template.DGo9y8-J.js"],__vite__mapDeps=i=>i.map(i=>__vite__fileDeps[i]);
+import{_ as t}from"./hoisted.CD8WJph8.js";async function o(){return t(()=>import("./golang-http-url.Bp9POWck.js"),__vite__mapDeps([0,1,2,3,4]))}const e="@@ASTRO-LINKS@@",c="@@ASTRO-STYLES@@",r="@@ASTRO-SCRIPTS@@",l={__astroPropagation:!0,getMod:o,collectedLinks:e,collectedStyles:c,collectedScripts:r};export{l as default};

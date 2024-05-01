@@ -1,4 +1,4 @@
-import{c as a,r as e,m as p}from"./render-template.lJP2fRET.js";import{u as l}from"./hoisted.kO0M7P_y.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<h2 id="how-to-reduce-the-nvidia-docker-image-size">How to reduce the Nvidia Docker image size</h2>
+import{c as a,r as e,m as p}from"./render-template.DGo9y8-J.js";import{u as l}from"./hoisted.CD8WJph8.js";import"./astro/assets-service.Cg1E-ILE.js";const n=`<h2 id="how-to-reduce-the-nvidia-docker-image-size">How to reduce the Nvidia Docker image size</h2>
 <h3 id="the-problem">The problem</h3>
 <p>Kubernetes has an extraction timeout, which means there is a upper limit for the image size, approximately around 15GB. In my GPU SaaS platform, I
 use the Nvidia Docker image to provide GPU services. In the case of Stable Diffusion WebUI</p>
@@ -15,7 +15,7 @@ storage to the container. So, the first step is to analyze the image.</p>
 <ul>
 <li>Analyze the cuda devel image</li>
 </ul>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> kubectl run -it --rm --restart=Never --image nvcr.io/nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 devel -- bash</span></span>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FF79C6">></span><span style="color:#F8F8F2"> kubectl run -it --rm </span><span style="color:#BD93F9">--restart</span><span style="color:#FF79C6">=</span><span style="color:#F1FA8C">Never</span><span style="color:#50FA7B"> --image</span><span style="color:#F1FA8C"> nvcr.io/nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04</span><span style="color:#F1FA8C"> devel</span><span style="color:#BD93F9"> --</span><span style="color:#F1FA8C"> bash</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:#50FA7B">root@devel:/#</span><span style="color:#F1FA8C"> du</span><span style="color:#BD93F9"> -h</span><span style="color:#BD93F9"> --max-depth=1</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> sort</span><span style="color:#BD93F9"> -hr</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> head</span><span style="color:#BD93F9"> -n</span><span style="color:#BD93F9"> 5</span></span>
 <span class="line"><span style="color:#50FA7B">9.5G</span><span style="color:#F1FA8C">	.</span></span>
@@ -50,14 +50,15 @@ storage to the container. So, the first step is to analyze the image.</p>
 <span class="line"></span>
 <span class="line"><span style="color:#50FA7B">root@devel:/opt#</span><span style="color:#F1FA8C"> du</span><span style="color:#BD93F9"> -h</span><span style="color:#BD93F9"> --max-depth=1</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> sort</span><span style="color:#BD93F9"> -hr</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> head</span><span style="color:#BD93F9"> -n</span><span style="color:#BD93F9"> 5</span></span>
 <span class="line"><span style="color:#50FA7B">918M</span><span style="color:#F1FA8C">	./nvidia</span></span>
-<span class="line"><span style="color:#50FA7B">918M</span><span style="color:#F1FA8C">	.</span></span></code></pre>
+<span class="line"><span style="color:#50FA7B">918M</span><span style="color:#F1FA8C">	.</span></span>
+<span class="line"></span></code></pre>
 <p>It is obvious that the <code>/usr/local/cuda-11.8</code> and <code>/usr/lib/x86_64-linux-gnu</code> and <code>/opt/nvidia</code> are the largest directories. However, I can’t
 remove <code>/usr/lib/x86_64-linux-gnu</code> because it contains the shared libraries. So I decide to remove the <code>/usr/local/cuda-11.8</code> and <code>/opt/nvidia</code>
 from the image. But I need to install cuda-toolkit and pytorch in the container and I also need a slim version of the cuda devel image. So I have
 to build it by myself.</p>
 <p>I found the <a href="https://gitlab.com/nvidia/container-images/cuda/-/tree/master/dist/11.8.0/ubuntu2204?ref_type=heads" rel="nofollow, noopener, noreferrer" target="_blank">nvidia/cuda Dockerfile</a>. I
 merged it like this:</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>FROM ubuntu:22.04 as builder</span></span>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span>FROM ubuntu:22.04 as builder</span></span>
 <span class="line"><span></span></span>
 <span class="line"><span>ENV NVARCH x86_64</span></span>
 <span class="line"><span></span></span>
@@ -73,9 +74,10 @@ merged it like this:</p>
 <span class="line"><span>    dpkg -i cuda-keyring_1.0-1_all.deb &#x26;&#x26; \\</span></span>
 <span class="line"><span>    apt-get purge --autoremove -y curl &#x26;&#x26; \\</span></span>
 <span class="line"><span>    rm -rf /var/lib/apt/lists/*</span></span>
-<span class="line"><span>...</span></span></code></pre>
+<span class="line"><span>...</span></span>
+<span class="line"><span></span></span></code></pre>
 <p>then I added the cuda-toolkit, python and others:</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>RUN apt-get update &#x26;&#x26; apt-get install -y --no-install-recommends \\</span></span>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span>RUN apt-get update &#x26;&#x26; apt-get install -y --no-install-recommends \\</span></span>
 <span class="line"><span>    cuda-toolkit-11-8 \\</span></span>
 <span class="line"><span>    &#x26;&#x26; apt-mark hold \${NV_CUDNN_PACKAGE_NAME} &#x26;&#x26; \\</span></span>
 <span class="line"><span>    rm -rf /var/lib/apt/lists/*</span></span>
@@ -117,11 +119,13 @@ merged it like this:</p>
 <span class="line"><span>    pip install -U jupyter_contrib_nbextensions &#x26;&#x26; \\</span></span>
 <span class="line"><span>    jupyter contrib nbextension install --user &#x26;&#x26; \\</span></span>
 <span class="line"><span>    jupyter nbextension enable --py widgetsnbextension &#x26;&#x26; \\</span></span>
-<span class="line"><span>    rm -rf ~/.cache/pip</span></span></code></pre>
+<span class="line"><span>    rm -rf ~/.cache/pip</span></span>
+<span class="line"><span></span></span></code></pre>
 <p>Then I used <a href="https://github.com/wagoodman/dive" rel="nofollow, noopener, noreferrer" target="_blank">dive tools</a> to analyze the image:</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">docker</span><span style="color:#F1FA8C"> run</span><span style="color:#BD93F9"> --rm</span><span style="color:#BD93F9"> -it</span><span style="color:#BD93F9"> -v</span><span style="color:#F1FA8C"> /var/run/docker.sock:/var/run/docker.sock</span><span style="color:#F1FA8C"> wagoodman/dive:latest</span><span style="color:#BD93F9"> 10.108</span><span style="color:#F1FA8C">.163.251:20443/megaease/sd-cuda118-cudnn8-ubuntu2204:builder</span></span></code></pre>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">docker</span><span style="color:#F1FA8C"> run</span><span style="color:#BD93F9"> --rm</span><span style="color:#BD93F9"> -it</span><span style="color:#BD93F9"> -v</span><span style="color:#F1FA8C"> /var/run/docker.sock:/var/run/docker.sock</span><span style="color:#F1FA8C"> wagoodman/dive:latest</span><span style="color:#F1FA8C"> 10.108.163.251:20443/megaease/sd-cuda118-cudnn8-ubuntu2204:builder</span></span>
+<span class="line"></span></code></pre>
 <p>From the result, I’ve made sure that I can remove the <code>/usr/local/cuda-11.8</code> and <code>/opt/nvidia</code> from the image.</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>FROM builder as tmp</span></span>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span>FROM builder as tmp</span></span>
 <span class="line"><span></span></span>
 <span class="line"><span>RUN mkdir /data &#x26;&#x26; mv /usr/local/cuda-11.8 /data/cuda-11.8 &#x26;&#x26; \\</span></span>
 <span class="line"><span>    mv /opt/nvidia /data/nvidia</span></span>
@@ -133,9 +137,10 @@ merged it like this:</p>
 <span class="line"><span>COPY --from=tmp /root /root</span></span>
 <span class="line"><span>COPY --from=tmp /var/cache /var/cache</span></span>
 <span class="line"><span>COPY --from=tmp /var/lib /var/lib</span></span>
-<span class="line"><span>COPY --from=tmp /run /run</span></span></code></pre>
+<span class="line"><span>COPY --from=tmp /run /run</span></span>
+<span class="line"><span></span></span></code></pre>
 <p>The next step is to add pytorch to the image.</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>FROM builder as builder-torch201</span></span>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span>FROM builder as builder-torch201</span></span>
 <span class="line"><span></span></span>
 <span class="line"><span>RUN pip install torch==2.0.1+cu118 torchvision==0.15.2+cu118 torchaudio==2.0.2+cu118 --index-url https://download.pytorch.org/whl/cu118 &#x26;&#x26; \\</span></span>
 <span class="line"><span>    rm -rf ~/.cache/pip</span></span>
@@ -153,10 +158,11 @@ merged it like this:</p>
 <span class="line"><span>COPY --from=tmp-torch201 /root /root</span></span>
 <span class="line"><span>COPY --from=tmp-torch201 /var/cache /var/cache</span></span>
 <span class="line"><span>COPY --from=tmp-torch201 /var/lib /var/lib</span></span>
-<span class="line"><span>COPY --from=tmp-torch201 /run /run</span></span></code></pre>
+<span class="line"><span>COPY --from=tmp-torch201 /run /run</span></span>
+<span class="line"><span></span></span></code></pre>
 <h3 id="make-it-a-little-bit-automatic">Make it a little bit automatic</h3>
 <p>I wrote a docker compose file to build the image and share the storage:</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#8BE9FD">services</span><span style="color:#FF79C6">:</span></span>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#8BE9FD">services</span><span style="color:#FF79C6">:</span></span>
 <span class="line"><span style="color:#8BE9FD">  builder</span><span style="color:#FF79C6">:</span></span>
 <span class="line"><span style="color:#8BE9FD">    image</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> megaease/cuda-11.8-cudnn8-ubuntu22.04:builder</span></span>
 <span class="line"><span style="color:#8BE9FD">    build</span><span style="color:#FF79C6">:</span></span>
@@ -192,9 +198,10 @@ merged it like this:</p>
 <span class="line"><span style="color:#8BE9FD">    image</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> megaease/cuda-11.8-cudnn8-ubuntu22.04:slim-torch201</span></span>
 <span class="line"><span style="color:#8BE9FD">    build</span><span style="color:#FF79C6">:</span></span>
 <span class="line"><span style="color:#8BE9FD">      context</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> .</span></span>
-<span class="line"><span style="color:#8BE9FD">      target</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> slim-torch201</span></span></code></pre>
+<span class="line"><span style="color:#8BE9FD">      target</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> slim-torch201</span></span>
+<span class="line"></span></code></pre>
 <p>The <code>generate_pvc.sh</code>:</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#6272A4">#!/bin/bash</span></span>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6272A4">#!/bin/bash</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:#50FA7B">rm</span><span style="color:#BD93F9"> -rf</span><span style="color:#F1FA8C"> /data/cuda</span></span>
 <span class="line"><span style="color:#50FA7B">mkdir</span><span style="color:#BD93F9"> -p</span><span style="color:#F1FA8C"> /data/cuda</span></span>
@@ -202,15 +209,17 @@ merged it like this:</p>
 <span class="line"></span>
 <span class="line"><span style="color:#50FA7B">rm</span><span style="color:#BD93F9"> -rf</span><span style="color:#F1FA8C"> /data/nvidia</span></span>
 <span class="line"><span style="color:#50FA7B">mkdir</span><span style="color:#BD93F9"> -p</span><span style="color:#F1FA8C"> /data/nvidia</span></span>
-<span class="line"><span style="color:#50FA7B">cp</span><span style="color:#BD93F9"> -rT</span><span style="color:#F1FA8C"> /opt/nvidia</span><span style="color:#F1FA8C"> /data/nvidia</span></span></code></pre>
+<span class="line"><span style="color:#50FA7B">cp</span><span style="color:#BD93F9"> -rT</span><span style="color:#F1FA8C"> /opt/nvidia</span><span style="color:#F1FA8C"> /data/nvidia</span></span>
+<span class="line"></span></code></pre>
 <p>The <code>generate_torch.sh</code>:</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#6272A4">#!/bin/bash</span></span>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6272A4">#!/bin/bash</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:#50FA7B">rm</span><span style="color:#BD93F9"> -rf</span><span style="color:#F1FA8C"> /data/dist-packages-torch201</span></span>
 <span class="line"><span style="color:#50FA7B">mkdir</span><span style="color:#BD93F9"> -p</span><span style="color:#F1FA8C"> /data/dist-packages-torch201</span></span>
-<span class="line"><span style="color:#50FA7B">cp</span><span style="color:#BD93F9"> -rT</span><span style="color:#F1FA8C"> /usr/local/lib/python3.10/dist-packages</span><span style="color:#F1FA8C"> /data/dist-packages-torch201</span></span></code></pre>
+<span class="line"><span style="color:#50FA7B">cp</span><span style="color:#BD93F9"> -rT</span><span style="color:#F1FA8C"> /usr/local/lib/python3.10/dist-packages</span><span style="color:#F1FA8C"> /data/dist-packages-torch201</span></span>
+<span class="line"></span></code></pre>
 <p>Then I wrote a build script to build the image and push data to the shared storage:</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#6272A4">#!/bin/bash</span></span>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6272A4">#!/bin/bash</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:#50FA7B">mkdir</span><span style="color:#BD93F9"> -p</span><span style="color:#F1FA8C"> pvc</span></span>
 <span class="line"><span style="color:#50FA7B">chmod</span><span style="color:#F1FA8C"> +x</span><span style="color:#F1FA8C"> generate_pvc.sh</span></span>
@@ -270,15 +279,17 @@ merged it like this:</p>
 <span class="line"><span style="color:#FF79C6">else</span></span>
 <span class="line"><span style="color:#6272A4">  # Build specific services</span></span>
 <span class="line"><span style="color:#50FA7B">  build_services</span><span style="color:#E9F284"> "</span><span style="color:#FFB86C;font-style:italic">$@</span><span style="color:#E9F284">"</span></span>
-<span class="line"><span style="color:#FF79C6">fi</span></span></code></pre>
+<span class="line"><span style="color:#FF79C6">fi</span></span>
+<span class="line"></span></code></pre>
 <h3 id="conclusion">Conclusion</h3>
 <p>The image size looks like this:</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>REPOSITORY                        TAG                                         IMAGE ID       CREATED         SIZE</span></span>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="text"><code><span class="line"><span>REPOSITORY                        TAG                                         IMAGE ID       CREATED         SIZE</span></span>
 <span class="line"><span>cuda-11.8-cudnn8-ubuntu22.04      builder                                     85145614cc65   2 months ago    12GB</span></span>
 <span class="line"><span>cuda-11.8-cudnn8-ubuntu22.04      builder-torch201                            6e66a33cfa69   2 months ago    16.5GB</span></span>
 <span class="line"><span></span></span>
 <span class="line"><span>cuda-11.8-cudnn8-ubuntu22.04      slim                                        f94fffa6243e   2 months ago    4.52GB</span></span>
-<span class="line"><span>cuda-11.8-cudnn8-ubuntu22.04      slim-torch201                               a80ffa1fecf0   2 months ago    4.13GB</span></span></code></pre>
+<span class="line"><span>cuda-11.8-cudnn8-ubuntu22.04      slim-torch201                               a80ffa1fecf0   2 months ago    4.13GB</span></span>
+<span class="line"><span></span></span></code></pre>
 <ul>
 <li>The <code>/usr/lib/x86_64-linux-gnu</code> is around 4GB, but I can’t remove it because it contains the shared libraries. However, If your service doesn’t
 require additional packages at runtime, you can also remove the <code>x86_64-linux-gnu</code> directory. After removing it, the image size will be reduced
@@ -620,4 +631,4 @@ cuda-11.8-cudnn8-ubuntu22.04      slim-torch201                               a8
   require additional packages at runtime, you can also remove the \`x86_64-linux-gnu\` directory. After removing it, the image size will be reduced
   to only 200MB. I suggest you not to remove it because it may cause some problems when you run it in the kubernetes environment.
 * When we push the \`slim\` image to Dockerhub or your private repository, the size is only 2.27GB after compressing it.
-`}function b(){return n}function v(){return[{depth:2,slug:"how-to-reduce-the-nvidia-docker-image-size",text:"How to reduce the Nvidia Docker image size"},{depth:3,slug:"the-problem",text:"The problem"},{depth:3,slug:"the-solution",text:"The solution"},{depth:3,slug:"make-it-a-little-bit-automatic",text:"Make it a little bit automatic"},{depth:3,slug:"conclusion",text:"Conclusion"}]}const g=a((c,i,d)=>{const{layout:F,...s}=o;return s.file=t,s.url=r,e`${p()}${l(n)}`});export{g as Content,b as compiledContent,g as default,t as file,o as frontmatter,v as getHeadings,m as rawContent,r as url};
+`}function b(){return n}function g(){return[{depth:2,slug:"how-to-reduce-the-nvidia-docker-image-size",text:"How to reduce the Nvidia Docker image size"},{depth:3,slug:"the-problem",text:"The problem"},{depth:3,slug:"the-solution",text:"The solution"},{depth:3,slug:"make-it-a-little-bit-automatic",text:"Make it a little bit automatic"},{depth:3,slug:"conclusion",text:"Conclusion"}]}const v=a((c,i,d)=>{const{layout:F,...s}=o;return s.file=t,s.url=r,e`${p()}${l(n)}`});export{v as Content,b as compiledContent,v as default,t as file,o as frontmatter,g as getHeadings,m as rawContent,r as url};
