@@ -5,8 +5,6 @@ description: "Part 4: build the first runnable single-cluster runtime baseline w
 tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator"]
 ---
 
-# Building a GPU SaaS Platform
-
 Target readers:
 
 - you already know Golang syntax and basic project structure

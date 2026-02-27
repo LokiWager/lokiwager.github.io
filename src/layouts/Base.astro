@@ -9,10 +9,12 @@ import { siteConfig } from "@/site-config";
 
 interface Props {
 	meta: SiteMeta;
+	mainClass?: string;
 }
 
 const {
 	meta: { title, description = siteConfig.description, ogImage, articleDate },
+	mainClass = "mt-8 sm:mt-10",
 } = Astro.props;
 ---
 
@@ -24,7 +26,7 @@ const {
 		<ThemeProvider />
 		<SkipLink />
 		<Header />
-		<main id="main">
+		<main id="main" class={mainClass}>
 			<slot />
 		</main>
 		<Footer />

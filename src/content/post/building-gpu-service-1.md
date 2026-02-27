@@ -5,8 +5,6 @@ description: "In this series of articles, I will share my experience of building
 tags: ["GPU", "SaaS", "Kubernetes", "Ceph"]
 ---
 
-## Building a GPU SaaS Platform
-
 ### Our Driving Example
 
 Nowadays, GPUs are widely used in many fields, such as deep learning, drawing, and video processing. Especially when OpenAI released ChatGPT, our

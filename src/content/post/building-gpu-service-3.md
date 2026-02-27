@@ -5,8 +5,6 @@ description: "Let's write down the design spec for our GPU SaaS platform."
 tags: ["GPU", "SaaS", "Kubernetes", "Ceph"]
 ---
 
-# Building a GPU SaaS Platform
-
 Depending on the requirements of the application, the container technology would be a good choice for us. We could choose Docker or Kubernetes. We
 could also use Block Storage, Object Storage, or File Storage, such as OpenEBS, MinIO, or Ceph. We could also use a cloud provider, such as AWS,
 Azure, or GCP. So, how do we choose the right technology for our GPU SaaS platform? Let's discuss it.

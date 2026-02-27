@@ -4,38 +4,29 @@ export interface TocItem extends MarkdownHeading {
 	subheadings: Array<TocItem>;
 }
 
-function diveChildren(item: TocItem, depth: number): Array<TocItem> {
-	if (depth === 1 || !item.subheadings.length) {
-		return item.subheadings;
-	} else {
-		// e.g., 2
-		return diveChildren(item.subheadings[item.subheadings.length - 1] as TocItem, depth - 1);
-	}
-}
-
 export function generateToc(headings: ReadonlyArray<MarkdownHeading>) {
 	// this ignores/filters out h1 element(s)
-	const bodyHeadings = [...headings.filter(({ depth }) => depth > 1)];
+	const bodyHeadings = headings.filter(({ depth }) => depth > 1);
 	const toc: Array<TocItem> = [];
+	const stack: Array<TocItem> = [];
 
-	bodyHeadings.forEach((h) => {
+	for (const h of bodyHeadings) {
 		const heading: TocItem = { ...h, subheadings: [] };
 
-		// add h2 elements into the top level
-		if (heading.depth === 2) {
+		// Pop until we find the nearest parent with smaller depth.
+		while (stack.length > 0 && stack[stack.length - 1]!.depth >= heading.depth) {
+			stack.pop();
+		}
+
+		if (stack.length === 0) {
+			// Top-level heading in TOC. This also handles pages whose first heading is h3/h4.
 			toc.push(heading);
 		} else {
-			const lastItemInToc = toc[toc.length - 1]!;
-			if (heading.depth < lastItemInToc.depth) {
-				throw new Error(`Orphan heading found: ${heading.text}.`);
-			}
-
-			// higher depth
-			// push into children, or children's children
-			const gap = heading.depth - lastItemInToc.depth;
-			const target = diveChildren(lastItemInToc, gap);
-			target.push(heading);
+			stack[stack.length - 1]!.subheadings.push(heading);
 		}
-	});
+
+		stack.push(heading);
+	}
+
 	return toc;
 }

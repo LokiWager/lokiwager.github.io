@@ -5,8 +5,6 @@ description: "The Nvidia Docker image is too large for Kubernetes to extract. Ho
 tags: ["Docker", "Kubernetes", "Image", "GPU"]
 ---
 
-## How to reduce the Nvidia Docker image size
-
 ### The problem
 
 Kubernetes has an extraction timeout, which means there is a upper limit for the image size, approximately around 15GB. In my GPU SaaS platform, I

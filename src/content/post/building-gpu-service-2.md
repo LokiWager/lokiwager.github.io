@@ -5,8 +5,6 @@ description: "How to write a requirement document for a GPU SaaS platform, and w
 tags: ["GPU", "SaaS", "Kubernetes", "Ceph"]
 ---
 
-## Building a GPU SaaS Platform
-
 As we discussed in the previous article, we will write a requirement document for our Stable Diffusion WebUI SaaS. This article is not a complete requirement document, but a guide to write a requirement document.
 
 ### Background

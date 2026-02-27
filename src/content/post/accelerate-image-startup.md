@@ -5,8 +5,6 @@ description: "The Nvidia Docker image is too large for Kubernetes to extract. Ho
 tags: ["Docker", "Kubernetes", "Image", "GPU"]
 ---
 
-# How to accelerate the startup of a large Docker image?
-
 In the previous article, we discussed the way to reduce the size of the Docker image. In this article, we will discuss how to accelerate the
 startup of a large Docker image without reducing the size of it.
 

@@ -5,8 +5,6 @@ description: "Documenting an interesting Online issue troubleshooting journey"
 tags: ["Golang", "Network"]
 ---
 
-## A Fun "Bug" with Golang's http.URL
-
 I recently encountered an interesting issue that I thought the steps I took to troubleshoot might be worth sharing. I use an open-source project
 called [dufs](https://github.com/sigoden/dufs) as a file server for my users. I found that I can't operate a file which name contains `#` and `?`,
 and I am sure that I've encoded the URL correctly.
