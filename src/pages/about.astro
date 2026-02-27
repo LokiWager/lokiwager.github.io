@@ -1,52 +1,90 @@
 ---
 import PageLayout from "@/layouts/Base";
-import {Icon} from "astro-icon";
+import { Icon } from "astro-icon";
 import { Image } from "astro:assets";
-import Netease from "@/assets/netease.png"
-import Megaease from "@/assets/megaease.webp"
+import Netease from "@/assets/netease.png";
+import Megaease from "@/assets/megaease.webp";
 
 const meta = {
-  title: "About",
-  description: "The blog of Loki'Wager",
+	title: "About",
+	description: "The blog of Loki'Wager",
 };
 ---
 
 <PageLayout meta={meta}>
-  <div class="space-y-6">
-    <h1 class="title">About</h1>
-    <p>
-      Hi, I’m Loki's Wager.
-    </p>
-    <p>
-      A professional software developer/software engineer/programmer <Icon class="h-6 w-6 inline" name="emojione-v1:laptop-computer" aria-hidden="true" focusable="false"/>
-    </p>
-    <p>
-      The Software Architecture Expert in Netease <Image src={Netease} alt="logo" class="h-6 w-6 inline" aria-hidden="true"/>
-    </p>
-    <p>
-      The Business Partner in Megaease <Image src={Megaease} alt="logo" class="h-6 w-6 inline" aria-hidden="true"/>
-    </p>
-    <p>
-      An Open Source Contributor <Icon class="h-6 w-6 inline" name="ri:open-arm-fill" aria-hidden="true" focusable="false"/>
-    </p>
-    <p>
-      Cloud Native & Observability & Big Data <Icon class="h-6 w-6 inline" name="cib:skillshare" aria-hidden="true" focusable="false"/>
-    </p>
-    <p>
-      <Icon class="h-6 w-6 inline" name="logos:go" aria-hidden="true" focusable="false"/>
-      <Icon class="h-6 w-6 inline" name="logos:python" aria-hidden="true" focusable="false"/>
-      <Icon class="h-6 w-6 inline" name="logos:java" aria-hidden="true" focusable="false"/>
-      <Icon class="h-6 w-6 inline" name="logos:c" aria-hidden="true" focusable="false"/>
-      <Icon class="h-6 w-6 inline" name="logos:rust" aria-hidden="true" focusable="false"/>
-    </p>
-    <p>
-      A poor-handed gamer <Icon class="h-6 w-6 inline" name="emojione-v1:video-game" aria-hidden="true" focusable="false"/>
-    </p>
-    <p>
-      A lifelong leaner <Icon class="h-6 w-6 inline" name="eos-icons:machine-learning-outlined" aria-hidden="true" focusable="false"/>
-    </p>
-    <p>
-      RainBow boy <Icon class="h-6 w-6 inline" name="noto-v1:rainbow" aria-hidden="true" focusable="false"/>
-    </p>
-  </div>
+	<div class="space-y-6">
+		<h1 class="title">About</h1>
+		<p>Hi, I’m Loki's Wager.</p>
+		<p>
+			A professional software developer/software engineer/programmer <Icon
+				class="inline h-6 w-6"
+				name="emojione-v1:laptop-computer"
+				aria-hidden="true"
+				focusable="false"
+			/>
+		</p>
+		<p>
+			The Software Architecture Expert in Netease <Image
+				src={Netease}
+				alt="logo"
+				class="inline h-6 w-6"
+				aria-hidden="true"
+			/>
+		</p>
+		<p>
+			The Business Partner in Megaease <Image
+				src={Megaease}
+				alt="logo"
+				class="inline h-6 w-6"
+				aria-hidden="true"
+			/>
+		</p>
+		<p>
+			An Open Source Contributor <Icon
+				class="inline h-6 w-6"
+				name="ri:open-arm-fill"
+				aria-hidden="true"
+				focusable="false"
+			/>
+		</p>
+		<p>
+			Cloud Native & Observability & Big Data <Icon
+				class="inline h-6 w-6"
+				name="cib:skillshare"
+				aria-hidden="true"
+				focusable="false"
+			/>
+		</p>
+		<p>
+			<Icon class="inline h-6 w-6" name="logos:go" aria-hidden="true" focusable="false" />
+			<Icon class="inline h-6 w-6" name="logos:python" aria-hidden="true" focusable="false" />
+			<Icon class="inline h-6 w-6" name="logos:java" aria-hidden="true" focusable="false" />
+			<Icon class="inline h-6 w-6" name="logos:c" aria-hidden="true" focusable="false" />
+			<Icon class="inline h-6 w-6" name="logos:rust" aria-hidden="true" focusable="false" />
+		</p>
+		<p>
+			A poor-handed gamer <Icon
+				class="inline h-6 w-6"
+				name="emojione-v1:video-game"
+				aria-hidden="true"
+				focusable="false"
+			/>
+		</p>
+		<p>
+			A lifelong leaner <Icon
+				class="inline h-6 w-6"
+				name="eos-icons:machine-learning-outlined"
+				aria-hidden="true"
+				focusable="false"
+			/>
+		</p>
+		<p>
+			RainBow boy <Icon
+				class="inline h-6 w-6"
+				name="noto-v1:rainbow"
+				aria-hidden="true"
+				focusable="false"
+			/>
+		</p>
+	</div>
 </PageLayout>

@@ -2,7 +2,7 @@
 title: "Building a GPU SaaS Platform - The design spec"
 publishDate: "3 March 2024"
 description: "Let's write down the design spec for our GPU SaaS platform."
-tags: [ "GPU", "SaaS", "Kubernetes", "Ceph" ]
+tags: ["GPU", "SaaS", "Kubernetes", "Ceph"]
 ---
 
 # Building a GPU SaaS Platform
@@ -37,15 +37,15 @@ Depending on the workload, and human resources, I choose Kubernetes.
 ### Storage Technology
 
 |                      | MinIO    | OpenEBS（jiva） | Rook(Ceph)          |
-|----------------------|----------|---------------|---------------------|
-| support of community | No       | yes           | yes                 |
-| storage type         | Object   | Block         | Block, Object, File |
-| deployment           | Easy     | Easy          | Easy                |
-| operation            | Easy     | Complex       | Complex             |
-| PVC auto-provision   | directPV | yes           | yes                 |
-| IOPS                 |          |               |                     |
-| Big Data I/O         |          |               |                     |
-| scheduling cost      |          |               |                     |
+| -------------------- | -------- | --------------- | ------------------- |
+| support of community | No       | yes             | yes                 |
+| storage type         | Object   | Block           | Block, Object, File |
+| deployment           | Easy     | Easy            | Easy                |
+| operation            | Easy     | Complex         | Complex             |
+| PVC auto-provision   | directPV | yes             | yes                 |
+| IOPS                 |          |                 |                     |
+| Big Data I/O         |          |                 |                     |
+| scheduling cost      |          |                 |                     |
 
 For our scenario
 
@@ -198,4 +198,3 @@ I would not discuss the design of the storage service in this article. However, 
 - Update Storage
 - Create Storage Accessor
 - Delete Storage Accessor
-

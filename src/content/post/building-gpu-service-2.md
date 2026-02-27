@@ -2,7 +2,7 @@
 title: "Building a GPU SaaS Platform - The requirement spec"
 publishDate: "26 February 2024"
 description: "How to write a requirement document for a GPU SaaS platform, and what should be included in the document."
-tags: [ "GPU", "SaaS", "Kubernetes", "Ceph" ]
+tags: ["GPU", "SaaS", "Kubernetes", "Ceph"]
 ---
 
 ## Building a GPU SaaS Platform
@@ -124,7 +124,6 @@ The storage management plane is responsible for managing the storage life cycle 
 3. The storage service management service should support listing the storage status.
 4. The storage service management service should support API for CRUD of the storage.
 5. The storage service management service should support access UI for the storage.
-
 
 ### Overall
 

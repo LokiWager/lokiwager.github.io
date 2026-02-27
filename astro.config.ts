@@ -10,7 +10,7 @@ import { remarkReadingTime } from "./src/utils/remark-reading-time";
 // https://astro.build/config
 export default defineConfig({
 	// ! Please remember to replace the following site property with your own domain
-	site: "https://astro-cactus.chriswilliams.dev/",
+	site: "https://lokiwager.github.io/",
 	markdown: {
 		remarkPlugins: [remarkUnwrapImages, remarkReadingTime],
 		rehypePlugins: [
@@ -31,7 +31,7 @@ export default defineConfig({
 	],
 	image: {
 		domains: ["webmention.io"],
-    service: passthroughImageService(),
+		service: passthroughImageService(),
 	},
 	// https://docs.astro.build/en/guides/prefetch/
 	prefetch: true,

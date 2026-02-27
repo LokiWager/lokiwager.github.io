@@ -1,8 +1,8 @@
 ---
-title: "A Fun \"Bug\" with Golang's http.URL"
+title: 'A Fun "Bug" with Golang''s http.URL'
 publishDate: "20 February 2024"
 description: "Documenting an interesting Online issue troubleshooting journey"
-tags: [ "Golang", "Network" ]
+tags: ["Golang", "Network"]
 ---
 
 ## A Fun "Bug" with Golang's http.URL
@@ -45,9 +45,9 @@ characters in the URL.
 
 The architecture of the server is shown in the figure. In front of the server, there is an open-source gateway called [easegress](https://github.com/easegress-io/easegress) and a self-developed reverse proxy.
 
-* The gateway is responsible for handling the request from the client and forwarding the request to the different server, like terminal server, console
+- The gateway is responsible for handling the request from the client and forwarding the request to the different server, like terminal server, console
   server, etc.
-* The reverse proxy is responsible for authenticating the request and finding the real pod to handle the request.
+- The reverse proxy is responsible for authenticating the request and finding the real pod to handle the request.
 
 Both of them are written in Golang. So I need to find which part decodes the URL.
 
@@ -158,4 +158,3 @@ So the issue is in the gateway. The `Path` method decodes the URL. But why Golan
 decoded. The important thing is that the `Path` documentation doesn't mention it. I think the documentation should be
 improved. In my opinion, the reason why Golang decodes the URL is that it is convenient for the developer, in most cases, the developer doesn't
 need the original encoding of the URL.
-

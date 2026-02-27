@@ -2,7 +2,7 @@
 title: "How to reduce the Nvidia Docker image size"
 publishDate: "22 February 2024"
 description: "The Nvidia Docker image is too large for Kubernetes to extract. How to reduce the image size?"
-tags: [ "Docker", "Kubernetes", "Image", "GPU" ]
+tags: ["Docker", "Kubernetes", "Image", "GPU"]
 ---
 
 ## How to reduce the Nvidia Docker image size
@@ -207,7 +207,7 @@ services:
       - type: bind
         source: generate_pvc.sh
         target: /generate_pvc.sh
-    command: [ "/generate_pvc.sh" ]
+    command: ["/generate_pvc.sh"]
   slim:
     image: megaease/cuda-11.8-cudnn8-ubuntu22.04:slim
     build:
@@ -336,7 +336,7 @@ cuda-11.8-cudnn8-ubuntu22.04      slim                                        f9
 cuda-11.8-cudnn8-ubuntu22.04      slim-torch201                               a80ffa1fecf0   2 months ago    4.13GB
 ```
 
-* The `/usr/lib/x86_64-linux-gnu` is around 4GB, but I can't remove it because it contains the shared libraries. However, If your service doesn't
+- The `/usr/lib/x86_64-linux-gnu` is around 4GB, but I can't remove it because it contains the shared libraries. However, If your service doesn't
   require additional packages at runtime, you can also remove the `x86_64-linux-gnu` directory. After removing it, the image size will be reduced
   to only 200MB. I suggest you not to remove it because it may cause some problems when you run it in the kubernetes environment.
-* When we push the `slim` image to Dockerhub or your private repository, the size is only 2.27GB after compressing it.
+- When we push the `slim` image to Dockerhub or your private repository, the size is only 2.27GB after compressing it.

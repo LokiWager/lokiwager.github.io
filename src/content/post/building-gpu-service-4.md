@@ -2,7 +2,7 @@
 title: "Building a GPU SaaS Platform - Runtime Bootstrap in Go"
 publishDate: "27 February 2026"
 description: "Part 4: build the first runnable single-cluster runtime baseline with production-oriented engineering habits."
-tags: [ "GPU", "SaaS", "Kubernetes", "Golang", "Operator" ]
+tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator"]
 ---
 
 # Building a GPU SaaS Platform
@@ -148,15 +148,17 @@ jobs:
 name: Release Image
 on:
   push:
-    tags: ['v*']
+    tags: ["v*"]
 ```
 
 Why:
+
 - tests prevent regressions while architecture is still changing fast
 - CI gives consistent verification on every PR/push
 - release workflow makes delivery repeatable and auditable
 
 Reader requirement:
+
 - you should understand this part by yourself and run it locally
 - use the repository workflows and test files as the reference implementation
 - do not skip this step, even if business features look more interesting
@@ -168,6 +170,7 @@ Follow-up:
 In a later standalone article, we will cover production testing strategy and CI/CD engineering in depth (unit/integration/e2e, test pyramids, flaky test control, pipeline design, release safety).
 
 Files:
+
 - `Makefile`
 - `.github/workflows/ci.yml`
 - `.github/workflows/release-image.yml`
@@ -208,6 +211,7 @@ func main() {
 ```
 
 Why:
+
 - startup failures are explicit and visible in one place
 - shutdown behavior is deterministic
 - business logic remains testable outside `main`
@@ -248,6 +252,7 @@ func New(cfg config.Config) (*Runtime, error) {
 ```
 
 Why:
+
 - all dependencies are visible in one location
 - easier to replace components in tests
 - clean migration path to operator manager later
@@ -300,6 +305,7 @@ func (s *Server) handleStocks(w http.ResponseWriter, r *http.Request) {
 ```
 
 Why:
+
 - transport concerns remain isolated
 - service methods can be reused by jobs/tests later
 - API protocol changes do not force lifecycle refactors
@@ -345,6 +351,7 @@ func (s *Service) CreateVM(ctx context.Context, req CreateVMRequest) (domain.VM,
 ```
 
 Why:
+
 - clear separation: capacity (`Stock`) vs workload (`VM`)
 - explicit rollback path when VM creation fails
 - same flow maps naturally to future reconcile logic
@@ -379,6 +386,7 @@ const (
 ```
 
 Why:
+
 - one binary can run in local dev, CI, or cluster
 - behavior changes through config instead of code edits
 - operational behavior is explicit and documented
@@ -405,6 +413,7 @@ func BuildClient(mode config.KubeMode, kubeconfig string) (kubernetes.Interface,
 ```
 
 Why:
+
 - `/health` can expose real cluster connectivity
 - startup mode supports local and in-cluster runtime
 - future migration to controller-runtime is incremental, not disruptive
@@ -438,6 +447,7 @@ func (r *StatusReporter) Start(ctx context.Context) {
 ```
 
 Why:
+
 - request logs show calls, not steady-state runtime health
 - periodic reporting surfaces drift and silent failures
 - provides extension point for future metrics/events pipeline

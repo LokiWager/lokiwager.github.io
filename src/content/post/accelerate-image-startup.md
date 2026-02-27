@@ -2,7 +2,7 @@
 title: "How to accelerate the startup of a large Docker image?"
 publishDate: "28 September 2024"
 description: "The Nvidia Docker image is too large for Kubernetes to extract. How to accelerate the startup of it?"
-tags: [ "Docker", "Kubernetes", "Image", "GPU" ]
+tags: ["Docker", "Kubernetes", "Image", "GPU"]
 ---
 
 # How to accelerate the startup of a large Docker image?
@@ -45,13 +45,11 @@ The image which is more than 50GB can be started in 1 second, which is amazing. 
 - If you have some containers that are started before the OBD plugin is installed, you need to remove the images and then re-pull them.
 - If you have private registries, you need to configure the `config.json`, `cred.json` and `containerd/config.toml` files.
 
-
-
 # References
+
 1. https://dev.to/napicella/what-is-a-containerd-snapshotters-3eo2
 2. https://medium.com/nttlabs/startup-containers-in-lightning-speed-with-lazy-image-distribution-on-containerd-243d94522361
 3. https://github.com/containerd/containerd/blob/main/docs/remote-snapshotter.md
-
 
 # Off-topic
 

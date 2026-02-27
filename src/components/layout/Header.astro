@@ -3,7 +3,7 @@ import ThemeToggle from "../ThemeToggle.astro";
 import Search from "../Search.astro";
 import { menuLinks } from "@/site-config";
 import { Image } from "astro:assets";
-import LogoImage from "@/assets/logo.png"
+import LogoImage from "@/assets/logo.png";
 
 const url = new URL(Astro.request.url);
 ---
@@ -15,7 +15,11 @@ const url = new URL(Astro.request.url);
 			class="inline-flex items-center grayscale hover:filter-none sm:relative sm:inline-block"
 			aria-current={url.pathname === "/" ? "page" : false}
 		>
-			<Image src={LogoImage} alt="logo" class="me-3 w-6 sm:absolute sm:start-[-4.5rem] sm:me-0 sm:w-12"/>
+			<Image
+				src={LogoImage}
+				alt="logo"
+				class="me-3 w-6 sm:absolute sm:start-[-4.5rem] sm:me-0 sm:w-12"
+			/>
 			<span class="text-xl font-bold sm:text-2xl">Loki's Wager</span>
 		</a>
 		<nav
@@ -37,7 +41,7 @@ const url = new URL(Astro.request.url);
 			}
 		</nav>
 	</div>
-  <!--<SocialList/>-->
+	<!--<SocialList/>-->
 	<Search />
 	<ThemeToggle />
 	<mobile-button>
@@ -66,7 +70,6 @@ const url = new URL(Astro.request.url);
 			<svg
 				id="cross-svg"
 				class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 text-accent opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100"
-				class="text-accent"
 				aria-hidden="true"
 				focusable="false"
 				xmlns="http://www.w3.org/2000/svg"

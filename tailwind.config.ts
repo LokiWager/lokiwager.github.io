@@ -64,6 +64,12 @@ export default {
 							border: "1px dotted #666",
 							borderRadius: "2px",
 						},
+						"code::before": {
+							content: '""',
+						},
+						"code::after": {
+							content: '""',
+						},
 						blockquote: {
 							borderLeftWidth: "0",
 						},

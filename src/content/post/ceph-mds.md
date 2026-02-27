@@ -49,6 +49,7 @@ Add new MDS instances across desired host (example: node01, node02, etc.).
 Enable standby MDS instances for system availability in case of active daemon failure.
 
 According to the documentation
+
 > Even with multiple active MDS daemons, a highly available system still requires standby daemons to take over if any of the servers running an active daemon fail.
 
 ```bash
@@ -63,7 +64,7 @@ Augment the number of active MDS daemons.
 > ceph fs set <FS_NAME> max_mds 3
 ```
 
-Note: Total MDS daemons = Active MDS daemons + (Standby MDS daemons * Active MDS daemons).
+Note: Total MDS daemons = Active MDS daemons + (Standby MDS daemons \* Active MDS daemons).
 
 5. Check the status of MDS daemons.
 

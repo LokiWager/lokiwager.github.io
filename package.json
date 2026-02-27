@@ -9,6 +9,8 @@
 		"postbuild": "pagefind --site dist",
 		"preview": "astro preview",
 		"format": "prettier -w --cache . && prettier -w --cache **/*.astro",
+		"format:check": "prettier --check \"**/*.{js,cjs,ts,astro,md,css,json,yaml,yml}\"",
+		"lint": "eslint . --ext .ts,.astro",
 		"check": "astro check"
 	},
 	"dependencies": {
