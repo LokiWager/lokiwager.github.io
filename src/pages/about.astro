@@ -1,6 +1,5 @@
 ---
 import PageLayout from "@/layouts/Base";
-import { Icon } from "astro-icon";
 import { Image } from "astro:assets";
 import Netease from "@/assets/netease.png";
 import Megaease from "@/assets/megaease.webp";
@@ -13,77 +12,74 @@ const meta = {
 
 <PageLayout meta={meta}>
 	<div class="space-y-6">
-		<p>Hi, I’m Loki's Wager.</p>
-		<p>
-			A professional software developer/software engineer/programmer <Icon
-				class="inline h-6 w-6"
-				name="emojione-v1:laptop-computer"
-				aria-hidden="true"
-				focusable="false"
-			/>
-		</p>
-		<p>
-			The Software Architecture Expert in Netease <Image
-				src={Netease}
-				alt="logo"
-				class="inline h-6 w-6"
-				aria-hidden="true"
-			/>
-		</p>
-		<p>
-			The Business Partner in Megaease <Image
-				src={Megaease}
-				alt="logo"
-				class="inline h-6 w-6"
-				aria-hidden="true"
-			/>
-		</p>
-		<p>
-			An Open Source Contributor <Icon
-				class="inline h-6 w-6"
-				name="ri:open-arm-fill"
-				aria-hidden="true"
-				focusable="false"
-			/>
-		</p>
-		<p>
-			Cloud Native & Observability & Big Data <Icon
-				class="inline h-6 w-6"
-				name="cib:skillshare"
-				aria-hidden="true"
-				focusable="false"
-			/>
-		</p>
-		<p>
-			<Icon class="inline h-6 w-6" name="logos:go" aria-hidden="true" focusable="false" />
-			<Icon class="inline h-6 w-6" name="logos:python" aria-hidden="true" focusable="false" />
-			<Icon class="inline h-6 w-6" name="logos:java" aria-hidden="true" focusable="false" />
-			<Icon class="inline h-6 w-6" name="logos:c" aria-hidden="true" focusable="false" />
-			<Icon class="inline h-6 w-6" name="logos:rust" aria-hidden="true" focusable="false" />
-		</p>
-		<p>
-			A poor-handed gamer <Icon
-				class="inline h-6 w-6"
-				name="emojione-v1:video-game"
-				aria-hidden="true"
-				focusable="false"
-			/>
-		</p>
-		<p>
-			A lifelong leaner <Icon
-				class="inline h-6 w-6"
-				name="eos-icons:machine-learning-outlined"
-				aria-hidden="true"
-				focusable="false"
-			/>
-		</p>
-		<p>
-			RainBow boy <Icon
-				class="inline h-6 w-6"
-				name="noto-v1:rainbow"
-				aria-hidden="true"
-				focusable="false"
-			/>
-		</p>
+		<section class="space-y-2">
+			<h2 class="text-base font-semibold text-accent-2">TL;DR</h2>
+			<p>
+				chill · tinkerer · lifelong learner · challenger · stack-agnostic developer · home cook ·
+				introverted chatterbox · casual gamer 🌈 🇨🇦
+			</p>
+		</section>
+		<section class="space-y-2">
+			<h2 class="text-base font-semibold text-accent-2">I am</h2>
+			<ul class="list-disc space-y-1 ps-5">
+				<li>Lokiwager, born in Northeast China and now based in Canada 🌈.</li>
+				<li>Used to be a game architecture expert at NetEase
+				<Image src={Netease} alt="NetEase logo" class="inline h-6 w-6" aria-hidden="true" />,
+				leading a team of several dozen engineers during a high-growth phase of my career.
+				At that peak, I chose to leave.</li>
+				<li>Joined MegaEase as a partner
+				<Image src={Megaease} alt="MegaEase logo" class="inline h-6 w-6" aria-hidden="true" />. Not
+				long after, the company faced major turbulence and was close to breaking apart. After that
+				chapter, I chose to immigrate to Canada.</li>
+			</ul>
+		</section>
+		<section class="space-y-2">
+			<h2 class="text-base font-semibold text-accent-2">I like</h2>
+			<ul class="list-disc space-y-1 ps-5">
+				<li>
+					Coding and cooking, because I enjoy building things. Software and dinner both count.
+				</li>
+				<li>Reading, because quiet time matters.</li>
+				<li>Tidy systems and solid plans, because they keep me calm and focused.</li>
+				<li>Nintendo games, because my reflexes are not exactly eSports-ready.</li>
+				<li>Open source, because I believe it makes the world better.</li>
+				<li>Running, because it keeps me healthy and happy.</li>
+			</ul>
+		</section>
+		<section class="space-y-2">
+			<h2 class="text-base font-semibold text-accent-2">Domain Expansion</h2>
+			<ul class="list-disc space-y-1 ps-5">
+				<li>Cloud Native: Kubernetes, Docker, LXC</li>
+				<li>Observability: Prometheus, tracing, logs</li>
+				<li>Big Data: Flink, Kafka</li>
+				<li>Databases: ClickHouse, MongoDB, Redis, PostgreSQL, VictoriaMetrics</li>
+				<li>Distributed Storage: Ceph, JuiceFS, S3</li>
+				<li>Linux: OS and network stack</li>
+				<li>Languages: Go, Python, Rust, Java</li>
+			</ul>
+		</section>
+		<section class="space-y-2">
+			<h2 class="text-base font-semibold text-accent-2">I do not discuss</h2>
+			<ul class="list-disc space-y-1 ps-5">
+				<li>Politics</li>
+				<li>Race-related</li>
+			</ul>
+		</section>
+		<section class="space-y-2">
+			<h2 class="text-base font-semibold text-accent-2">I am happy to discuss</h2>
+			<ul class="list-disc space-y-1 ps-5">
+				<li>Technical problems, architecture tradeoffs, and performance bottlenecks</li>
+				<li>Big-tech and startup experience</li>
+				<li>Identity and orientation</li>
+				<li>Programming, books, cooking, and games</li>
+			</ul>
+		</section>
+		<section class="space-y-2">
+			<h2 class="text-base font-semibold text-accent-2">I hope</h2>
+			<ul class="list-disc space-y-1 ps-5">
+				<li>We can become friends, or at least good internet friends</li>
+				<li>Everyone gets to live the life they want and be happy doing it</li>
+			</ul>
+		</section>
 	</div>
 </PageLayout>
