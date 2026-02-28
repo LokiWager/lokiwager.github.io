@@ -1,51 +1,4 @@
-<!DOCTYPE html><html lang="en-GB"> <head><meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title>Building a GPU SaaS Platform - Runtime Bootstrap in Go • Loki&#39;s Wager</title>  <link rel="icon" href="/logo.png" sizes="any"> <!--<link rel="icon" href="/icon.svg" type="image/svg+xml" />--> <!--<link rel="apple-touch-icon" href="/apple-touch-icon.png" />--> <!--<link rel="manifest" href="/manifest.webmanifest" />--> <!--<link rel="canonical" href={canonicalURL} />-->  <meta name="title" content="Building a GPU SaaS Platform - Runtime Bootstrap in Go • Loki's Wager"> <meta name="description" content="Part 4: build the first runnable single-cluster runtime baseline with production-oriented engineering habits."> <meta name="author" content="Loki's Wager">  <meta name="theme-color" content="">  <meta property="og:type" content="article"> <meta property="og:title" content="Building a GPU SaaS Platform - Runtime Bootstrap in Go"> <meta property="og:description" content="Part 4: build the first runnable single-cluster runtime baseline with production-oriented engineering habits."> <meta property="og:url" content="https://lokiwager.github.io/posts/building-gpu-service-4/"> <meta property="og:site_name" content="Loki's Wager"> <meta property="og:locale" content="en_GB"> <!--<meta property="og:image" content={socialImageURL} />--> <meta property="og:image:width" content="1200"> <meta property="og:image:height" content="630">  <meta property="article:author" content="Loki's Wager"> <meta property="article:published_time" content="2026-02-27T00:00:00.000Z">   <meta property="twitter:card" content="summary_large_image"> <meta property="twitter:url" content="https://lokiwager.github.io/posts/building-gpu-service-4/"> <meta property="twitter:title" content="Building a GPU SaaS Platform - Runtime Bootstrap in Go"> <meta property="twitter:description" content="Part 4: build the first runnable single-cluster runtime baseline with production-oriented engineering habits."> <!--<meta property="twitter:image" content={socialImageURL} />-->  <link rel="sitemap" href="/sitemap-index.xml">  <link rel="alternate" type="application/rss+xml" title="Loki's Wager" href="/rss.xml">   <link rel="webmention" href="https://webmention.io/lokiwager.github.io/webmention">  <meta name="generator" content="Astro v4.4.6"><link rel="stylesheet" href="/_astro/_slug_.HOQxaWpw.css" /><script type="module" src="/_astro/hoisted.H_vjxbBs.js"></script>
-<script type="module" src="/_astro/page.tdlkyGlf.js"></script></head> <body> <script>
-	function getUserPref() {
-		const storedTheme = typeof localStorage !== "undefined" && localStorage.getItem("theme");
-		return (
-			storedTheme || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
-		);
-	}
-
-	function setTheme(newTheme) {
-		if (!newTheme || (newTheme !== "light" && newTheme !== "dark")) {
-			return console.warn(
-				`Incorrect theme value received. Expected 'light' or 'dark', received ${newTheme}`,
-			);
-		}
-
-		const root = document.documentElement;
-
-		// class already set to newTheme, exit early
-		if (
-			(newTheme === "dark" && root.classList.contains("dark")) ||
-			(newTheme === "light" && !root.classList.contains("dark"))
-		) {
-			return;
-		}
-
-		const colorThemeMetaTag = document.querySelector("meta[name='theme-color']");
-		document.documentElement.classList.toggle("dark", newTheme === "dark");
-		const bgColour = getComputedStyle(document.body).getPropertyValue("--theme-bg");
-
-		colorThemeMetaTag.setAttribute("content", `hsl(${bgColour})`);
-		if (typeof localStorage !== "undefined") {
-			localStorage.setItem("theme", newTheme);
-		}
-	}
-
-	// initial setup
-	setTheme(getUserPref());
-
-	// View Transitions hook to restore theme
-	document.addEventListener("astro:after-swap", () => setTheme(getUserPref()));
-
-	// listen for theme-change custom event, fired in src/components/ThemeToggle.astro
-	document.addEventListener("theme-change", (e) => {
-		setTheme(e.detail.theme);
-	});
-</script> <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:start-1 focus:top-1.5">skip to content
-</a> <header id="main-header" class="group relative mb-2 flex items-center sm:ps-[4.5rem]"> <div class="flex sm:flex-col"> <a href="/" class="inline-flex items-center grayscale hover:filter-none sm:relative sm:inline-block"> <img src="/_astro/logo.5KInvHpf_ZOK7lA.webp" alt="logo" class="me-3 w-6 sm:absolute sm:start-[-4.5rem] sm:me-0 sm:w-12" width="543" height="700" loading="lazy" decoding="async"> <span class="text-xl font-bold sm:text-2xl">Loki's Wager</span> </a> <nav id="navigation-menu" class="absolute -inset-x-4 top-14 hidden flex-col items-end gap-y-4 rounded-md bg-bgColor/[.85] py-4 text-accent shadow backdrop-blur group-[.menu-open]:z-50 group-[.menu-open]:flex sm:static sm:z-auto sm:-ms-4 sm:mt-1 sm:flex sm:flex-row sm:items-center sm:divide-x sm:divide-dashed sm:divide-accent sm:rounded-none sm:bg-transparent sm:py-0 sm:shadow-none sm:backdrop-blur-none" aria-label="Main menu"> <a href="/" class="px-4 py-4 sm:py-0 sm:hover:underline" data-astro-prefetch> Home </a><a href="/about/" class="px-4 py-4 sm:py-0 sm:hover:underline" data-astro-prefetch> About </a><a href="/posts/" class="px-4 py-4 sm:py-0 sm:hover:underline" data-astro-prefetch> Blog </a> </nav> </div> <!--<SocialList/>--> <site-search id="search" class="ms-auto" data-astro-cid-otpdt6jm> <button data-open-modal disabled class="flex h-9 w-9 items-center justify-center rounded-md ring-zinc-400 transition-all hover:ring-2" data-astro-cid-otpdt6jm> <svg aria-label="search" class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" data-astro-cid-otpdt6jm> <path stroke="none" d="M0 0h24v24H0z" data-astro-cid-otpdt6jm></path> <path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" data-astro-cid-otpdt6jm></path> </svg> </button> <dialog aria-label="search" class="h-full max-h-full w-full max-w-full border border-zinc-400 bg-bgColor shadow backdrop:backdrop-blur sm:mx-auto sm:mb-auto sm:mt-16 sm:h-max sm:max-h-[calc(100%-8rem)] sm:min-h-[15rem] sm:w-5/6 sm:max-w-[48rem] sm:rounded-md" data-astro-cid-otpdt6jm> <div class="dialog-frame flex flex-col gap-4 p-6 pt-12 sm:pt-6" data-astro-cid-otpdt6jm> <button data-close-modal class="ms-auto cursor-pointer rounded-md bg-zinc-200 p-2 font-semibold dark:bg-zinc-700" data-astro-cid-otpdt6jm>Close</button> <div class="search-container" data-astro-cid-otpdt6jm> <div id="cactus__search" data-astro-cid-otpdt6jm></div> </div> </div> </dialog> </site-search>    <theme-toggle class="ms-2 sm:ms-4"> <button type="button" id="toggle-theme" class="relative h-9 w-9 rounded-md p-2 ring-zinc-400 transition-all hover:ring-2" aria-label="Toggle Dark Mode"> <svg id="sun-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-100 opacity-100 transition-all dark:scale-0 dark:opacity-0" aria-hidden="true" focusable="false" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg id="moon-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100" aria-hidden="true" focusable="false" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path> <path d="M19 11h2m-1 -1v2"></path> </svg> </button> </theme-toggle>  <mobile-button> <button id="toggle-navigation-menu" class="group relative ms-4 h-7 w-7 sm:invisible sm:hidden" type="button" aria-label="Open main menu" aria-expanded="false" aria-haspopup="menu"> <svg id="line-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transition-all group-aria-expanded:scale-0 group-aria-expanded:opacity-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"></path> </svg> <svg id="cross-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 text-accent opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path> </svg> </button> </mobile-button> </header>  <main id="main" class="mt-8 sm:mt-10">  <div class="gap-x-10 lg:flex lg:items-start"> <aside class="sticky top-20 order-2 -me-32 hidden basis-64 lg:block"> <h2 class="font-semibold">Table of Contents</h2> <ul class="mt-4 text-xs"> <li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#chapter-goal" aria-label="Scroll to section: Chapter Goal">Chapter Goal</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#engineering-goal-of-this-iteration" aria-label="Scroll to section: Engineering Goal of This Iteration">Engineering Goal of This Iteration</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#what-we-deliberately-do-not-build-yet" aria-label="Scroll to section: What We Deliberately Do Not Build Yet">What We Deliberately Do Not Build Yet</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#technology-selection-in-this-iteration" aria-label="Scroll to section: Technology Selection in This Iteration">Technology Selection in This Iteration</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#architecture-iteration-1" aria-label="Scroll to section: Architecture (Iteration 1)">Architecture (Iteration 1)</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#step-by-step-implementation" aria-label="Scroll to section: Step-by-Step Implementation">Step-by-Step Implementation</a> <ul> <li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#step-0-add-testing-and-cicd-from-day-one" aria-label="Scroll to section: Step 0: Add testing and CI/CD from day one">Step 0: Add testing and CI/CD from day one</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#step-1-keep-main-minimal-and-predictable" aria-label="Scroll to section: Step 1: Keep main minimal and predictable">Step 1: Keep main minimal and predictable</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#step-2-use-a-dedicated-runtime-wiring-layer" aria-label="Scroll to section: Step 2: Use a dedicated runtime wiring layer">Step 2: Use a dedicated runtime wiring layer</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#step-3-keep-api-handlers-thin" aria-label="Scroll to section: Step 3: Keep API handlers thin">Step 3: Keep API handlers thin</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#step-4-keep-lifecycle-orchestration-in-service" aria-label="Scroll to section: Step 4: Keep lifecycle orchestration in service">Step 4: Keep lifecycle orchestration in service</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#step-5-extract-config-early" aria-label="Scroll to section: Step 5: Extract config early">Step 5: Extract config early</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#step-6-add-kubernetes-adapter-for-connectivity-signal" aria-label="Scroll to section: Step 6: Add Kubernetes adapter for connectivity signal">Step 6: Add Kubernetes adapter for connectivity signal</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#step-7-add-a-periodic-reporter-job" aria-label="Scroll to section: Step 7: Add a periodic reporter job">Step 7: Add a periodic reporter job</a>  </li> </ul> </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#how-to-validate-this-iteration" aria-label="Scroll to section: How to Validate This Iteration">How to Validate This Iteration</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#troubleshooting-guide-early-iteration" aria-label="Scroll to section: Troubleshooting Guide (Early Iteration)">Troubleshooting Guide (Early Iteration)</a> <ul> <li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#runtime-exits-on-startup" aria-label="Scroll to section: Runtime exits on startup">Runtime exits on startup</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#health-shows-kubernetesconnectedfalse" aria-label="Scroll to section: /health shows kubernetesConnected=false">/health shows kubernetesConnected=false</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#vm-creation-fails-with-no-available-stock" aria-label="Scroll to section: VM creation fails with no available stock">VM creation fails with no available stock</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#api-returns-400" aria-label="Scroll to section: API returns 400">API returns 400</a>  </li> </ul> </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#iteration-summary" aria-label="Scroll to section: Iteration Summary">Iteration Summary</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#next-chapter-preview" aria-label="Scroll to section: Next Chapter Preview">Next Chapter Preview</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#repository" aria-label="Scroll to section: Repository">Repository</a>  </li> </ul> </aside> <article class="flex-grow break-words" data-pagefind-body> <div id="blog-hero"><h1 class="title mb-3 sm:mb-1"> Building a GPU SaaS Platform - Runtime Bootstrap in Go </h1> <div class="flex flex-wrap items-center gap-x-3 gap-y-2"> <p class="font-semibold"> <time datetime="2026-02-27T00:00:00.000Z"> 27 February 2026 </time> /  8 min read </p>  </div> <div class="mt-3"> <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" class="me-1 inline-block h-6 w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z"></path> <path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116"></path> <path d="M6 9h-.01"></path> </svg>  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag gpu" href="/tags/gpu/" data-pagefind-filter="tag"> gpu </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag saas" href="/tags/saas/" data-pagefind-filter="tag"> saas </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag kubernetes" href="/tags/kubernetes/" data-pagefind-filter="tag"> kubernetes </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag golang" href="/tags/golang/" data-pagefind-filter="tag"> golang </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag operator" href="/tags/operator/" data-pagefind-filter="tag"> operator </a>  </div></div> <div class="prose prose-sm prose-cactus mt-12 max-w-none prose-headings:font-semibold prose-headings:text-accent-2 prose-th:before:content-none">  <p>Target readers:</p>
+import{c as e,r as a,m as o}from"./render-template.rCiCpz-f.js";import{u as l}from"./hoisted.6ZpvY2Zp.js";import"./astro/assets-service.wdzbVTWi.js";const s=`<p>Target readers:</p>
 <ul>
 <li>you already know Golang syntax and basic project structure</li>
 <li>you are not yet confident in production-oriented engineering decisions</li>
@@ -190,7 +143,7 @@ Define a deterministic startup and shutdown path. <code>main</code> is orchestra
 <pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">func</span><span style="color:#50FA7B"> main</span><span style="color:#F8F8F2">() {</span></span>
 <span class="line"><span style="color:#F8F8F2">    cfg, err </span><span style="color:#FF79C6">:=</span><span style="color:#50FA7B"> loadConfig</span><span style="color:#F8F8F2">()</span></span>
 <span class="line"><span style="color:#FF79C6">    if</span><span style="color:#F8F8F2"> err </span><span style="color:#FF79C6">!=</span><span style="color:#BD93F9"> nil</span><span style="color:#F8F8F2"> {</span></span>
-<span class="line"><span style="color:#F8F8F2">        fmt.</span><span style="color:#50FA7B">Fprintf</span><span style="color:#F8F8F2">(os.Stderr, </span><span style="color:#E9F284">"</span><span style="color:#F1FA8C">config error: </span><span style="color:#BD93F9">%v</span><span style="color:#FF79C6">\\</span><span style="color:#F1FA8C">n</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">, err)</span></span>
+<span class="line"><span style="color:#F8F8F2">        fmt.</span><span style="color:#50FA7B">Fprintf</span><span style="color:#F8F8F2">(os.Stderr, </span><span style="color:#E9F284">"</span><span style="color:#F1FA8C">config error: </span><span style="color:#BD93F9">%v</span><span style="color:#FF79C6">\\\\</span><span style="color:#F1FA8C">n</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">, err)</span></span>
 <span class="line"><span style="color:#F8F8F2">        os.</span><span style="color:#50FA7B">Exit</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">1</span><span style="color:#F8F8F2">)</span></span>
 <span class="line"><span style="color:#F8F8F2">    }</span></span>
 <span class="line"></span>
@@ -199,12 +152,12 @@ Define a deterministic startup and shutdown path. <code>main</code> is orchestra
 <span class="line"></span>
 <span class="line"><span style="color:#F8F8F2">    runtime, err </span><span style="color:#FF79C6">:=</span><span style="color:#F8F8F2"> app.</span><span style="color:#50FA7B">New</span><span style="color:#F8F8F2">(cfg)</span></span>
 <span class="line"><span style="color:#FF79C6">    if</span><span style="color:#F8F8F2"> err </span><span style="color:#FF79C6">!=</span><span style="color:#BD93F9"> nil</span><span style="color:#F8F8F2"> {</span></span>
-<span class="line"><span style="color:#F8F8F2">        fmt.</span><span style="color:#50FA7B">Fprintf</span><span style="color:#F8F8F2">(os.Stderr, </span><span style="color:#E9F284">"</span><span style="color:#F1FA8C">startup error: </span><span style="color:#BD93F9">%v</span><span style="color:#FF79C6">\\</span><span style="color:#F1FA8C">n</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">, err)</span></span>
+<span class="line"><span style="color:#F8F8F2">        fmt.</span><span style="color:#50FA7B">Fprintf</span><span style="color:#F8F8F2">(os.Stderr, </span><span style="color:#E9F284">"</span><span style="color:#F1FA8C">startup error: </span><span style="color:#BD93F9">%v</span><span style="color:#FF79C6">\\\\</span><span style="color:#F1FA8C">n</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">, err)</span></span>
 <span class="line"><span style="color:#F8F8F2">        os.</span><span style="color:#50FA7B">Exit</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">1</span><span style="color:#F8F8F2">)</span></span>
 <span class="line"><span style="color:#F8F8F2">    }</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:#FF79C6">    if</span><span style="color:#F8F8F2"> err </span><span style="color:#FF79C6">:=</span><span style="color:#F8F8F2"> runtime.</span><span style="color:#50FA7B">Run</span><span style="color:#F8F8F2">(ctx); err </span><span style="color:#FF79C6">!=</span><span style="color:#BD93F9"> nil</span><span style="color:#F8F8F2"> {</span></span>
-<span class="line"><span style="color:#F8F8F2">        fmt.</span><span style="color:#50FA7B">Fprintf</span><span style="color:#F8F8F2">(os.Stderr, </span><span style="color:#E9F284">"</span><span style="color:#F1FA8C">runtime error: </span><span style="color:#BD93F9">%v</span><span style="color:#FF79C6">\\</span><span style="color:#F1FA8C">n</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">, err)</span></span>
+<span class="line"><span style="color:#F8F8F2">        fmt.</span><span style="color:#50FA7B">Fprintf</span><span style="color:#F8F8F2">(os.Stderr, </span><span style="color:#E9F284">"</span><span style="color:#F1FA8C">runtime error: </span><span style="color:#BD93F9">%v</span><span style="color:#FF79C6">\\\\</span><span style="color:#F1FA8C">n</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">, err)</span></span>
 <span class="line"><span style="color:#F8F8F2">        os.</span><span style="color:#50FA7B">Exit</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">1</span><span style="color:#F8F8F2">)</span></span>
 <span class="line"><span style="color:#F8F8F2">    }</span></span>
 <span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
@@ -261,8 +214,8 @@ Keep HTTP layer responsible only for transport, not business rules.</p>
 <span class="line"><span style="color:#F8F8F2">    s.mux.</span><span style="color:#50FA7B">HandleFunc</span><span style="color:#F8F8F2">(</span><span style="color:#E9F284">"</span><span style="color:#F1FA8C">/api/v1/vms/</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">, s.handleVMByID)</span></span>
 <span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
 <pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">type</span><span style="color:#8BE9FD;font-style:italic"> envelope</span><span style="color:#FF79C6"> struct</span><span style="color:#F8F8F2"> {</span></span>
-<span class="line"><span style="color:#F8F8F2">    Data  </span><span style="color:#8BE9FD;font-style:italic">any</span><span style="color:#E9F284">       `</span><span style="color:#F1FA8C">json:"data,omitempty"</span><span style="color:#E9F284">`</span></span>
-<span class="line"><span style="color:#F8F8F2">    Error </span><span style="color:#FF79C6">*</span><span style="color:#8BE9FD;font-style:italic">apiError</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"error,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Data  </span><span style="color:#8BE9FD;font-style:italic">any</span><span style="color:#E9F284">       \`</span><span style="color:#F1FA8C">json:"data,omitempty"</span><span style="color:#E9F284">\`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Error </span><span style="color:#FF79C6">*</span><span style="color:#8BE9FD;font-style:italic">apiError</span><span style="color:#E9F284"> \`</span><span style="color:#F1FA8C">json:"error,omitempty"</span><span style="color:#E9F284">\`</span></span>
 <span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
 <pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">func</span><span style="color:#F8F8F2"> (</span><span style="color:#FFB86C;font-style:italic">s </span><span style="color:#FF79C6">*</span><span style="color:#8BE9FD;font-style:italic">Server</span><span style="color:#F8F8F2">) </span><span style="color:#50FA7B">handleStocks</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">w</span><span style="color:#8BE9FD;font-style:italic"> http</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">ResponseWriter</span><span style="color:#F8F8F2">, </span><span style="color:#FFB86C;font-style:italic">r</span><span style="color:#FF79C6"> *</span><span style="color:#8BE9FD;font-style:italic">http</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">Request</span><span style="color:#F8F8F2">) {</span></span>
 <span class="line"><span style="color:#FF79C6">    switch</span><span style="color:#F8F8F2"> r.Method {</span></span>
@@ -415,14 +368,14 @@ No background reporting means incidents can remain invisible until user traffic 
 <ol start="4">
 <li>stock lifecycle</li>
 </ol>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/stocks</span><span style="color:#FF79C6"> \</span></span>
-<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/stocks</span><span style="color:#FF79C6"> \\</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \\</span></span>
 <span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{"number":2,"specName":"g1.1","cpu":"4","memory":"16Gi","gpuType":"RTX4090","gpuNum":1}</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
 <ol start="5">
 <li>vm lifecycle</li>
 </ol>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/vms</span><span style="color:#FF79C6"> \</span></span>
-<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/vms</span><span style="color:#FF79C6"> \\</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \\</span></span>
 <span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{"tenantID":"tenant-a","tenantName":"team-a","specName":"g1.1"}</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
 <p>Definition of Done for this chapter:</p>
 <ul>
@@ -476,5 +429,560 @@ Create stock first or use a valid <code>specName</code>.</p>
 <p>At that point, we will migrate from in-memory state to Kubernetes-native desired/actual state management.</p>
 <h2 id="repository">Repository</h2>
 <p>Code for this tutorial runtime:</p>
-<p><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank">gpu-operator-runtime</a></p>   </div> </article> </div> <button id="to-top-btn" class="z-90 fixed bottom-8 end-4 flex h-10 w-10 translate-y-28 items-center justify-center rounded-full border-2 border-transparent bg-zinc-200 text-3xl opacity-0 transition-all duration-300 hover:border-zinc-400 data-[show=true]:translate-y-0 data-[show=true]:opacity-100 dark:bg-zinc-700 sm:end-8 sm:h-12 sm:w-12" aria-label="Back to Top" data-show="false"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6"> <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path> </svg> </button>  </main> <footer class="mt-auto flex w-full flex-col items-center justify-center gap-y-2 pb-4 pt-20 text-center align-top font-semibold text-gray-600 dark:text-gray-400 sm:flex-row sm:justify-between sm:text-xs"> <div class="me-0 sm:me-4">
-Copyright &copy; 2026  Loki&#39;s Wager </div> <nav aria-label="More on this site" class="flex gap-x-2 sm:gap-x-0 sm:divide-x sm:divide-gray-500"> <!--{--> <!--	menuLinks.map((link) => (--> <!--		<a--> <!--			href={link.path}--> <!--			class="px-4 py-2 sm:px-2 sm:py-0 sm:hover:text-textColor sm:hover:underline"--> <!--		>--> <!--			{link.title}--> <!--		</a>--> <!--	))--> <!--}--> <div class="flex flex-wrap items-end gap-x-4"> <!--<p>Find me on</p>--> <ul class="flex flex-1 items-center gap-x-2 sm:flex-initial"> <li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://github.com/LokiWager" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:github"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg> <span class="sr-only">Github</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://twitter.com/loki66118227" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:twitter"><path fill="currentColor" d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/></svg> <span class="sr-only">Twitter</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="mailto:lokitingyi@gmail.com" target="_blank" rel="noopener noreferrer me authn"> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:email"><path fill="currentColor" d="m20 8-8 5-8-5V6l8 5 8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/></svg> <span class="sr-only">email</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://space.bilibili.com/4810234" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="ri:bilibili-fill"><path fill="currentColor" d="M18.223 3.086a1.25 1.25 0 0 1 0 1.768L17.08 5.996h1.17A3.75 3.75 0 0 1 22 9.747v7.5a3.75 3.75 0 0 1-3.75 3.75H5.75A3.75 3.75 0 0 1 2 17.247v-7.5a3.75 3.75 0 0 1 3.75-3.75h1.166L5.775 4.855a1.25 1.25 0 1 1 1.767-1.768l2.652 2.652c.079.079.145.165.198.257h3.213c.053-.092.12-.18.199-.258l2.651-2.652a1.25 1.25 0 0 1 1.768 0zm.027 5.42H5.75a1.25 1.25 0 0 0-1.247 1.157l-.003.094v7.5c0 .659.51 1.199 1.157 1.246l.093.004h12.5a1.25 1.25 0 0 0 1.247-1.157l.003-.093v-7.5c0-.69-.56-1.25-1.25-1.25zm-10 2.5c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25zm7.5 0c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25z"/></svg> <span class="sr-only">Bilibili</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://www.instagram.com/lokiwager/" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:instagram"><path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg> <span class="sr-only">Instagram</span> </a> </li> </ul> </div> </nav> </footer> </body></html> 
+<p><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank">gpu-operator-runtime</a></p>`,t={title:"Building a GPU SaaS Platform - Runtime Bootstrap in Go",publishDate:"27 February 2026",description:"Part 4: build the first runnable single-cluster runtime baseline with production-oriented engineering habits.",tags:["GPU","SaaS","Kubernetes","Golang","Operator"],minutesRead:"8 min read"},p="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-4.md",r=void 0;function g(){return`
+Target readers:
+
+- you already know Golang syntax and basic project structure
+- you are not yet confident in production-oriented engineering decisions
+
+This chapter is not just about "making code run". It is about learning how to make decisions that support long-term delivery.
+
+## Chapter Goal
+
+By the end of this chapter, you should have a runnable single-cluster runtime baseline that includes:
+
+- process startup and graceful shutdown
+- baseline API (\`health / stocks / vms\`)
+- minimal lifecycle loop (create stock -> allocate VM -> release stock)
+- periodic status reporting
+- optional Kubernetes connectivity
+- initial quality baseline (unit tests + CI/CD)
+
+More importantly, you should understand **why** we implement it this way.
+
+## Engineering Goal of This Iteration
+
+For a real production system, the first iteration should optimize for:
+
+- clear boundaries, not feature completeness
+- fast validation, not premature complexity
+- low refactor cost in next iteration
+
+That is why this chapter intentionally does **not** implement a full Operator yet.
+
+## What We Deliberately Do Not Build Yet
+
+Not included in this chapter:
+
+- CRD + reconcile loop
+- PVC/Ceph workflows
+- multi-cluster state aggregation
+- serverless runtime workflow
+
+Reason: these features are important, but introducing them before we stabilize service boundaries makes troubleshooting much harder.
+
+## Technology Selection in This Iteration
+
+Constraints:
+
+- use standard library for HTTP (\`net/http\`)
+- use standard library for logging (\`log/slog\`)
+- avoid extra frameworks in the first implementation
+- include only required Kubernetes dependency (\`client-go\`)
+
+\`\`\`go
+require k8s.io/client-go v0.30.10
+\`\`\`
+
+Why this choice:
+
+- fewer abstractions at start means easier debugging
+- lower cognitive load for readers new to engineering practice
+- we keep room to evolve later (Echo/Gin, zap, metrics stack) based on measured needs
+
+## Architecture (Iteration 1)
+
+\`\`\`text
++-------------------+        +-------------------+
+|   cmd/runtime     | -----> |   pkg/runtime     |
+| (flags & signals) |        | (wire everything) |
++-------------------+        +---------+---------+
+                                      |
+                    +-----------------+-----------------+
+                    |                                   |
+          +---------v---------+               +---------v---------+
+          |    pkg/api        |               |    pkg/jobs       |
+          |   net/http        |               | status reporter   |
+          +---------+---------+               +---------+---------+
+                    |                                   |
+                    +-----------------+-----------------+
+                                      |
+                            +---------v---------+
+                            |   pkg/service     |
+                            | use-cases         |
+                            +----+---------+----+
+                                 |         |
+                        +--------v-+   +---v----------------+
+                        | pkg/store |   | pkg/kube           |
+                        | in-memory |   | client-go adapter  |
+                        +-----------+   +--------------------+
+\`\`\`
+
+Boundary rules:
+
+- \`api\`: transport only (decode/encode/status code)
+- \`service\`: business orchestration only
+- \`store\`: state operations only
+- \`runtime\`: wiring only
+
+These rules prevent "everything in handler" code, which is the most common early-stage anti-pattern.
+
+## Step-by-Step Implementation
+
+### Step 0: Add testing and CI/CD from day one
+
+Purpose:
+Set minimum quality gates at project initialization, not after incidents.
+This chapter only gives a lightweight setup. You should treat this part as mandatory homework.
+
+Code:
+
+\`\`\`bash
+make ci
+\`\`\`
+
+\`\`\`make
+ci: fmt-check vet test-race build
+\`\`\`
+
+\`\`\`yaml
+# .github/workflows/ci.yml
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: make fmt-check
+      - run: make vet
+      - run: make test-race
+      - run: make build
+\`\`\`
+
+\`\`\`yaml
+# .github/workflows/release-image.yml
+name: Release Image
+on:
+  push:
+    tags: ["v*"]
+\`\`\`
+
+Why:
+
+- tests prevent regressions while architecture is still changing fast
+- CI gives consistent verification on every PR/push
+- release workflow makes delivery repeatable and auditable
+
+Reader requirement:
+
+- you should understand this part by yourself and run it locally
+- use the repository workflows and test files as the reference implementation
+- do not skip this step, even if business features look more interesting
+
+Pitfall:
+If testing and CI/CD are postponed, technical debt grows quickly and every refactor becomes risky.
+
+Follow-up:
+In a later standalone article, we will cover production testing strategy and CI/CD engineering in depth (unit/integration/e2e, test pyramids, flaky test control, pipeline design, release safety).
+
+Files:
+
+- \`Makefile\`
+- \`.github/workflows/ci.yml\`
+- \`.github/workflows/release-image.yml\`
+- \`pkg/config/config_test.go\`
+- \`pkg/store/memory_test.go\`
+- \`pkg/service/service_test.go\`
+- \`pkg/api/server_test.go\`
+
+### Step 1: Keep \`main\` minimal and predictable
+
+Purpose:
+Define a deterministic startup and shutdown path. \`main\` is orchestration only.
+
+Code:
+
+\`\`\`go
+func main() {
+    cfg, err := loadConfig()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "config error: %v\\\\n", err)
+        os.Exit(1)
+    }
+
+    ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+    defer stop()
+
+    runtime, err := app.New(cfg)
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "startup error: %v\\\\n", err)
+        os.Exit(1)
+    }
+
+    if err := runtime.Run(ctx); err != nil {
+        fmt.Fprintf(os.Stderr, "runtime error: %v\\\\n", err)
+        os.Exit(1)
+    }
+}
+\`\`\`
+
+Why:
+
+- startup failures are explicit and visible in one place
+- shutdown behavior is deterministic
+- business logic remains testable outside \`main\`
+
+Pitfall:
+Putting business logic in \`main\` makes testing hard and refactors expensive.
+
+File: \`cmd/runtime/main.go\`
+
+### Step 2: Use a dedicated runtime wiring layer
+
+Purpose:
+Create one composition root (\`pkg/runtime\`) to wire dependencies and keep layering stable.
+
+Code:
+
+\`\`\`go
+func New(cfg config.Config) (*Runtime, error) {
+    logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+
+    kubeClient, err := kube.BuildClient(cfg.KubeMode, cfg.Kubeconfig)
+    if err != nil {
+        return nil, err
+    }
+
+    memStore := store.NewMemoryStore()
+    svc := service.New(memStore, kubeClient, logger)
+    handler := api.NewServer(svc, logger)
+
+    httpServer := &http.Server{
+        Addr:              cfg.HTTPAddr,
+        Handler:           handler,
+        ReadHeaderTimeout: 5 * time.Second,
+    }
+
+    return &Runtime{...}, nil
+}
+\`\`\`
+
+Why:
+
+- all dependencies are visible in one location
+- easier to replace components in tests
+- clean migration path to operator manager later
+
+Pitfall:
+If handlers/services instantiate dependencies directly, ownership becomes unclear and startup behavior fragments.
+
+File: \`pkg/runtime/runtime.go\`
+
+### Step 3: Keep API handlers thin
+
+Purpose:
+Keep HTTP layer responsible only for transport, not business rules.
+
+Code:
+
+\`\`\`go
+func (s *Server) routes() {
+    s.mux.HandleFunc("/api/v1/health", s.handleHealth)
+    s.mux.HandleFunc("/api/v1/stocks", s.handleStocks)
+    s.mux.HandleFunc("/api/v1/vms", s.handleVMs)
+    s.mux.HandleFunc("/api/v1/vms/", s.handleVMByID)
+}
+\`\`\`
+
+\`\`\`go
+type envelope struct {
+    Data  any       \`json:"data,omitempty"\`
+    Error *apiError \`json:"error,omitempty"\`
+}
+\`\`\`
+
+\`\`\`go
+func (s *Server) handleStocks(w http.ResponseWriter, r *http.Request) {
+    switch r.Method {
+    case http.MethodPost:
+        var req service.CreateStockRequest
+        if err := decodeBody(r.Body, &req); err != nil {
+            writeError(w, http.StatusBadRequest, "invalid_request", err.Error())
+            return
+        }
+        stocks, err := s.service.CreateStocks(r.Context(), req)
+        if err != nil {
+            writeError(w, http.StatusBadRequest, "create_stocks_failed", err.Error())
+            return
+        }
+        writeData(w, http.StatusCreated, stocks)
+    }
+}
+\`\`\`
+
+Why:
+
+- transport concerns remain isolated
+- service methods can be reused by jobs/tests later
+- API protocol changes do not force lifecycle refactors
+
+Pitfall:
+If validation, status code mapping, and business logic are mixed in handlers, every API change becomes high risk.
+
+File: \`pkg/api/server.go\`
+
+### Step 4: Keep lifecycle orchestration in \`service\`
+
+Purpose:
+Implement the first runtime lifecycle loop and explain why \`Stock\` is a first-class model.
+
+\`Stock\` represents pre-provisioned GPU capacity. It is intentionally separated from tenant VM identity.
+This avoids coupling capacity accounting with workload lifecycle.
+
+Code:
+
+\`\`\`go
+func (s *Service) CreateVM(ctx context.Context, req CreateVMRequest) (domain.VM, error) {
+    var (
+        stock domain.Stock
+        err   error
+    )
+
+    if strings.TrimSpace(req.StockID) != "" {
+        stock, err = s.store.ReserveStockByID(strings.TrimSpace(req.StockID))
+    } else {
+        stock, err = s.store.ReserveStock(strings.TrimSpace(req.SpecName))
+    }
+    if err != nil {
+        return domain.VM{}, err
+    }
+
+    vm := domain.VM{...}
+    if err := s.store.CreateVM(vm); err != nil {
+        _ = s.store.ReleaseStock(stock.ID)
+        return domain.VM{}, err
+    }
+    return vm, nil
+}
+\`\`\`
+
+Why:
+
+- clear separation: capacity (\`Stock\`) vs workload (\`VM\`)
+- explicit rollback path when VM creation fails
+- same flow maps naturally to future reconcile logic
+
+Pitfall:
+If you create VM first and reserve stock later, failure handling becomes inconsistent and can leak capacity.
+
+File: \`pkg/service/service.go\`
+
+### Step 5: Extract config early
+
+Purpose:
+Make runtime behavior configurable from day one, instead of adding flags ad hoc later.
+
+Code:
+
+\`\`\`go
+type Config struct {
+    HTTPAddr       string
+    ReportInterval time.Duration
+    KubeMode       KubeMode
+    Kubeconfig     string
+}
+\`\`\`
+
+\`\`\`go
+const (
+    KubeModeAuto     KubeMode = "auto"
+    KubeModeOff      KubeMode = "off"
+    KubeModeRequired KubeMode = "required"
+)
+\`\`\`
+
+Why:
+
+- one binary can run in local dev, CI, or cluster
+- behavior changes through config instead of code edits
+- operational behavior is explicit and documented
+
+Pitfall:
+Without a config model, feature flags and env parsing spread across packages quickly.
+
+File: \`pkg/config/config.go\`
+
+### Step 6: Add Kubernetes adapter for connectivity signal
+
+Purpose:
+Add Kubernetes awareness before operator adoption.
+
+\`\`\`go
+func BuildClient(mode config.KubeMode, kubeconfig string) (kubernetes.Interface, error) {
+    if mode == config.KubeModeOff {
+        return nil, nil
+    }
+    restConfig, err := buildRestConfig(kubeconfig)
+    ...
+    return kubernetes.NewForConfig(restConfig)
+}
+\`\`\`
+
+Why:
+
+- \`/health\` can expose real cluster connectivity
+- startup mode supports local and in-cluster runtime
+- future migration to controller-runtime is incremental, not disruptive
+
+Pitfall:
+If cluster integration starts only when introducing reconcile, migration risk and debugging complexity both spike.
+
+File: \`pkg/kube/client.go\`
+
+### Step 7: Add a periodic reporter job
+
+Purpose:
+Introduce a minimal observability loop with periodic runtime state reporting.
+
+\`\`\`go
+func (r *StatusReporter) Start(ctx context.Context) {
+    ticker := time.NewTicker(r.interval)
+    defer ticker.Stop()
+
+    for {
+        select {
+        case <-ctx.Done():
+            return
+        case <-ticker.C:
+            health, err := r.service.Health(ctx)
+            ...
+            r.logger.Info("runtime status", ...)
+        }
+    }
+}
+\`\`\`
+
+Why:
+
+- request logs show calls, not steady-state runtime health
+- periodic reporting surfaces drift and silent failures
+- provides extension point for future metrics/events pipeline
+
+Pitfall:
+No background reporting means incidents can remain invisible until user traffic fails.
+
+File: \`pkg/jobs/status_reporter.go\`
+
+## How to Validate This Iteration
+
+Validation checklist:
+
+1. compile and dependency sanity
+
+\`\`\`bash
+make tidy
+go test ./...
+\`\`\`
+
+2. run runtime
+
+\`\`\`bash
+make run
+\`\`\`
+
+3. health check
+
+\`\`\`bash
+curl -s http://127.0.0.1:8080/api/v1/health | jq
+\`\`\`
+
+4. stock lifecycle
+
+\`\`\`bash
+curl -s -X POST http://127.0.0.1:8080/api/v1/stocks \\
+  -H 'Content-Type: application/json' \\
+  -d '{"number":2,"specName":"g1.1","cpu":"4","memory":"16Gi","gpuType":"RTX4090","gpuNum":1}' | jq
+\`\`\`
+
+5. vm lifecycle
+
+\`\`\`bash
+curl -s -X POST http://127.0.0.1:8080/api/v1/vms \\
+  -H 'Content-Type: application/json' \\
+  -d '{"tenantID":"tenant-a","tenantName":"team-a","specName":"g1.1"}' | jq
+\`\`\`
+
+Definition of Done for this chapter:
+
+- service is runnable locally
+- API contract is stable and explicit
+- stock/vm lifecycle loop works end-to-end
+- status reporter emits periodic runtime state
+
+## Troubleshooting Guide (Early Iteration)
+
+### Runtime exits on startup
+
+Check:
+
+- invalid flag values (\`--kube-mode\`)
+- port already in use (\`:8080\`)
+- \`required\` kube mode without valid kubeconfig
+
+### \`/health\` shows \`kubernetesConnected=false\`
+
+Check:
+
+- run with \`--kube-mode=auto\` or \`--kube-mode=required\`
+- verify \`~/.kube/config\` exists and context is correct
+- if running in cluster, verify service account permissions
+
+### VM creation fails with no available stock
+
+This is expected behavior if stock pool is empty.
+Create stock first or use a valid \`specName\`.
+
+### API returns 400
+
+Common causes:
+
+- malformed JSON
+- missing required fields (\`specName\`, \`number\`)
+- unsupported request shape due to strict decode
+
+## Iteration Summary
+
+This chapter intentionally prioritizes engineering foundations over feature volume.
+
+We now have:
+
+- clear layering
+- deterministic startup/shutdown path
+- explicit lifecycle flow with rollback
+- basic operational visibility
+
+This is a good production-minded baseline for introducing more complexity safely.
+
+## Next Chapter Preview
+
+Part 5 will introduce the **minimal Operator skeleton**:
+
+- \`controller-runtime\` manager
+- first CRD model for runtime resources
+- first reconcile loop and status update flow
+
+At that point, we will migrate from in-memory state to Kubernetes-native desired/actual state management.
+
+## Repository
+
+Code for this tutorial runtime:
+
+[gpu-operator-runtime](https://github.com/LokiWager/gpu-operator-runtime)
+`}function m(){return s}function f(){return[{depth:2,slug:"chapter-goal",text:"Chapter Goal"},{depth:2,slug:"engineering-goal-of-this-iteration",text:"Engineering Goal of This Iteration"},{depth:2,slug:"what-we-deliberately-do-not-build-yet",text:"What We Deliberately Do Not Build Yet"},{depth:2,slug:"technology-selection-in-this-iteration",text:"Technology Selection in This Iteration"},{depth:2,slug:"architecture-iteration-1",text:"Architecture (Iteration 1)"},{depth:2,slug:"step-by-step-implementation",text:"Step-by-Step Implementation"},{depth:3,slug:"step-0-add-testing-and-cicd-from-day-one",text:"Step 0: Add testing and CI/CD from day one"},{depth:3,slug:"step-1-keep-main-minimal-and-predictable",text:"Step 1: Keep main minimal and predictable"},{depth:3,slug:"step-2-use-a-dedicated-runtime-wiring-layer",text:"Step 2: Use a dedicated runtime wiring layer"},{depth:3,slug:"step-3-keep-api-handlers-thin",text:"Step 3: Keep API handlers thin"},{depth:3,slug:"step-4-keep-lifecycle-orchestration-in-service",text:"Step 4: Keep lifecycle orchestration in service"},{depth:3,slug:"step-5-extract-config-early",text:"Step 5: Extract config early"},{depth:3,slug:"step-6-add-kubernetes-adapter-for-connectivity-signal",text:"Step 6: Add Kubernetes adapter for connectivity signal"},{depth:3,slug:"step-7-add-a-periodic-reporter-job",text:"Step 7: Add a periodic reporter job"},{depth:2,slug:"how-to-validate-this-iteration",text:"How to Validate This Iteration"},{depth:2,slug:"troubleshooting-guide-early-iteration",text:"Troubleshooting Guide (Early Iteration)"},{depth:3,slug:"runtime-exits-on-startup",text:"Runtime exits on startup"},{depth:3,slug:"health-shows-kubernetesconnectedfalse",text:"/health shows kubernetesConnected=false"},{depth:3,slug:"vm-creation-fails-with-no-available-stock",text:"VM creation fails with no available stock"},{depth:3,slug:"api-returns-400",text:"API returns 400"},{depth:2,slug:"iteration-summary",text:"Iteration Summary"},{depth:2,slug:"next-chapter-preview",text:"Next Chapter Preview"},{depth:2,slug:"repository",text:"Repository"}]}const b=e((i,c,F)=>{const{layout:y,...n}=t;return n.file=p,n.url=r,a`${o()}${l(s)}`});export{b as Content,m as compiledContent,b as default,p as file,t as frontmatter,f as getHeadings,g as rawContent,r as url};
