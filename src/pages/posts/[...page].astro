@@ -42,8 +42,8 @@ const paginationProps = {
 ---
 
 <PageLayout meta={meta}>
-	<div class="grid gap-y-16 sm:grid-cols-[3fr_1fr] sm:gap-x-8">
-		<section aria-label="Blog post list">
+	<div class="gap-x-10 lg:flex lg:items-start">
+		<section aria-label="Blog post list" class="flex-grow">
 			<ul class="space-y-8 text-start">
 				{
 					page.data.map((p) => (
@@ -57,7 +57,7 @@ const paginationProps = {
 		</section>
 		{
 			!!uniqueTags.length && (
-				<aside>
+				<aside class="mt-12 lg:sticky lg:top-20 lg:order-2 lg:-me-32 lg:mt-0 lg:basis-64">
 					<h2 class="mb-4 flex items-center text-lg font-semibold">
 						<svg
 							aria-hidden="true"
