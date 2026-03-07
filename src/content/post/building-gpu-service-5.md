@@ -1,5 +1,5 @@
 ---
-title: "Building a GPU SaaS Platform - Kubebuilder Baseline and the First Real Reconcile"
+title: "Building a GPU SaaS Platform - Operator Baseline"
 publishDate: "5 March 2026"
 description: "Part 5: move the project onto a standard kubebuilder layout, switch the API to Echo, and let requests create real custom resources."
 tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator"]
