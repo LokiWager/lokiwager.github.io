@@ -36,7 +36,7 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
 	{data.title}
 </h1>
 <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-	<p class="font-mono text-sm font-semibold text-zinc-500 dark:text-zinc-400">
+	<p class="font-semibold">
 		<FormattedDate date={data.publishDate} dateTimeOptions={dateTimeOptions} /> /{" "}
 		{remarkPluginFrontmatter.minutesRead}
 	</p>
@@ -72,7 +72,7 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
 			{data.tags.map((tag, i) => (
 				<>
 					<a
-						class="cactus-link inline-block font-mono text-sm before:content-['#']"
+						class="cactus-link inline-block before:content-['#']"
 						aria-label={`View more blogs with the tag ${tag}`}
 						href={`/tags/${tag}/`}
 						data-pagefind-filter="tag"

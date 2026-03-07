@@ -49,21 +49,32 @@ const paginationProps = {
 ---
 
 <PageLayout meta={meta}>
-	<h1 class="title mb-6 flex items-center">
-		<a href="/tags/" class="text-accent sm:hover:underline">Tags</a>
-		<span class="me-3 ms-2">→</span>
-		<span class="text-xl">#{tag}</span>
-	</h1>
-	<section aria-label="Blog post list">
-		<ul class="space-y-8">
-			{
-				page.data.map((p) => (
-					<li class="flex flex-col flex-wrap gap-2 sm:flex-row [&_q]:basis-full">
-						<PostPreview post={p} as="h2" withDesc />
-					</li>
-				))
-			}
-		</ul>
-		<Pagination {...paginationProps} />
-	</section>
+	<div class="grid w-full max-w-none gap-x-10 lg:grid-cols-[5fr_1.4fr] lg:items-start">
+		<section aria-label="Blog post list" class="min-w-0">
+			<h1 class="title mb-6 flex items-center">
+				<a href="/tags/" class="text-accent sm:hover:underline">Tags</a>
+				<span class="me-3 ms-2">→</span>
+				<span class="text-xl">#{tag}</span>
+			</h1>
+			<ul class="space-y-8">
+				{
+					page.data.map((p) => (
+						<li class="flex flex-col flex-wrap gap-2 sm:flex-row [&_q]:basis-full">
+							<PostPreview post={p} as="h2" withDesc />
+						</li>
+					))
+				}
+			</ul>
+			<Pagination {...paginationProps} />
+		</section>
+		<aside class="mt-12 lg:sticky lg:top-20 lg:mt-0">
+			<h2 class="mb-4 text-lg font-semibold">#{tag}</h2>
+			<p class="text-sm leading-7 text-zinc-600 dark:text-zinc-400">
+				Posts filed under this tag. Use the tag index to jump across the rest of the blog topics.
+			</p>
+			<a class="mt-4 inline-block sm:hover:text-accent" href="/tags/" aria-label="Back to all tags">
+				View all tags →
+			</a>
+		</aside>
+	</div>
 </PageLayout>

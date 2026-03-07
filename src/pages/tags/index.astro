@@ -12,24 +12,34 @@ const meta = {
 ---
 
 <PageLayout meta={meta}>
-	<h1 class="title mb-6">Tags</h1>
-	<ul class="space-y-4">
-		{
-			allTags.map(([tag, val]) => (
-				<li class="flex items-center gap-x-2">
-					<a
-						class="cactus-link inline-block"
-						href={`/tags/${tag}/`}
-						title={`View posts with the tag: ${tag}`}
-						data-astro-prefetch
-					>
-						&#35;{tag}
-					</a>
-					<span class="inline-block">
-						- {val} Post{val > 1 && "s"}
-					</span>
-				</li>
-			))
-		}
-	</ul>
+	<div class="grid w-full max-w-none gap-x-10 lg:grid-cols-[5fr_1.4fr] lg:items-start">
+		<section class="min-w-0">
+			<h1 class="title mb-6">Tags</h1>
+			<ul class="space-y-4">
+				{
+					allTags.map(([tag, val]) => (
+						<li class="flex items-center gap-x-2">
+							<a
+								class="cactus-link inline-block"
+								href={`/tags/${tag}/`}
+								title={`View posts with the tag: ${tag}`}
+								data-astro-prefetch
+							>
+								&#35;{tag}
+							</a>
+							<span class="inline-block">
+								- {val} Post{val > 1 && "s"}
+							</span>
+						</li>
+					))
+				}
+			</ul>
+		</section>
+		<aside class="mt-12 lg:sticky lg:top-20 lg:mt-0">
+			<h2 class="mb-4 text-lg font-semibold">Tag Index</h2>
+			<p class="text-sm leading-7 text-zinc-600 dark:text-zinc-400">
+				Browse every topic used across the blog and jump into the posts collected under each tag.
+			</p>
+		</aside>
+	</div>
 </PageLayout>
