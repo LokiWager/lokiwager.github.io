@@ -1,4 +1,4 @@
-import{c as e,r as a,m as o}from"./render-template.rCiCpz-f.js";import{u as l}from"./hoisted.6ZpvY2Zp.js";import"./astro/assets-service.wdzbVTWi.js";const s=`<p>Target readers:</p>
+import{c as e,r as a,m as o}from"./render-template.2--iflDr.js";import{u as l}from"./hoisted.AA_i54vz.js";import"./astro/assets-service.wdzbVTWi.js";const s=`<p>Target readers:</p>
 <ul>
 <li>you already know Golang syntax and basic project structure</li>
 <li>you are not yet confident in production-oriented engineering decisions</li>

@@ -1,0 +1,413 @@
+<!DOCTYPE html><html lang="en-GB"> <head><meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title>Building a GPU SaaS Platform - Operator Baseline • Loki&#39;s Wager</title>  <link rel="icon" href="/logo.png" sizes="any"> <!--<link rel="icon" href="/icon.svg" type="image/svg+xml" />--> <!--<link rel="apple-touch-icon" href="/apple-touch-icon.png" />--> <!--<link rel="manifest" href="/manifest.webmanifest" />--> <!--<link rel="canonical" href={canonicalURL} />-->  <meta name="title" content="Building a GPU SaaS Platform - Operator Baseline • Loki's Wager"> <meta name="description" content="Part 5: move the project onto a standard kubebuilder layout, switch the API to Echo, and let requests create real custom resources."> <meta name="author" content="Loki's Wager">  <meta name="theme-color" content="">  <meta property="og:type" content="article"> <meta property="og:title" content="Building a GPU SaaS Platform - Operator Baseline"> <meta property="og:description" content="Part 5: move the project onto a standard kubebuilder layout, switch the API to Echo, and let requests create real custom resources."> <meta property="og:url" content="https://lokiwager.github.io/posts/building-gpu-service-5/"> <meta property="og:site_name" content="Loki's Wager"> <meta property="og:locale" content="en_GB"> <!--<meta property="og:image" content={socialImageURL} />--> <meta property="og:image:width" content="1200"> <meta property="og:image:height" content="630">  <meta property="article:author" content="Loki's Wager"> <meta property="article:published_time" content="2026-03-05T00:00:00.000Z">   <meta property="twitter:card" content="summary_large_image"> <meta property="twitter:url" content="https://lokiwager.github.io/posts/building-gpu-service-5/"> <meta property="twitter:title" content="Building a GPU SaaS Platform - Operator Baseline"> <meta property="twitter:description" content="Part 5: move the project onto a standard kubebuilder layout, switch the API to Echo, and let requests create real custom resources."> <!--<meta property="twitter:image" content={socialImageURL} />-->  <link rel="sitemap" href="/sitemap-index.xml">  <link rel="alternate" type="application/rss+xml" title="Loki's Wager" href="/rss.xml">   <link rel="webmention" href="https://webmention.io/lokiwager.github.io/webmention">  <meta name="generator" content="Astro v4.4.6"><link rel="stylesheet" href="/_astro/_slug_.-xw0IAPH.css" /><script type="module" src="/_astro/hoisted.v6nOoZfW.js"></script>
+<script type="module" src="/_astro/page.tdlkyGlf.js"></script></head> <body> <script>
+	function getUserPref() {
+		const storedTheme = typeof localStorage !== "undefined" && localStorage.getItem("theme");
+		return (
+			storedTheme || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+		);
+	}
+
+	function setTheme(newTheme) {
+		if (!newTheme || (newTheme !== "light" && newTheme !== "dark")) {
+			return console.warn(
+				`Incorrect theme value received. Expected 'light' or 'dark', received ${newTheme}`,
+			);
+		}
+
+		const root = document.documentElement;
+
+		// class already set to newTheme, exit early
+		if (
+			(newTheme === "dark" && root.classList.contains("dark")) ||
+			(newTheme === "light" && !root.classList.contains("dark"))
+		) {
+			return;
+		}
+
+		const colorThemeMetaTag = document.querySelector("meta[name='theme-color']");
+		document.documentElement.classList.toggle("dark", newTheme === "dark");
+		const bgColour = getComputedStyle(document.body).getPropertyValue("--theme-bg");
+
+		colorThemeMetaTag.setAttribute("content", `hsl(${bgColour})`);
+		if (typeof localStorage !== "undefined") {
+			localStorage.setItem("theme", newTheme);
+		}
+	}
+
+	// initial setup
+	setTheme(getUserPref());
+
+	// View Transitions hook to restore theme
+	document.addEventListener("astro:after-swap", () => setTheme(getUserPref()));
+
+	// listen for theme-change custom event, fired in src/components/ThemeToggle.astro
+	document.addEventListener("theme-change", (e) => {
+		setTheme(e.detail.theme);
+	});
+</script> <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:start-1 focus:top-1.5">skip to content
+</a> <header id="main-header" class="group relative mb-2 flex items-center sm:ps-[4.5rem]"> <div class="flex sm:flex-col"> <a href="/" class="inline-flex items-center grayscale hover:filter-none sm:relative sm:inline-block"> <img src="/_astro/logo.gw81Hwkb_Zb412R.webp" alt="logo" class="me-3 w-6 sm:absolute sm:start-[-4.5rem] sm:me-0 sm:w-12" width="1024" height="1536" loading="lazy" decoding="async"> <span class="text-xl font-bold sm:text-2xl">Loki's Wager</span> </a> <nav id="navigation-menu" class="absolute -inset-x-4 top-14 hidden flex-col items-end gap-y-4 rounded-md bg-bgColor/[.85] py-4 text-accent shadow backdrop-blur group-[.menu-open]:z-50 group-[.menu-open]:flex sm:static sm:z-auto sm:-ms-4 sm:mt-1 sm:flex sm:flex-row sm:items-center sm:divide-x sm:divide-dashed sm:divide-accent sm:rounded-none sm:bg-transparent sm:py-0 sm:shadow-none sm:backdrop-blur-none" aria-label="Main menu"> <a href="/" class="px-4 py-4 sm:py-0 sm:hover:underline" data-astro-prefetch> Home </a><a href="/about/" class="px-4 py-4 sm:py-0 sm:hover:underline" data-astro-prefetch> About </a><a href="/posts/" class="px-4 py-4 sm:py-0 sm:hover:underline" data-astro-prefetch> Blog </a> </nav> </div> <!--<SocialList/>--> <site-search id="search" class="ms-auto" data-astro-cid-otpdt6jm> <button data-open-modal disabled class="flex h-9 w-9 items-center justify-center rounded-md ring-zinc-400 transition-all hover:ring-2" data-astro-cid-otpdt6jm> <svg aria-label="search" class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" data-astro-cid-otpdt6jm> <path stroke="none" d="M0 0h24v24H0z" data-astro-cid-otpdt6jm></path> <path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" data-astro-cid-otpdt6jm></path> </svg> </button> <dialog aria-label="search" class="h-full max-h-full w-full max-w-full border border-zinc-400 bg-bgColor shadow backdrop:backdrop-blur sm:mx-auto sm:mb-auto sm:mt-16 sm:h-max sm:max-h-[calc(100%-8rem)] sm:min-h-[15rem] sm:w-5/6 sm:max-w-[48rem] sm:rounded-md" data-astro-cid-otpdt6jm> <div class="dialog-frame flex flex-col gap-4 p-6 pt-12 sm:pt-6" data-astro-cid-otpdt6jm> <button data-close-modal class="ms-auto cursor-pointer rounded-md bg-zinc-200 p-2 font-semibold dark:bg-zinc-700" data-astro-cid-otpdt6jm>Close</button> <div class="search-container" data-astro-cid-otpdt6jm> <div id="cactus__search" data-astro-cid-otpdt6jm></div> </div> </div> </dialog> </site-search>    <theme-toggle class="ms-2 sm:ms-4"> <button type="button" id="toggle-theme" class="relative h-9 w-9 rounded-md p-2 ring-zinc-400 transition-all hover:ring-2" aria-label="Toggle Dark Mode"> <svg id="sun-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-100 opacity-100 transition-all dark:scale-0 dark:opacity-0" aria-hidden="true" focusable="false" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg id="moon-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100" aria-hidden="true" focusable="false" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path> <path d="M19 11h2m-1 -1v2"></path> </svg> </button> </theme-toggle>  <mobile-button> <button id="toggle-navigation-menu" class="group relative ms-4 h-7 w-7 sm:invisible sm:hidden" type="button" aria-label="Open main menu" aria-expanded="false" aria-haspopup="menu"> <svg id="line-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transition-all group-aria-expanded:scale-0 group-aria-expanded:opacity-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"></path> </svg> <svg id="cross-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 text-accent opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path> </svg> </button> </mobile-button> </header>  <main id="main" class="mt-8 sm:mt-10">  <div class="gap-x-10 lg:flex lg:items-start"> <aside class="sticky top-20 order-2 -me-32 hidden basis-64 lg:block"> <h2 class="font-semibold">Table of Contents</h2> <ul class="mt-4 text-xs"> <li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#what-we-are-doing-in-this-chapter" aria-label="Scroll to section: What We Are Doing In This Chapter">What We Are Doing In This Chapter</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#a-few-ground-rules-before-we-start" aria-label="Scroll to section: A Few Ground Rules Before We Start">A Few Ground Rules Before We Start</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#what-is-an-operator" aria-label="Scroll to section: What Is An Operator?">What Is An Operator?</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#what-is-a-crd" aria-label="Scroll to section: What Is A CRD?">What Is A CRD?</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#why-we-switched-to-kubebuilder" aria-label="Scroll to section: Why We Switched To Kubebuilder">Why We Switched To Kubebuilder</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#architecture-in-this-iteration" aria-label="Scroll to section: Architecture In This Iteration">Architecture In This Iteration</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#step-1-replace-the-hand-wired-layout-with-kubebuilder" aria-label="Scroll to section: Step 1: Replace The Hand-Wired Layout With Kubebuilder">Step 1: Replace The Hand-Wired Layout With Kubebuilder</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#step-2-define-a-small-but-honest-api-type" aria-label="Scroll to section: Step 2: Define A Small But Honest API Type">Step 2: Define A Small But Honest API Type</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#step-3-keep-one-entry-point" aria-label="Scroll to section: Step 3: Keep One Entry Point">Step 3: Keep One Entry Point</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#step-4-switch-the-api-layer-to-echo" aria-label="Scroll to section: Step 4: Switch The API Layer To Echo">Step 4: Switch The API Layer To Echo</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#step-5-reconcile-to-a-deployment" aria-label="Scroll to section: Step 5: Reconcile To A Deployment">Step 5: Reconcile To A Deployment</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#step-6-let-rbac-and-crd-manifests-be-generated" aria-label="Scroll to section: Step 6: Let RBAC And CRD Manifests Be Generated">Step 6: Let RBAC And CRD Manifests Be Generated</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#step-7-keep-tests-small-and-direct" aria-label="Scroll to section: Step 7: Keep Tests Small And Direct">Step 7: Keep Tests Small And Direct</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#how-to-run-this-version" aria-label="Scroll to section: How To Run This Version">How To Run This Version</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#common-mistakes-in-this-step" aria-label="Scroll to section: Common Mistakes In This Step">Common Mistakes In This Step</a> <ul> <li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#the-api-works-locally-but-nothing-happens-in-cluster" aria-label="Scroll to section: The API works locally, but nothing happens in cluster">The API works locally, but nothing happens in cluster</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#the-stockpool-exists-but-no-deployment-appears" aria-label="Scroll to section: The StockPool exists, but no Deployment appears">The StockPool exists, but no Deployment appears</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#the-deployment-is-created-but-the-pod-spec-looks-wrong" aria-label="Scroll to section: The deployment is created, but the pod spec looks wrong">The deployment is created, but the pod spec looks wrong</a>  </li><li class="ms-2"> <a class="block line-clamp-2 hover:text-accent mt-2 text-[0.6875rem]" href="#status-never-moves-past-progressing" aria-label="Scroll to section: Status never moves past progressing">Status never moves past progressing</a>  </li> </ul> </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#summary" aria-label="Scroll to section: Summary">Summary</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#next-chapter-preview" aria-label="Scroll to section: Next Chapter Preview">Next Chapter Preview</a>  </li><li class=""> <a class="block line-clamp-2 hover:text-accent mt-3" href="#repository" aria-label="Scroll to section: Repository">Repository</a>  </li> </ul> </aside> <article class="flex-grow break-words" data-pagefind-body> <div id="blog-hero"><h1 class="title mb-3 sm:mb-1"> Building a GPU SaaS Platform - Operator Baseline </h1> <div class="flex flex-wrap items-center gap-x-3 gap-y-2"> <p class="font-semibold"> <time datetime="2026-03-05T00:00:00.000Z"> 5 March 2026 </time> /  11 min read </p>  </div> <div class="mt-3"> <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" class="me-1 inline-block h-6 w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z"></path> <path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116"></path> <path d="M6 9h-.01"></path> </svg>  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag gpu" href="/tags/gpu/" data-pagefind-filter="tag"> gpu </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag saas" href="/tags/saas/" data-pagefind-filter="tag"> saas </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag kubernetes" href="/tags/kubernetes/" data-pagefind-filter="tag"> kubernetes </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag golang" href="/tags/golang/" data-pagefind-filter="tag"> golang </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag operator" href="/tags/operator/" data-pagefind-filter="tag"> operator </a>  </div></div> <div class="prose prose-sm prose-cactus mt-12 max-w-none prose-headings:font-semibold prose-headings:text-accent-2 prose-th:before:content-none">  <p>Part 4 gave us a service-shaped project.</p>
+<p>Part 5 is where it starts acting like a Kubernetes system instead of a well-organized mock.</p>
+<p>The high-level change is simple:</p>
+<ul>
+<li>the HTTP server still accepts control-plane requests</li>
+<li>but it no longer tries to act as the source of truth</li>
+<li>instead, it creates a <code>StockPool</code> custom resource</li>
+<li>the controller reconciles that resource into a <code>Deployment</code></li>
+</ul>
+<p>That is the first real control loop in the project.</p>
+<h2 id="what-we-are-doing-in-this-chapter">What We Are Doing In This Chapter</h2>
+<p>This chapter does six concrete things:</p>
+<ol>
+<li>refactor the project onto a standard <code>kubebuilder</code> layout</li>
+<li>switch the HTTP layer from raw <code>net/http</code> to <code>echo</code></li>
+<li>define the <code>StockPool</code> CRD</li>
+<li>implement <code>StockPoolReconciler</code> so a CR becomes a <code>Deployment</code></li>
+<li>generate RBAC and CRD manifests instead of hand-maintaining them</li>
+<li>add unit tests for the API flow and reconcile flow</li>
+</ol>
+<p>That gives us a believable baseline without pretending we already finished the whole runtime.</p>
+<h2 id="a-few-ground-rules-before-we-start">A Few Ground Rules Before We Start</h2>
+<p>There are a few design choices in this chapter that are intentional, even if they are not final.</p>
+<p>First, the HTTP server and the Kubernetes operator live in the same binary for now. That is a temporary trade-off, not a philosophical commitment. Long term, splitting them usually makes maintenance, failover, and ownership boundaries cleaner. But for this stage of the project, a single process keeps the lifecycle simple and makes the control flow easier to teach:</p>
+<p><code>request -> custom resource -> reconcile -> workload</code></p>
+<p>Second, some of the earlier “stock” ideas still show up in the broader series because this is an iterative project, not a fake greenfield rewrite every week. Stock-style reservation can simplify certain scheduling conversations, but it is not the final answer. Later in the series we will talk about better approaches and why they matter.</p>
+<p>Third, this chapter uses <code>echo</code> instead of raw <code>net/http</code>. That is not because Go lacks framework choices. It definitely does not. You could reasonably pick <code>Gin</code>, <code>Fiber</code>, or something else. I picked <code>echo</code> for boring, practical reasons:</p>
+<ul>
+<li>it is easy to read and easy to wire</li>
+<li>it has solid documentation and a mature community</li>
+<li>its HTTP behavior is configurable enough for real services</li>
+<li>it stays lightweight for a control-plane service that should not become the main throughput bottleneck anyway</li>
+</ul>
+<p>If the control plane ever becomes a hot path, you usually have a traffic-shaping problem before you have an HTTP framework problem.</p>
+<h2 id="what-is-an-operator">What Is An Operator?</h2>
+<p>An operator is just application-specific control logic built on top of the Kubernetes reconciliation model.</p>
+<ul>
+<li>users declare desired state</li>
+<li>Kubernetes stores that desired state</li>
+<li>a controller watches for changes</li>
+<li>the controller keeps nudging the cluster toward the declared state</li>
+</ul>
+<p>That last bit matters. The controller is not just handling a one-shot request. It is continuously correcting drift.</p>
+<p>For a GPU SaaS platform, that is exactly the model we want. Users ask for capacity. The system records the request. Controllers make the workloads exist and keep them healthy.</p>
+<h2 id="what-is-a-crd">What Is A CRD?</h2>
+<p>A CRD, or CustomResourceDefinition, is how you teach Kubernetes a new API type.</p>
+<p>Without a CRD, <code>StockPool</code> is just a Go struct and some wishful thinking.</p>
+<p>With a CRD:</p>
+<ul>
+<li>Kubernetes knows the resource exists</li>
+<li>the API server can store it</li>
+<li>clients can query it</li>
+<li>controllers can watch it</li>
+</ul>
+<p>That is why this chapter is a real milestone. We are moving from “service logic that happens to know about Kubernetes” to “Kubernetes-native desired state with a dedicated API contract.”</p>
+<h2 id="why-we-switched-to-kubebuilder">Why We Switched To Kubebuilder</h2>
+<p>The previous hand-wired operator code was fine as a sketch. It was not fine as the foundation of a teaching project that is supposed to model production habits.</p>
+<p>Once CRDs, controllers, RBAC, generated manifests, and manager wiring enter the picture, hand-rolling everything quickly becomes a maintenance tax.</p>
+<p>Could we have picked <code>operator-sdk</code> instead? Sure. <code>kubebuilder</code> is not the only valid option. I picked it partly out of preference, and partly because the documentation is deep enough that when something goes sideways, you have a decent chance of finding the answer without sacrificing a weekend to archaeology.</p>
+<p>So this iteration makes a clear move:</p>
+<ul>
+<li>use the standard <code>kubebuilder</code> project layout</li>
+<li>generate CRD and RBAC artifacts</li>
+<li>keep one binary and one control-plane entrypoint for now</li>
+</ul>
+<p>That gives readers a structure they are likely to see again in real controller repositories.</p>
+<h2 id="architecture-in-this-iteration">Architecture In This Iteration</h2>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>+--------------------------------------------------------------+</span></span>
+<span class="line"><span>| cmd/main.go                                                  |</span></span>
+<span class="line"><span>| one process: HTTP server + controller manager + background   |</span></span>
+<span class="line"><span>| jobs                                                         |</span></span>
+<span class="line"><span>+-----------------------------+--------------------------------+</span></span>
+<span class="line"><span>                              |</span></span>
+<span class="line"><span>                              v</span></span>
+<span class="line"><span>                 +------------+-------------+</span></span>
+<span class="line"><span>                 | Echo HTTP API            |</span></span>
+<span class="line"><span>                 | POST /operator/stockpools|</span></span>
+<span class="line"><span>                 +------------+-------------+</span></span>
+<span class="line"><span>                              |</span></span>
+<span class="line"><span>                              v</span></span>
+<span class="line"><span>                 +------------+-------------+</span></span>
+<span class="line"><span>                 | service layer            |</span></span>
+<span class="line"><span>                 | create async job         |</span></span>
+<span class="line"><span>                 | create StockPool CR      |</span></span>
+<span class="line"><span>                 +------------+-------------+</span></span>
+<span class="line"><span>                              |</span></span>
+<span class="line"><span>                              v</span></span>
+<span class="line"><span>                 +------------+-------------+</span></span>
+<span class="line"><span>                 | StockPool CR             |</span></span>
+<span class="line"><span>                 | runtime.lokiwager.io     |</span></span>
+<span class="line"><span>                 +------------+-------------+</span></span>
+<span class="line"><span>                              |</span></span>
+<span class="line"><span>                              v</span></span>
+<span class="line"><span>                 +------------+-------------+</span></span>
+<span class="line"><span>                 | StockPoolReconciler      |</span></span>
+<span class="line"><span>                 | ensure Deployment        |</span></span>
+<span class="line"><span>                 | update status            |</span></span>
+<span class="line"><span>                 +------------+-------------+</span></span>
+<span class="line"><span>                              |</span></span>
+<span class="line"><span>                              v</span></span>
+<span class="line"><span>                 +------------+-------------+</span></span>
+<span class="line"><span>                 | Deployment               |</span></span>
+<span class="line"><span>                 | placeholder runtime pods |</span></span>
+<span class="line"><span>                 +--------------------------+</span></span></code></pre>
+<p>Notice what changed from Part 4:</p>
+<ul>
+<li>the API is no longer the source of truth</li>
+<li>the custom resource is the source of truth</li>
+<li>reconcile owns the drift-correction path</li>
+</ul>
+<p>That mental model is more important than any individual code snippet in this chapter.</p>
+<h2 id="step-1-replace-the-hand-wired-layout-with-kubebuilder">Step 1: Replace The Hand-Wired Layout With Kubebuilder</h2>
+<p>The first major change is structural.</p>
+<p>We move from a homegrown operator layout to the standard shape most Kubernetes engineers expect:</p>
+<ul>
+<li><code>PROJECT</code></li>
+<li><code>api/v1alpha1</code></li>
+<li><code>internal/controller</code></li>
+<li><code>config/crd</code></li>
+<li><code>config/rbac</code></li>
+<li><code>config/default</code></li>
+</ul>
+<p>Why do this now?</p>
+<p>Because teaching real engineering practice means teaching the boring defaults too, not just the fun parts.</p>
+<p><code>kubebuilder</code> buys us a few things immediately:</p>
+<ul>
+<li>predictable file layout</li>
+<li>generated deepcopy methods</li>
+<li>CRD generation from Go markers</li>
+<li>RBAC generation from controller markers</li>
+<li>easier onboarding for anyone who has seen a controller repo before</li>
+</ul>
+<p>This is not glamorous, but it is the kind of decision that saves your future self from becoming unpaid support for your own clever shortcuts.</p>
+<h2 id="step-2-define-a-small-but-honest-api-type">Step 2: Define A Small But Honest API Type</h2>
+<p>The <code>StockPool</code> API lives in <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>api/v1alpha1/stockpool_types.go</code></a>.</p>
+<p>Core fields now look like this:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">type</span><span style="color:#8BE9FD;font-style:italic"> StockPoolSpec</span><span style="color:#FF79C6"> struct</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    SpecName </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"specName"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Image    </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"image,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Memory   </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"memory,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    GPU      </span><span style="color:#8BE9FD;font-style:italic">int32</span><span style="color:#E9F284">  `</span><span style="color:#F1FA8C">json:"gpu,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Replicas </span><span style="color:#8BE9FD;font-style:italic">int32</span><span style="color:#E9F284">  `</span><span style="color:#F1FA8C">json:"replicas"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">type</span><span style="color:#8BE9FD;font-style:italic"> StockPoolStatus</span><span style="color:#FF79C6"> struct</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    Available          </span><span style="color:#8BE9FD;font-style:italic">int32</span><span style="color:#E9F284">       `</span><span style="color:#F1FA8C">json:"available,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Allocated          </span><span style="color:#8BE9FD;font-style:italic">int32</span><span style="color:#E9F284">       `</span><span style="color:#F1FA8C">json:"allocated,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Phase              </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">      `</span><span style="color:#F1FA8C">json:"phase,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    ObservedGeneration </span><span style="color:#8BE9FD;font-style:italic">int64</span><span style="color:#E9F284">       `</span><span style="color:#F1FA8C">json:"observedGeneration,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    LastSyncTime       </span><span style="color:#8BE9FD;font-style:italic">metav1</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">Time</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"lastSyncTime,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>Why this shape?</p>
+<p><code>SpecName</code> stays because users still need a concrete runtime flavor such as <code>g1.1</code>.</p>
+<p><code>Replicas</code> is still the smallest useful desired-state signal.</p>
+<p><code>Image</code>, <code>Memory</code>, and <code>GPU</code> are where the API starts to feel less toy-like. Once those fields exist in the spec, readers can see a real path from control-plane input to pod template output.</p>
+<p><code>Status</code> gives users immediate feedback without forcing them to reverse-engineer controller logs every time something is still converging.</p>
+<p>We also add kubebuilder markers so the CRD can be generated from the type:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#6272A4">// +kubebuilder:subresource:status</span></span>
+<span class="line"><span style="color:#6272A4">// +kubebuilder:printcolumn:name="Spec",type=string,JSONPath=`.spec.specName`</span></span>
+<span class="line"><span style="color:#6272A4">// +kubebuilder:printcolumn:name="Desired",type=integer,JSONPath=`.spec.replicas`</span></span>
+<span class="line"><span style="color:#6272A4">// +kubebuilder:printcolumn:name="Available",type=integer,JSONPath=`.status.available`</span></span></code></pre>
+<p>That means the CRD definition comes from the Go contract instead of a hand-maintained YAML file quietly drifting off the map.</p>
+<h2 id="step-3-keep-one-entry-point">Step 3: Keep One Entry Point</h2>
+<p>The unified entrypoint is <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>cmd/main.go</code></a>.</p>
+<p>This file now does three jobs:</p>
+<ul>
+<li>build the controller manager</li>
+<li>register the reconciler</li>
+<li>attach non-leader background runnables such as the HTTP server and the job worker</li>
+</ul>
+<p>Manager setup:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">mgr, err </span><span style="color:#FF79C6">:=</span><span style="color:#F8F8F2"> ctrl.</span><span style="color:#50FA7B">NewManager</span><span style="color:#F8F8F2">(restConfig, </span><span style="color:#8BE9FD;font-style:italic">ctrl</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">Options</span><span style="color:#F8F8F2">{</span></span>
+<span class="line"><span style="color:#F8F8F2">    Scheme: scheme,</span></span>
+<span class="line"><span style="color:#F8F8F2">    Metrics: </span><span style="color:#8BE9FD;font-style:italic">metricsserver</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">Options</span><span style="color:#F8F8F2">{</span></span>
+<span class="line"><span style="color:#F8F8F2">        BindAddress:   metricsAddr,</span></span>
+<span class="line"><span style="color:#F8F8F2">        SecureServing: secureMetrics,</span></span>
+<span class="line"><span style="color:#F8F8F2">        TLSOpts:       tlsOpts,</span></span>
+<span class="line"><span style="color:#F8F8F2">    },</span></span>
+<span class="line"><span style="color:#F8F8F2">    HealthProbeBindAddress: probeAddr,</span></span>
+<span class="line"><span style="color:#F8F8F2">    LeaderElection:         enableLeaderElection,</span></span>
+<span class="line"><span style="color:#F8F8F2">    LeaderElectionID:       </span><span style="color:#E9F284">"</span><span style="color:#F1FA8C">9d4c4758.lokiwager.io</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">})</span></span></code></pre>
+<p>Then we attach the API server to the manager lifecycle:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> err </span><span style="color:#FF79C6">:=</span><span style="color:#F8F8F2"> mgr.</span><span style="color:#50FA7B">Add</span><span style="color:#F8F8F2">(</span><span style="color:#8BE9FD;font-style:italic">nonLeaderRunnable</span><span style="color:#F8F8F2">{run: </span><span style="color:#FF79C6">func</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">ctx</span><span style="color:#8BE9FD;font-style:italic"> context</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">Context</span><span style="color:#F8F8F2">) </span><span style="color:#8BE9FD;font-style:italic">error</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#FF79C6">    return</span><span style="color:#50FA7B"> startHTTPServer</span><span style="color:#F8F8F2">(ctx, httpServer)</span></span>
+<span class="line"><span style="color:#F8F8F2">}}); err </span><span style="color:#FF79C6">!=</span><span style="color:#BD93F9"> nil</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    os.</span><span style="color:#50FA7B">Exit</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">1</span><span style="color:#F8F8F2">)</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>That is cleaner than building a second bootstrap world outside the manager and then trying to keep shutdown behavior consistent by brute force.</p>
+<p>One more practical change landed in this iteration: the deployment manifest now declares the API port and exposes it through a dedicated Service:</p>
+<ul>
+<li><code>config/manager/manager.yaml</code> declares <code>--http-addr=:8080</code> and the container port</li>
+<li><code>config/default/api_service.yaml</code> exposes the HTTP API inside the cluster</li>
+</ul>
+<p>That is the kind of detail teams forget surprisingly often when the binary grows from “just a controller” into “controller plus API.”</p>
+<h2 id="step-4-switch-the-api-layer-to-echo">Step 4: Switch The API Layer To Echo</h2>
+<p>The HTTP layer in <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>pkg/api/server.go</code></a> now uses <code>echo</code> instead of raw <code>net/http</code>.</p>
+<p>Current endpoints:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>GET  /api/v1/health</span></span>
+<span class="line"><span>GET  /api/v1/operator/stockpools</span></span>
+<span class="line"><span>POST /api/v1/operator/stockpools</span></span>
+<span class="line"><span>GET  /api/v1/operator/jobs/{jobID}</span></span></code></pre>
+<p>The service layer in <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>pkg/service/service.go</code></a> owns the actual flow.</p>
+<p>Request DTO:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">type</span><span style="color:#8BE9FD;font-style:italic"> CreateStockPoolRequest</span><span style="color:#FF79C6"> struct</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    Name      </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"name,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Namespace </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"namespace,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    SpecName  </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"specName"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Image     </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"image,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Memory    </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"memory,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    GPU       </span><span style="color:#8BE9FD;font-style:italic">int32</span><span style="color:#E9F284">  `</span><span style="color:#F1FA8C">json:"gpu,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Replicas  </span><span style="color:#8BE9FD;font-style:italic">int32</span><span style="color:#E9F284">  `</span><span style="color:#F1FA8C">json:"replicas"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>Async create path:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">func</span><span style="color:#F8F8F2"> (</span><span style="color:#FFB86C;font-style:italic">s </span><span style="color:#FF79C6">*</span><span style="color:#8BE9FD;font-style:italic">Service</span><span style="color:#F8F8F2">) </span><span style="color:#50FA7B">CreateStockPoolAsync</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">ctx</span><span style="color:#8BE9FD;font-style:italic"> context</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">Context</span><span style="color:#F8F8F2">, </span><span style="color:#FFB86C;font-style:italic">req</span><span style="color:#8BE9FD;font-style:italic"> CreateStockPoolRequest</span><span style="color:#F8F8F2">) (</span><span style="color:#8BE9FD;font-style:italic">domain</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">OperatorJob</span><span style="color:#F8F8F2">, </span><span style="color:#8BE9FD;font-style:italic">error</span><span style="color:#F8F8F2">) {</span></span>
+<span class="line"><span style="color:#FF79C6">    ...</span></span>
+<span class="line"><span style="color:#F8F8F2">    s.jobQueue </span><span style="color:#FF79C6">&#x3C;-</span><span style="color:#8BE9FD;font-style:italic"> createStockPoolJob</span><span style="color:#F8F8F2">{jobID: jobID, req: req}</span></span>
+<span class="line"><span style="color:#FF79C6">    return</span><span style="color:#F8F8F2"> job, </span><span style="color:#BD93F9">nil</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>Worker:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">func</span><span style="color:#F8F8F2"> (</span><span style="color:#FFB86C;font-style:italic">s </span><span style="color:#FF79C6">*</span><span style="color:#8BE9FD;font-style:italic">Service</span><span style="color:#F8F8F2">) </span><span style="color:#50FA7B">StartOperatorJobWorker</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">ctx</span><span style="color:#8BE9FD;font-style:italic"> context</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">Context</span><span style="color:#F8F8F2">) {</span></span>
+<span class="line"><span style="color:#FF79C6">    for</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#FF79C6">        select</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#FF79C6">        case</span><span style="color:#FF79C6"> &#x3C;-</span><span style="color:#F8F8F2">ctx.</span><span style="color:#50FA7B">Done</span><span style="color:#F8F8F2">():</span></span>
+<span class="line"><span style="color:#FF79C6">            return</span></span>
+<span class="line"><span style="color:#FF79C6">        case</span><span style="color:#F8F8F2"> job </span><span style="color:#FF79C6">:=</span><span style="color:#FF79C6"> &#x3C;-</span><span style="color:#F8F8F2">s.jobQueue:</span></span>
+<span class="line"><span style="color:#F8F8F2">            s.</span><span style="color:#50FA7B">setJobRunning</span><span style="color:#F8F8F2">(job.jobID)</span></span>
+<span class="line"><span style="color:#FF79C6">            if</span><span style="color:#F8F8F2"> err </span><span style="color:#FF79C6">:=</span><span style="color:#F8F8F2"> s.</span><span style="color:#50FA7B">createStockPoolObject</span><span style="color:#F8F8F2">(ctx, job.req); err </span><span style="color:#FF79C6">!=</span><span style="color:#BD93F9"> nil</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">                s.</span><span style="color:#50FA7B">setJobFailed</span><span style="color:#F8F8F2">(job.jobID, err)</span></span>
+<span class="line"><span style="color:#FF79C6">                continue</span></span>
+<span class="line"><span style="color:#F8F8F2">            }</span></span>
+<span class="line"><span style="color:#F8F8F2">            s.</span><span style="color:#50FA7B">setJobSucceeded</span><span style="color:#F8F8F2">(job.jobID, job.req)</span></span>
+<span class="line"><span style="color:#F8F8F2">        }</span></span>
+<span class="line"><span style="color:#F8F8F2">    }</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>This is the key boundary in the current design:</p>
+<p><code>HTTP request -> async job -> CR creation -> reconcile</code></p>
+<p>We are no longer storing pretend runtime state in memory and calling that progress. The API hands desired state to Kubernetes. That is the right shape for the control plane we are trying to build.</p>
+<h2 id="step-5-reconcile-to-a-deployment">Step 5: Reconcile To A Deployment</h2>
+<p>The reconciler lives in <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>internal/controller/stockpool_controller.go</code></a>.</p>
+<p>This is the first chapter where reconcile performs a real side effect:</p>
+<ul>
+<li>load <code>StockPool</code></li>
+<li>ensure a <code>Deployment</code> exists</li>
+<li>update <code>Deployment.spec.replicas</code></li>
+<li>map <code>image</code>, <code>memory</code>, and <code>gpu</code> into the pod template</li>
+<li>compute and write <code>StockPool.status</code></li>
+</ul>
+<p>The creation path looks like this:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">newDep, err </span><span style="color:#FF79C6">:=</span><span style="color:#50FA7B"> desiredDeployment</span><span style="color:#F8F8F2">(pool, desired)</span></span>
+<span class="line"><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> err </span><span style="color:#FF79C6">:=</span><span style="color:#F8F8F2"> controllerutil.</span><span style="color:#50FA7B">SetControllerReference</span><span style="color:#F8F8F2">(</span><span style="color:#FF79C6">&#x26;</span><span style="color:#F8F8F2">pool, newDep, r.Scheme); err </span><span style="color:#FF79C6">!=</span><span style="color:#BD93F9"> nil</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#FF79C6">    return</span><span style="color:#8BE9FD;font-style:italic"> ctrl</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">Result</span><span style="color:#F8F8F2">{}, err</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span>
+<span class="line"><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> err </span><span style="color:#FF79C6">:=</span><span style="color:#F8F8F2"> r.</span><span style="color:#50FA7B">Create</span><span style="color:#F8F8F2">(ctx, newDep); err </span><span style="color:#FF79C6">!=</span><span style="color:#BD93F9"> nil</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#FF79C6">    return</span><span style="color:#8BE9FD;font-style:italic"> ctrl</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">Result</span><span style="color:#F8F8F2">{}, err</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>And the status path still reflects observed state, not wishful thinking:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">next </span><span style="color:#FF79C6">:=</span><span style="color:#8BE9FD;font-style:italic"> runtimev1alpha1</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">StockPoolStatus</span><span style="color:#F8F8F2">{</span></span>
+<span class="line"><span style="color:#F8F8F2">    Available:          dep.Status.AvailableReplicas,</span></span>
+<span class="line"><span style="color:#F8F8F2">    Allocated:          </span><span style="color:#50FA7B">maxInt32</span><span style="color:#F8F8F2">(desired</span><span style="color:#FF79C6">-</span><span style="color:#F8F8F2">dep.Status.AvailableReplicas, </span><span style="color:#BD93F9">0</span><span style="color:#F8F8F2">),</span></span>
+<span class="line"><span style="color:#F8F8F2">    ObservedGeneration: pool.Generation,</span></span>
+<span class="line"><span style="color:#F8F8F2">    LastSyncTime:       metav1.</span><span style="color:#50FA7B">NewTime</span><span style="color:#F8F8F2">(time.</span><span style="color:#50FA7B">Now</span><span style="color:#F8F8F2">().</span><span style="color:#50FA7B">UTC</span><span style="color:#F8F8F2">()),</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>The new resource mapping logic is especially worth noticing. <code>memory</code> is parsed into Kubernetes resource quantities, and <code>gpu</code> is wired to <code>nvidia.com/gpu</code> requests and limits. That means the reader can now see a clean line from API payload to CR spec to pod resources.</p>
+<p>The deployment still uses a placeholder container image by default if one is not provided. That is fine. The point here is control flow, not pretending we have already built the final GPU runtime.</p>
+<h2 id="step-6-let-rbac-and-crd-manifests-be-generated">Step 6: Let RBAC And CRD Manifests Be Generated</h2>
+<p>The repo now uses generated output under <code>config/</code>.</p>
+<p>That includes:</p>
+<ul>
+<li><code>config/crd/bases/runtime.lokiwager.io_stockpools.yaml</code></li>
+<li><code>config/rbac/role.yaml</code></li>
+<li><code>config/samples/runtime_v1alpha1_stockpool.yaml</code></li>
+</ul>
+<p>And the <code>Makefile</code> includes:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">make</span><span style="color:#F1FA8C"> manifests</span><span style="color:#F1FA8C"> generate</span></span></code></pre>
+<p>This is one of those habits that pays off quietly. When manifests are derived from types and markers, the diff usually tells a coherent story. When they are maintained by hand, the diff often tells you someone forgot something on a random Friday and hoped nobody would notice.</p>
+<h2 id="step-7-keep-tests-small-and-direct">Step 7: Keep Tests Small And Direct</h2>
+<p>We keep tests practical in this chapter.</p>
+<p>Controller test:</p>
+<ul>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>internal/controller/stockpool_controller_test.go</code></a></li>
+</ul>
+<p>Service tests:</p>
+<ul>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>pkg/service/service_operator_test.go</code></a></li>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>pkg/service/service_test.go</code></a></li>
+</ul>
+<p>API test:</p>
+<ul>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>pkg/api/server_test.go</code></a></li>
+</ul>
+<p>The controller test now checks more than “did status change?” It also verifies that the reconciled deployment carries the expected image, memory limit, and GPU limit.</p>
+<p>The service test verifies that the async job worker eventually creates the <code>StockPool</code> CR with the requested runtime fields.</p>
+<p>That is enough coverage for this iteration because the main risk lives in glue code and state transitions.</p>
+<p>We still have not introduced <code>envtest</code> here, and that is deliberate. This chapter already carries a major conceptual jump: <code>kubebuilder</code>, real reconciliation, and real workload generation. Throwing every testing strategy into the same chapter would make it louder, not better.</p>
+<h2 id="how-to-run-this-version">How To Run This Version</h2>
+<p>In the code repo:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">make</span><span style="color:#F1FA8C"> manifests</span><span style="color:#F1FA8C"> generate</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> apply</span><span style="color:#BD93F9"> -f</span><span style="color:#F1FA8C"> config/crd/bases/runtime.lokiwager.io_stockpools.yaml</span></span>
+<span class="line"><span style="color:#50FA7B">make</span><span style="color:#F1FA8C"> run</span></span></code></pre>
+<p>Create a pool:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/operator/stockpools</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{"name":"pool-g1","namespace":"default","specName":"g1.1","image":"nginx:1.27","memory":"16Gi","gpu":1,"replicas":2}</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>Then verify:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> stockpools.runtime.lokiwager.io</span><span style="color:#F1FA8C"> pool-g1</span><span style="color:#BD93F9"> -o</span><span style="color:#F1FA8C"> yaml</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> deployment</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> default</span></span></code></pre>
+<p>If you deploy this through the generated manifests instead of <code>make run</code>, the in-cluster API is exposed on port <code>8080</code> through the generated API Service.</p>
+<p>Local validation for this iteration:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">make</span><span style="color:#F1FA8C"> ci</span></span></code></pre>
+<p>That now covers:</p>
+<ul>
+<li>CRD/RBAC generation</li>
+<li>formatting</li>
+<li><code>go vet</code></li>
+<li>race-enabled tests</li>
+<li>build</li>
+</ul>
+<h2 id="common-mistakes-in-this-step">Common Mistakes In This Step</h2>
+<h3 id="the-api-works-locally-but-nothing-happens-in-cluster">The API works locally, but nothing happens in cluster</h3>
+<p>Check whether the process can actually talk to the cluster. This version relies on standard controller-runtime kubeconfig handling, so a bad context or missing config breaks the chain before reconcile even gets a chance to be blamed for crimes it did not commit.</p>
+<h3 id="the-stockpool-exists-but-no-deployment-appears">The <code>StockPool</code> exists, but no <code>Deployment</code> appears</h3>
+<p>Check:</p>
+<ul>
+<li>the reconciler is registered with the manager</li>
+<li>the CRD group/version matches the Go type</li>
+<li>RBAC allows <code>deployments</code> create and update</li>
+</ul>
+<h3 id="the-deployment-is-created-but-the-pod-spec-looks-wrong">The deployment is created, but the pod spec looks wrong</h3>
+<p>Check the CR values:</p>
+<ul>
+<li><code>image</code></li>
+<li><code>memory</code></li>
+<li><code>gpu</code></li>
+</ul>
+<p>Remember that invalid <code>memory</code> values have to parse as Kubernetes resource quantities, and GPU is intentionally mapped to <code>nvidia.com/gpu</code>.</p>
+<h3 id="status-never-moves-past-progressing">Status never moves past progressing</h3>
+<p>Remember that <code>status</code> is based on observed deployment state, not on what we hope the cluster will do eventually. If the deployment is not becoming available, the operator should not fake confidence.</p>
+<h2 id="summary">Summary</h2>
+<p>Part 5 is the first chapter where the project starts to feel structurally honest.</p>
+<p>We now have:</p>
+<ul>
+<li>a standard <code>kubebuilder</code> scaffold</li>
+<li>an <code>echo</code>-based control-plane API</li>
+<li>a single-process control plane</li>
+<li>an HTTP API that creates CRs instead of fake runtime state</li>
+<li>a reconciler that creates a real Kubernetes workload</li>
+<li>generated CRD and RBAC artifacts</li>
+<li>runtime fields flowing from API all the way into pod resources</li>
+</ul>
+<p>That is a much stronger base for the rest of the book.</p>
+<h2 id="next-chapter-preview">Next Chapter Preview</h2>
+<p>Part 6 should stop at “minimal but real” and move into “useful.”</p>
+<p>That likely means:</p>
+<ul>
+<li>making the controller own more lifecycle detail</li>
+<li>improving idempotency and error handling</li>
+<li>tightening the API/job contract</li>
+<li>preparing the path toward actual runtime pods instead of placeholders</li>
+</ul>
+<h2 id="repository">Repository</h2>
+<p>Code for this chapter:</p>
+<ul>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank">gpu-operator-runtime</a></li>
+</ul>   </div> </article> </div> <button id="to-top-btn" class="z-90 fixed bottom-8 end-4 flex h-10 w-10 translate-y-28 items-center justify-center rounded-full border-2 border-transparent bg-zinc-200 text-3xl opacity-0 transition-all duration-300 hover:border-zinc-400 data-[show=true]:translate-y-0 data-[show=true]:opacity-100 dark:bg-zinc-700 sm:end-8 sm:h-12 sm:w-12" aria-label="Back to Top" data-show="false"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6"> <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path> </svg> </button>  </main> <footer class="mt-auto flex w-full flex-col items-center justify-center gap-y-2 pb-4 pt-20 text-center align-top font-semibold text-gray-600 dark:text-gray-400 sm:flex-row sm:justify-between sm:text-xs"> <div class="me-0 sm:me-4">
+Copyright &copy; 2026  Loki&#39;s Wager </div> <nav aria-label="More on this site" class="flex gap-x-2 sm:gap-x-0 sm:divide-x sm:divide-gray-500"> <!--{--> <!--	menuLinks.map((link) => (--> <!--		<a--> <!--			href={link.path}--> <!--			class="px-4 py-2 sm:px-2 sm:py-0 sm:hover:text-textColor sm:hover:underline"--> <!--		>--> <!--			{link.title}--> <!--		</a>--> <!--	))--> <!--}--> <div class="flex flex-wrap items-end gap-x-4"> <!--<p>Find me on</p>--> <ul class="flex flex-1 items-center gap-x-2 sm:flex-initial"> <li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://github.com/LokiWager" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:github"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg> <span class="sr-only">Github</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://twitter.com/loki66118227" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:twitter"><path fill="currentColor" d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/></svg> <span class="sr-only">Twitter</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="mailto:lokitingyi@gmail.com" target="_blank" rel="noopener noreferrer me authn"> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:email"><path fill="currentColor" d="m20 8-8 5-8-5V6l8 5 8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/></svg> <span class="sr-only">email</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://space.bilibili.com/4810234" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="ri:bilibili-fill"><path fill="currentColor" d="M18.223 3.086a1.25 1.25 0 0 1 0 1.768L17.08 5.996h1.17A3.75 3.75 0 0 1 22 9.747v7.5a3.75 3.75 0 0 1-3.75 3.75H5.75A3.75 3.75 0 0 1 2 17.247v-7.5a3.75 3.75 0 0 1 3.75-3.75h1.166L5.775 4.855a1.25 1.25 0 1 1 1.767-1.768l2.652 2.652c.079.079.145.165.198.257h3.213c.053-.092.12-.18.199-.258l2.651-2.652a1.25 1.25 0 0 1 1.768 0zm.027 5.42H5.75a1.25 1.25 0 0 0-1.247 1.157l-.003.094v7.5c0 .659.51 1.199 1.157 1.246l.093.004h12.5a1.25 1.25 0 0 0 1.247-1.157l.003-.093v-7.5c0-.69-.56-1.25-1.25-1.25zm-10 2.5c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25zm7.5 0c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25z"/></svg> <span class="sr-only">Bilibili</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://www.instagram.com/lokiwager/" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:instagram"><path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg> <span class="sr-only">Instagram</span> </a> </li> </ul> </div> </nav> </footer> </body></html> 
