@@ -1,4 +1,4 @@
-import{c as e,r as a,m as o}from"./render-template.HrPJ3nqB.js";import{u as l}from"./hoisted.WhbDMAh-.js";import"./astro/assets-service.wdzbVTWi.js";const s=`<p>Target readers:</p>
+import{c as e,r as a,m as o}from"./render-template.EUycRu7A.js";import{u as l}from"./hoisted.vDHagUjq.js";import"./astro/assets-service.wdzbVTWi.js";const s=`<p>Target readers:</p>
 <ul>
 <li>you already know Golang syntax and basic project structure</li>
 <li>you are not yet confident in production-oriented engineering decisions</li>
@@ -429,7 +429,7 @@ Create stock first or use a valid <code>specName</code>.</p>
 <p>At that point, we will migrate from in-memory state to Kubernetes-native desired/actual state management.</p>
 <h2 id="repository">Repository</h2>
 <p>Code for this tutorial runtime:</p>
-<p><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank">gpu-operator-runtime</a></p>`,t={title:"Building a GPU SaaS Platform - Runtime Bootstrap in Go",publishDate:"27 February 2026",description:"Part 4: build the first runnable single-cluster runtime baseline with production-oriented engineering habits.",tags:["GPU","SaaS","Kubernetes","Golang","Operator"],minutesRead:"8 min read"},p="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-4.md",r=void 0;function g(){return`
+<p><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank">gpu-operator-runtime</a></p>`,t={title:"Building a GPU SaaS Platform - Runtime Bootstrap in Go",publishDate:"27 February 2026",description:"Part 4: build the first runnable single-cluster runtime baseline with production-oriented engineering habits.",tags:["GPU","SaaS","Kubernetes","Golang","Operator"],minutesRead:"8 min read"},p="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-4.md",r=void 0;function g(){return`
 Target readers:
 
 - you already know Golang syntax and basic project structure

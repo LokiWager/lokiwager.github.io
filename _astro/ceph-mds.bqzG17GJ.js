@@ -1,4 +1,4 @@
-import{c as a,r as s,m as o}from"./render-template.HrPJ3nqB.js";import{u as t}from"./hoisted.WhbDMAh-.js";import"./astro/assets-service.wdzbVTWi.js";const e=`<h2 id="background">Background</h2>
+import{c as a,r as s,m as o}from"./render-template.EUycRu7A.js";import{u as t}from"./hoisted.vDHagUjq.js";import"./astro/assets-service.wdzbVTWi.js";const e=`<h2 id="background">Background</h2>
 <p>As a developer of a GPU SaaS platform relying on Kubernetes with Ceph as the storage backend. Recently, I encountered performance issues with CephFS, notably the extended execution time of commands like <code>import torch</code>, taking around 180 seconds. Investigating further, it became evident that the CephFS performance was constrained by a single MDS (Metadata Server) running by default.</p>
 <p>However, I found that there is no clear documentation about how to configure multiple active MDS daemons. So I write this article to record the process of configuring multiple active MDS daemons.</p>
 <h2 id="what-is-mds">What is MDS</h2>
@@ -9,7 +9,7 @@ import{c as a,r as s,m as o}from"./render-template.HrPJ3nqB.js";import{u as t}fr
 <li><strong>Multiple Active</strong>: Configuring multiple MDS daemons to distribute the load.</li>
 </ol>
 <h2 id="when-to-use-multiple-active-mds-daemons">When to Use Multiple Active MDS Daemons</h2>
-<p>As per the <a href="https://docs.ceph.com/en/quincy/cephfs/multimds/#when-should-i-use-multiple-active-mds-daemons" rel="nofollow, noopener, noreferrer" target="_blank">Ceph documentation</a>, multiple active MDS daemons are recommended in the following scenarios:</p>
+<p>As per the <a href="https://docs.ceph.com/en/quincy/cephfs/multimds/#when-should-i-use-multiple-active-mds-daemons" rel="nofollow noopener noreferrer" target="_blank">Ceph documentation</a>, multiple active MDS daemons are recommended in the following scenarios:</p>
 <ol>
 <li><strong>Large Number of Clients:</strong> When handling a substantial client base.</li>
 <li><strong>Metadata Performance Bottleneck:</strong> When the default single MDS becomes a performance bottleneck.</li>

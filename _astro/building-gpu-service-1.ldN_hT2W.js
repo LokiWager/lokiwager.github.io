@@ -1,10 +1,10 @@
-import{c as t,r as s,m as a}from"./render-template.HrPJ3nqB.js";import{u as r}from"./hoisted.WhbDMAh-.js";import"./astro/assets-service.wdzbVTWi.js";const o=`<h3 id="our-driving-example">Our Driving Example</h3>
+import{c as t,r as s,m as a}from"./render-template.EUycRu7A.js";import{u as r}from"./hoisted.vDHagUjq.js";import"./astro/assets-service.wdzbVTWi.js";const o=`<h3 id="our-driving-example">Our Driving Example</h3>
 <p>Nowadays, GPUs are widely used in many fields, such as deep learning, drawing, and video processing. Especially when OpenAI released ChatGPT, our
 daily life has been influenced by AI technology more than ever. However, the cost of GPU is still high, and it is not easy to get a GPU server.
 Therefore, we want to build a GPU SaaS platform to provide GPU services.</p>
 <h3 id="what-should-our-gpu-saas-platform-do">What should our GPU SaaS platform do?</h3>
 <p>Now, we have no ambition to build a platform like AWS or GCP. In this series of articles, we will focus on building a [Stable Diffusion WebUI]
-(<a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui" rel="nofollow, noopener, noreferrer" target="_blank">https://github.com/AUTOMATIC1111/stable-diffusion-webui</a>) Saas for designers. Of course, the platform we build can be used for other purposes.</p>
+(<a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui" rel="nofollow noopener noreferrer" target="_blank">https://github.com/AUTOMATIC1111/stable-diffusion-webui</a>) Saas for designers. Of course, the platform we build can be used for other purposes.</p>
 <p>So, what should our GPU SaaS platform do? In my opinion, it should have the following features for users:</p>
 <ul>
 <li><strong>Easy to use</strong>: Users can use the platform without any knowledge of Kubernetes, Docker, or other technologies.</li>

@@ -1,7 +1,7 @@
-import{s as c,g as d}from"./_astro_assets.Ny5S18Yf.js";import{c as p,r as u,m}from"./render-template.HrPJ3nqB.js";import{u as g}from"./hoisted.WhbDMAh-.js";import"./astro/assets-service.wdzbVTWi.js";const f={src:"/_astro/reduce-image.ty0CwkbT.png",width:2019,height:1003,format:"png"},y=async function(a){const e={};{const r=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/reduce-image/reduce-image\\.png[^"]*)"',"g");let o,t=0;for(;(o=r.exec(a))!==null;){const n="./img/reduce-image/reduce-image.png_"+t,i=JSON.parse(o[1].replace(/&#x22;/g,'"')),{src:s,...l}=i;e[n]=await d({src:f,...l}),t++}}return e};async function b(a){return y(a).then(e=>a.replaceAll(/__ASTRO_IMAGE_="([^"]+)"/gm,(r,o)=>{const t=JSON.parse(o.replace(/&#x22;/g,'"')),n=t.src+"_"+t.index;e[n].srcSet&&e[n].srcSet.values.length>0&&(e[n].attributes.srcset=e[n].srcSet.attribute);const{index:i,...s}=e[n].attributes;return c({src:e[n].src,...s})}))}const h=await b(`<p>In the previous article, we discussed the way to reduce the size of the Docker image. In this article, we will discuss how to accelerate the
+import{s as c,g as d}from"./_astro_assets.h0ORRyIw.js";import{c as p,r as u,m}from"./render-template.EUycRu7A.js";import{u as g}from"./hoisted.vDHagUjq.js";import"./astro/assets-service.wdzbVTWi.js";const f={src:"/_astro/reduce-image.ty0CwkbT.png",width:2019,height:1003,format:"png"},y=async function(a){const e={};{const r=new RegExp('__ASTRO_IMAGE_="([^"]*\\./img/reduce-image/reduce-image\\.png[^"]*)"',"g");let o,t=0;for(;(o=r.exec(a))!==null;){const n="./img/reduce-image/reduce-image.png_"+t,i=JSON.parse(o[1].replace(/&#x22;/g,'"')),{src:s,...l}=i;e[n]=await d({src:f,...l}),t++}}return e};async function b(a){return y(a).then(e=>a.replaceAll(/__ASTRO_IMAGE_="([^"]+)"/gm,(r,o)=>{const t=JSON.parse(o.replace(/&#x22;/g,'"')),n=t.src+"_"+t.index;e[n].srcSet&&e[n].srcSet.values.length>0&&(e[n].attributes.srcset=e[n].srcSet.attribute);const{index:i,...s}=e[n].attributes;return c({src:e[n].src,...s})}))}const h=await b(`<p>In the previous article, we discussed the way to reduce the size of the Docker image. In this article, we will discuss how to accelerate the
 startup of a large Docker image without reducing the size of it.</p>
 <h2 id="containerd-snapshotter-plugin">Containerd Snapshotter Plugin</h2>
-<p>The startup time of a container is mainly determined by the time <a href="https://medium.com/nttlabs/startup-containers-in-lightning-speed-with-lazy-image-distribution-on-containerd-243d94522361" rel="nofollow, noopener, noreferrer" target="_blank">pull the image and extract the image</a>.</p>
+<p>The startup time of a container is mainly determined by the time <a href="https://medium.com/nttlabs/startup-containers-in-lightning-speed-with-lazy-image-distribution-on-containerd-243d94522361" rel="nofollow noopener noreferrer" target="_blank">pull the image and extract the image</a>.</p>
 <p>So can we pull the image lazily? Can we only download the necessary layers of the image? In the above article, the author mentioned that the
 containerd snapshotter plugin can help us to achieve this goal.</p>
 <ul>
@@ -20,9 +20,9 @@ containerd snapshotter plugin can help us to achieve this goal.</p>
 <h2 id="different-snapshotter-plugins">Different Snapshotter Plugins</h2>
 <p>In the containerd, there are several snapshotter plugins available.</p>
 <ul>
-<li><a href="https://github.com/containerd/stargz-snapshotter" rel="nofollow, noopener, noreferrer" target="_blank">stargz-snapshotter</a>: A snapshotter plugin that supports the stargz format.</li>
-<li><a href="https://github.com/containerd/nydus-snapshotter" rel="nofollow, noopener, noreferrer" target="_blank">nydus-snapshotter</a>: A snapshotter plugin that supports the Nydus format.</li>
-<li><a href="https://github.com/containerd/accelerated-container-image" rel="nofollow, noopener, noreferrer" target="_blank">overlaybd-snapshotter</a>: A snapshotter plugin that supports the overlaybd format.</li>
+<li><a href="https://github.com/containerd/stargz-snapshotter" rel="nofollow noopener noreferrer" target="_blank">stargz-snapshotter</a>: A snapshotter plugin that supports the stargz format.</li>
+<li><a href="https://github.com/containerd/nydus-snapshotter" rel="nofollow noopener noreferrer" target="_blank">nydus-snapshotter</a>: A snapshotter plugin that supports the Nydus format.</li>
+<li><a href="https://github.com/containerd/accelerated-container-image" rel="nofollow noopener noreferrer" target="_blank">overlaybd-snapshotter</a>: A snapshotter plugin that supports the overlaybd format.</li>
 </ul>
 <p>Stargz and Nydus are two popular snapshotter plugins that have been widely used in the industry. But for me, I am more interested in the OverlayBD.
 It is more deployable that can be easily integrated with the existing containerd. In my production environment, I have already used the OverlayBD.
@@ -35,9 +35,9 @@ The image which is more than 50GB can be started in 1 second, which is amazing. 
 </ul>
 <h1 id="references">References</h1>
 <ol>
-<li><a href="https://dev.to/napicella/what-is-a-containerd-snapshotters-3eo2" rel="nofollow, noopener, noreferrer" target="_blank">https://dev.to/napicella/what-is-a-containerd-snapshotters-3eo2</a></li>
-<li><a href="https://medium.com/nttlabs/startup-containers-in-lightning-speed-with-lazy-image-distribution-on-containerd-243d94522361" rel="nofollow, noopener, noreferrer" target="_blank">https://medium.com/nttlabs/startup-containers-in-lightning-speed-with-lazy-image-distribution-on-containerd-243d94522361</a></li>
-<li><a href="https://github.com/containerd/containerd/blob/main/docs/remote-snapshotter.md" rel="nofollow, noopener, noreferrer" target="_blank">https://github.com/containerd/containerd/blob/main/docs/remote-snapshotter.md</a></li>
+<li><a href="https://dev.to/napicella/what-is-a-containerd-snapshotters-3eo2" rel="nofollow noopener noreferrer" target="_blank">https://dev.to/napicella/what-is-a-containerd-snapshotters-3eo2</a></li>
+<li><a href="https://medium.com/nttlabs/startup-containers-in-lightning-speed-with-lazy-image-distribution-on-containerd-243d94522361" rel="nofollow noopener noreferrer" target="_blank">https://medium.com/nttlabs/startup-containers-in-lightning-speed-with-lazy-image-distribution-on-containerd-243d94522361</a></li>
+<li><a href="https://github.com/containerd/containerd/blob/main/docs/remote-snapshotter.md" rel="nofollow noopener noreferrer" target="_blank">https://github.com/containerd/containerd/blob/main/docs/remote-snapshotter.md</a></li>
 </ol>
 <h1 id="off-topic">Off-topic</h1>
 <p>I am so sorry that I have not written any articles for a long time. I have been busy with matters related to move to Canada. I have just settled

@@ -1,4 +1,4 @@
-import{c as s,r as t,m as a}from"./render-template.HrPJ3nqB.js";import{u as o}from"./hoisted.WhbDMAh-.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<p>Part 5 gave us a real control loop:</p>
+import{c as s,r as t,m as a}from"./render-template.EUycRu7A.js";import{u as o}from"./hoisted.vDHagUjq.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<p>Part 5 gave us a real control loop:</p>
 <ul>
 <li>HTTP request</li>
 <li><code>StockPool</code> custom resource</li>
@@ -370,8 +370,8 @@ controller to discover the mistake later.</p>
 <h2 id="repository">Repository</h2>
 <p>Code for this chapter:</p>
 <ul>
-<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank">gpu-operator-runtime</a></li>
-</ul>`,l={title:"Building a GPU SaaS Platform - Useful Operator Contracts",publishDate:"9 March 2026",description:"Part 6: add operation idempotency, Swagger docs, clearer controller failure status, and the first runtime template.",tags:["GPU","SaaS","Kubernetes","Golang","Operator"],minutesRead:"11 min read"},r="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-6.md",i=void 0;function g(){return`
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank">gpu-operator-runtime</a></li>
+</ul>`,l={title:"Building a GPU SaaS Platform - Useful Operator Contracts",publishDate:"14 March 2026",description:"Part 6: add operation idempotency, Swagger docs, clearer controller failure status, and the first runtime template.",tags:["GPU","SaaS","Kubernetes","Golang","Operator"],minutesRead:"11 min read"},r="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-6.md",i=void 0;function g(){return`
 Part 5 gave us a real control loop:
 
 - HTTP request

@@ -1,4 +1,4 @@
-import{c as a,r as e,m as p}from"./render-template.HrPJ3nqB.js";import{u as l}from"./hoisted.WhbDMAh-.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<h3 id="the-problem">The problem</h3>
+import{c as a,r as e,m as p}from"./render-template.EUycRu7A.js";import{u as l}from"./hoisted.vDHagUjq.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<h3 id="the-problem">The problem</h3>
 <p>Kubernetes has an extraction timeout, which means there is a upper limit for the image size, approximately around 15GB. In my GPU SaaS platform, I
 use the Nvidia Docker image to provide GPU services. In the case of Stable Diffusion WebUI</p>
 <ul>
@@ -54,7 +54,7 @@ storage to the container. So, the first step is to analyze the image.</p>
 remove <code>/usr/lib/x86_64-linux-gnu</code> because it contains the shared libraries. So I decide to remove the <code>/usr/local/cuda-11.8</code> and <code>/opt/nvidia</code>
 from the image. But I need to install cuda-toolkit and pytorch in the container and I also need a slim version of the cuda devel image. So I have
 to build it by myself.</p>
-<p>I found the <a href="https://gitlab.com/nvidia/container-images/cuda/-/tree/master/dist/11.8.0/ubuntu2204?ref_type=heads" rel="nofollow, noopener, noreferrer" target="_blank">nvidia/cuda Dockerfile</a>. I
+<p>I found the <a href="https://gitlab.com/nvidia/container-images/cuda/-/tree/master/dist/11.8.0/ubuntu2204?ref_type=heads" rel="nofollow noopener noreferrer" target="_blank">nvidia/cuda Dockerfile</a>. I
 merged it like this:</p>
 <pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>FROM ubuntu:22.04 as builder</span></span>
 <span class="line"><span></span></span>
@@ -117,7 +117,7 @@ merged it like this:</p>
 <span class="line"><span>    jupyter contrib nbextension install --user &#x26;&#x26; \\</span></span>
 <span class="line"><span>    jupyter nbextension enable --py widgetsnbextension &#x26;&#x26; \\</span></span>
 <span class="line"><span>    rm -rf ~/.cache/pip</span></span></code></pre>
-<p>Then I used <a href="https://github.com/wagoodman/dive" rel="nofollow, noopener, noreferrer" target="_blank">dive tools</a> to analyze the image:</p>
+<p>Then I used <a href="https://github.com/wagoodman/dive" rel="nofollow noopener noreferrer" target="_blank">dive tools</a> to analyze the image:</p>
 <pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">docker</span><span style="color:#F1FA8C"> run</span><span style="color:#BD93F9"> --rm</span><span style="color:#BD93F9"> -it</span><span style="color:#BD93F9"> -v</span><span style="color:#F1FA8C"> /var/run/docker.sock:/var/run/docker.sock</span><span style="color:#F1FA8C"> wagoodman/dive:latest</span><span style="color:#BD93F9"> 10.108</span><span style="color:#F1FA8C">.163.251:20443/megaease/sd-cuda118-cudnn8-ubuntu2204:builder</span></span></code></pre>
 <p>From the result, I’ve made sure that I can remove the <code>/usr/local/cuda-11.8</code> and <code>/opt/nvidia</code> from the image.</p>
 <pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>FROM builder as tmp</span></span>

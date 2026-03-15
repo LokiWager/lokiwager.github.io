@@ -1,4 +1,4 @@
-import{c as s,r as t,m as o}from"./render-template.HrPJ3nqB.js";import{u as a}from"./hoisted.WhbDMAh-.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<p>Part 4 gave us a service-shaped project.</p>
+import{c as s,r as t,m as o}from"./render-template.EUycRu7A.js";import{u as a}from"./hoisted.vDHagUjq.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<p>Part 4 gave us a service-shaped project.</p>
 <p>Part 5 is where it starts acting like a Kubernetes system instead of a well-organized mock.</p>
 <p>The high-level change is simple:</p>
 <ul>
@@ -132,7 +132,7 @@ import{c as s,r as t,m as o}from"./render-template.HrPJ3nqB.js";import{u as a}fr
 </ul>
 <p>This is not glamorous, but it is the kind of decision that saves your future self from becoming unpaid support for your own clever shortcuts.</p>
 <h2 id="step-2-define-a-small-but-honest-api-type">Step 2: Define A Small But Honest API Type</h2>
-<p>The <code>StockPool</code> API lives in <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>api/v1alpha1/stockpool_types.go</code></a>.</p>
+<p>The <code>StockPool</code> API lives in <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank"><code>api/v1alpha1/stockpool_types.go</code></a>.</p>
 <p>Core fields now look like this:</p>
 <pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">type</span><span style="color:#8BE9FD;font-style:italic"> StockPoolSpec</span><span style="color:#FF79C6"> struct</span><span style="color:#F8F8F2"> {</span></span>
 <span class="line"><span style="color:#F8F8F2">    SpecName </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> \`</span><span style="color:#F1FA8C">json:"specName"</span><span style="color:#E9F284">\`</span></span>
@@ -161,7 +161,7 @@ import{c as s,r as t,m as o}from"./render-template.HrPJ3nqB.js";import{u as a}fr
 <span class="line"><span style="color:#6272A4">// +kubebuilder:printcolumn:name="Available",type=integer,JSONPath=\`.status.available\`</span></span></code></pre>
 <p>That means the CRD definition comes from the Go contract instead of a hand-maintained YAML file quietly drifting off the map.</p>
 <h2 id="step-3-keep-one-entry-point">Step 3: Keep One Entry Point</h2>
-<p>The unified entrypoint is <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>cmd/main.go</code></a>.</p>
+<p>The unified entrypoint is <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank"><code>cmd/main.go</code></a>.</p>
 <p>This file now does three jobs:</p>
 <ul>
 <li>build the controller manager</li>
@@ -194,13 +194,13 @@ import{c as s,r as t,m as o}from"./render-template.HrPJ3nqB.js";import{u as a}fr
 </ul>
 <p>That is the kind of detail teams forget surprisingly often when the binary grows from “just a controller” into “controller plus API.”</p>
 <h2 id="step-4-switch-the-api-layer-to-echo">Step 4: Switch The API Layer To Echo</h2>
-<p>The HTTP layer in <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>pkg/api/server.go</code></a> now uses <code>echo</code> instead of raw <code>net/http</code>.</p>
+<p>The HTTP layer in <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank"><code>pkg/api/server.go</code></a> now uses <code>echo</code> instead of raw <code>net/http</code>.</p>
 <p>Current endpoints:</p>
 <pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>GET  /api/v1/health</span></span>
 <span class="line"><span>GET  /api/v1/operator/stockpools</span></span>
 <span class="line"><span>POST /api/v1/operator/stockpools</span></span>
 <span class="line"><span>GET  /api/v1/operator/jobs/{jobID}</span></span></code></pre>
-<p>The service layer in <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>pkg/service/service.go</code></a> owns the actual flow.</p>
+<p>The service layer in <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank"><code>pkg/service/service.go</code></a> owns the actual flow.</p>
 <p>Request DTO:</p>
 <pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">type</span><span style="color:#8BE9FD;font-style:italic"> CreateStockPoolRequest</span><span style="color:#FF79C6"> struct</span><span style="color:#F8F8F2"> {</span></span>
 <span class="line"><span style="color:#F8F8F2">    Name      </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> \`</span><span style="color:#F1FA8C">json:"name,omitempty"</span><span style="color:#E9F284">\`</span></span>
@@ -237,7 +237,7 @@ import{c as s,r as t,m as o}from"./render-template.HrPJ3nqB.js";import{u as a}fr
 <p><code>HTTP request -> async job -> CR creation -> reconcile</code></p>
 <p>We are no longer storing pretend runtime state in memory and calling that progress. The API hands desired state to Kubernetes. That is the right shape for the control plane we are trying to build.</p>
 <h2 id="step-5-reconcile-to-a-deployment">Step 5: Reconcile To A Deployment</h2>
-<p>The reconciler lives in <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>internal/controller/stockpool_controller.go</code></a>.</p>
+<p>The reconciler lives in <a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank"><code>internal/controller/stockpool_controller.go</code></a>.</p>
 <p>This is the first chapter where reconcile performs a real side effect:</p>
 <ul>
 <li>load <code>StockPool</code></li>
@@ -278,16 +278,16 @@ import{c as s,r as t,m as o}from"./render-template.HrPJ3nqB.js";import{u as a}fr
 <p>We keep tests practical in this chapter.</p>
 <p>Controller test:</p>
 <ul>
-<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>internal/controller/stockpool_controller_test.go</code></a></li>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank"><code>internal/controller/stockpool_controller_test.go</code></a></li>
 </ul>
 <p>Service tests:</p>
 <ul>
-<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>pkg/service/service_operator_test.go</code></a></li>
-<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>pkg/service/service_test.go</code></a></li>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank"><code>pkg/service/service_operator_test.go</code></a></li>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank"><code>pkg/service/service_test.go</code></a></li>
 </ul>
 <p>API test:</p>
 <ul>
-<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank"><code>pkg/api/server_test.go</code></a></li>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank"><code>pkg/api/server_test.go</code></a></li>
 </ul>
 <p>The controller test now checks more than “did status change?” It also verifies that the reconciled deployment carries the expected image, memory limit, and GPU limit.</p>
 <p>The service test verifies that the async job worker eventually creates the <code>StockPool</code> CR with the requested runtime fields.</p>
@@ -361,7 +361,7 @@ import{c as s,r as t,m as o}from"./render-template.HrPJ3nqB.js";import{u as a}fr
 <h2 id="repository">Repository</h2>
 <p>Code for this chapter:</p>
 <ul>
-<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank">gpu-operator-runtime</a></li>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank">gpu-operator-runtime</a></li>
 </ul>`,r={title:"Building a GPU SaaS Platform - Operator Baseline",publishDate:"5 March 2026",description:"Part 5: move the project onto a standard kubebuilder layout, switch the API to Echo, and let requests create real custom resources.",tags:["GPU","SaaS","Kubernetes","Golang","Operator"],minutesRead:"11 min read"},l="/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-5.md",p=void 0;function m(){return`
 Part 4 gave us a service-shaped project.
 
