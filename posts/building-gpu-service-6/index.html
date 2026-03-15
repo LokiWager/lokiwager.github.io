@@ -1,0 +1,422 @@
+<!DOCTYPE html><html lang="en-GB"> <head><meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title>Building a GPU SaaS Platform - Useful Operator Contracts • Loki&#39;s Wager</title>  <link rel="icon" href="/logo.png" sizes="any"> <!--<link rel="icon" href="/icon.svg" type="image/svg+xml" />--> <!--<link rel="apple-touch-icon" href="/apple-touch-icon.png" />--> <!--<link rel="manifest" href="/manifest.webmanifest" />--> <!--<link rel="canonical" href={canonicalURL} />-->  <meta name="title" content="Building a GPU SaaS Platform - Useful Operator Contracts • Loki's Wager"> <meta name="description" content="Part 6: add operation idempotency, Swagger docs, clearer controller failure status, and the first runtime template."> <meta name="author" content="Loki's Wager">  <meta name="theme-color" content="">  <meta property="og:type" content="article"> <meta property="og:title" content="Building a GPU SaaS Platform - Useful Operator Contracts"> <meta property="og:description" content="Part 6: add operation idempotency, Swagger docs, clearer controller failure status, and the first runtime template."> <meta property="og:url" content="https://lokiwager.app/posts/building-gpu-service-6/"> <meta property="og:site_name" content="Loki's Wager"> <meta property="og:locale" content="en_GB"> <!--<meta property="og:image" content={socialImageURL} />--> <meta property="og:image:width" content="1200"> <meta property="og:image:height" content="630">  <meta property="article:author" content="Loki's Wager"> <meta property="article:published_time" content="2026-03-09T00:00:00.000Z">   <meta property="twitter:card" content="summary_large_image"> <meta property="twitter:url" content="https://lokiwager.app/posts/building-gpu-service-6/"> <meta property="twitter:title" content="Building a GPU SaaS Platform - Useful Operator Contracts"> <meta property="twitter:description" content="Part 6: add operation idempotency, Swagger docs, clearer controller failure status, and the first runtime template."> <!--<meta property="twitter:image" content={socialImageURL} />-->  <link rel="sitemap" href="/sitemap-index.xml">  <link rel="alternate" type="application/rss+xml" title="Loki's Wager" href="/rss.xml">   <link rel="webmention" href="https://webmention.io/lokiwager.github.io/webmention">  <meta name="generator" content="Astro v4.4.6"><link rel="stylesheet" href="/_astro/_slug_.LpekWeOf.css" /><script type="module" src="/_astro/hoisted.gIr5wnkV.js"></script>
+<script type="module" src="/_astro/page.tdlkyGlf.js"></script></head> <body> <script>
+	function getUserPref() {
+		const storedTheme = typeof localStorage !== "undefined" && localStorage.getItem("theme");
+		return (
+			storedTheme || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+		);
+	}
+
+	function setTheme(newTheme) {
+		if (!newTheme || (newTheme !== "light" && newTheme !== "dark")) {
+			return console.warn(
+				`Incorrect theme value received. Expected 'light' or 'dark', received ${newTheme}`,
+			);
+		}
+
+		const root = document.documentElement;
+
+		// class already set to newTheme, exit early
+		if (
+			(newTheme === "dark" && root.classList.contains("dark")) ||
+			(newTheme === "light" && !root.classList.contains("dark"))
+		) {
+			return;
+		}
+
+		const colorThemeMetaTag = document.querySelector("meta[name='theme-color']");
+		document.documentElement.classList.toggle("dark", newTheme === "dark");
+		const bgColour = getComputedStyle(document.body).getPropertyValue("--theme-bg");
+
+		colorThemeMetaTag.setAttribute("content", `hsl(${bgColour})`);
+		if (typeof localStorage !== "undefined") {
+			localStorage.setItem("theme", newTheme);
+		}
+	}
+
+	// initial setup
+	setTheme(getUserPref());
+
+	// View Transitions hook to restore theme
+	document.addEventListener("astro:after-swap", () => setTheme(getUserPref()));
+
+	// listen for theme-change custom event, fired in src/components/ThemeToggle.astro
+	document.addEventListener("theme-change", (e) => {
+		setTheme(e.detail.theme);
+	});
+</script> <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:start-1 focus:top-1.5">skip to content
+</a> <header id="main-header" class="group relative mb-2 flex items-start px-8 lg:px-0"> <div class="flex items-start gap-4 sm:gap-6"> <a href="/" class="inline-flex shrink-0 grayscale hover:filter-none"> <img src="/_astro/logo.Rlh1755u_Z2ro35K.webp" alt="logo" class="w-8 sm:w-12" width="824" height="1115" loading="lazy" decoding="async"> </a> <div class="flex flex-col items-start"> <a href="/" class="inline-flex items-center"> <span class="text-xl font-bold sm:text-2xl">Loki's Wager</span> </a> <nav id="navigation-menu" class="absolute -inset-x-4 top-14 hidden flex-col items-start gap-y-4 rounded-md bg-bgColor/[.85] py-4 text-accent shadow backdrop-blur group-[.menu-open]:z-50 group-[.menu-open]:flex sm:static sm:inset-auto sm:mt-1 sm:flex sm:flex-row sm:items-center sm:divide-x sm:divide-dashed sm:divide-accent sm:rounded-none sm:bg-transparent sm:py-0 sm:shadow-none sm:backdrop-blur-none" aria-label="Main menu"> <a href="/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:pl-0 sm:pr-4" data-astro-prefetch> Home </a><a href="/about/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:px-4" data-astro-prefetch> About </a><a href="/posts/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:pl-4 sm:pr-0" data-astro-prefetch> Blog </a> </nav> </div> </div> <div class="ms-auto flex items-center"> <theme-toggle class="ms-2 sm:ms-4"> <button type="button" id="toggle-theme" class="relative h-9 w-9 rounded-md p-2 ring-zinc-400 transition-all hover:ring-2" aria-label="Toggle Dark Mode"> <svg id="sun-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-100 opacity-100 transition-all dark:scale-0 dark:opacity-0" aria-hidden="true" focusable="false" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg id="moon-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100" aria-hidden="true" focusable="false" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path> <path d="M19 11h2m-1 -1v2"></path> </svg> </button> </theme-toggle>  <mobile-button> <button id="toggle-navigation-menu" class="group relative ms-4 h-7 w-7 sm:invisible sm:hidden" type="button" aria-label="Open main menu" aria-expanded="false" aria-haspopup="menu"> <svg id="line-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transition-all group-aria-expanded:scale-0 group-aria-expanded:opacity-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"></path> </svg> <svg id="cross-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 text-accent opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path> </svg> </button> </mobile-button> </div> </header>  <main id="main" class="mt-8 px-8 sm:mt-10 lg:px-0">  <div class="grid w-full max-w-none gap-x-10 lg:grid-cols-[5fr_1.4fr] lg:items-start"> <article class="min-w-0 break-words" data-pagefind-body> <div id="blog-hero"><h1 class="title mb-3 sm:mb-1"> Building a GPU SaaS Platform - Useful Operator Contracts </h1> <div class="flex flex-wrap items-center gap-x-3 gap-y-2"> <p class="font-semibold"> <time datetime="2026-03-09T00:00:00.000Z"> 9 March 2026 </time> /  11 min read </p>  </div> <div class="mt-3"> <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" class="me-1 inline-block h-6 w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z"></path> <path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116"></path> <path d="M6 9h-.01"></path> </svg>  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag gpu" href="/tags/gpu/" data-pagefind-filter="tag"> gpu </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag saas" href="/tags/saas/" data-pagefind-filter="tag"> saas </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag kubernetes" href="/tags/kubernetes/" data-pagefind-filter="tag"> kubernetes </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag golang" href="/tags/golang/" data-pagefind-filter="tag"> golang </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag operator" href="/tags/operator/" data-pagefind-filter="tag"> operator </a>  </div></div> <div class="prose prose-sm prose-cactus mt-12 max-w-none prose-headings:font-semibold prose-headings:text-accent-2 prose-th:before:content-none">  <p>Part 5 gave us a real control loop:</p>
+<ul>
+<li>HTTP request</li>
+<li><code>StockPool</code> custom resource</li>
+<li>controller reconcile</li>
+<li><code>Deployment</code></li>
+</ul>
+<p>That was the minimum line where the project stopped being a mock.</p>
+<p>Part 6 is about making that line survivable.</p>
+<p>In a real system, the next problems are not glamorous:</p>
+<ul>
+<li>clients retry requests</li>
+<li>duplicate writes appear</li>
+<li>bad specs get accepted and then fail somewhere deeper in the stack</li>
+<li>the controller owns too little of the workload lifecycle</li>
+<li>the pod template is still too fake to support later runtime work</li>
+</ul>
+<p>That is exactly what this chapter fixes. No one wants to spend every day patching the same fragile system. If you have ever been on call, and spent the whole night half-awake because you were afraid of missing an alert, you already understand why these “boring” problems matter so much. Then the next day, because you did not sleep well, you create even more bugs. A lot of the time, engineers are not out there “building the future.” They are repairing cracks in systems that should have been made safer earlier. That is why we need to take validation, monitoring, degradation, and circuit-breaking seriously from the beginning.</p>
+<h2 id="chapter-goal">Chapter Goal</h2>
+<p>By the end of this chapter, the runtime has five new properties:</p>
+<ol>
+<li>create requests are idempotent at the operation level</li>
+<li>the API contract is stricter about what a job means</li>
+<li>the controller reports failures and lifecycle state more explicitly</li>
+<li><code>StockPool.spec</code> contains the first real runtime template instead of a hardwired <code>sleep 3600</code></li>
+<li>the Echo API publishes Swagger documentation so the contract is visible without reading handler code</li>
+</ol>
+<p>This is not yet a full GPU runtime. It is the point where the Operator starts behaving like software that can survive retries, support debugging, and grow into real workloads.</p>
+<h2 id="the-real-problem-we-were-hiding">The Real Problem We Were Hiding</h2>
+<p>Before this iteration, a write request could easily lie to the caller without meaning to.</p>
+<p>Example:</p>
+<ol>
+<li>the API accepts a create request</li>
+<li>the async job reports success because the CR was created</li>
+<li>the controller later fails to build the workload because <code>memory</code> is invalid</li>
+<li>the caller only sees “job succeeded” unless they inspect controller logs or cluster events</li>
+</ol>
+<p>That is a bad contract.</p>
+<p>A production system does not need perfect abstractions on day one, but it does need honest ones.</p>
+<p>So Part 6 tightens the contract in two directions at the same time:</p>
+<ul>
+<li>the write path becomes safer under retries</li>
+<li>the reconcile path becomes more observable when desired state is invalid or incomplete</li>
+</ul>
+<p>All changes in this chapter are tightly related. If you only add idempotency but keep bad controller feedback, you still have a hard-to-debug system.
+If you only improve controller status but keep a loose write contract, retries still create garbage. If you only add a runtime template without a
+service, you still have no stable network boundary for the pod. So when you finish this chapter, stop and ask yourself: is this really enough? What problems are still unsolved? If we leave them alone now, will they become much more expensive later? Keeping that instinct alive is part of what makes software engineering interesting.</p>
+<h2 id="why-operationid-matters">Why <code>operationID</code> Matters</h2>
+<p>Distributed systems retry. That is normal.</p>
+<p>Browsers retry. Gateways retry. SDKs retry. Humans retry.</p>
+<p>If a <code>POST</code> request can create two <code>StockPool</code> objects because the caller did not receive the first response, the problem is not “the caller should be smarter”. The problem is that the API contract is under-specified.</p>
+<p>So the create request now requires an <code>operationID</code>:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">type</span><span style="color:#8BE9FD;font-style:italic"> CreateStockPoolRequest</span><span style="color:#FF79C6"> struct</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    OperationID </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"operationID"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Name        </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"name,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Namespace   </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"namespace,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    SpecName    </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"specName"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Image       </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"image,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Memory      </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"memory,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    GPU         </span><span style="color:#8BE9FD;font-style:italic">int32</span><span style="color:#E9F284">  `</span><span style="color:#F1FA8C">json:"gpu,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Replicas    </span><span style="color:#8BE9FD;font-style:italic">int32</span><span style="color:#E9F284">  `</span><span style="color:#F1FA8C">json:"replicas"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Template    </span><span style="color:#8BE9FD;font-style:italic">runtimev1alpha1</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">StockPoolTemplate</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"template,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>The service now does three things with that identifier:</p>
+<ul>
+<li>it normalizes and validates the request before queuing work</li>
+<li>it computes a request hash from the normalized payload</li>
+<li>it stores both <code>operationID</code> and request hash on the <code>StockPool</code> annotations</li>
+</ul>
+<p>That gives us useful behavior:</p>
+<ul>
+<li>same <code>operationID</code> + same payload: return the same operation</li>
+<li>same <code>operationID</code> + different payload: reject with <code>409 Conflict</code></li>
+<li>generated object names become deterministic when the caller does not provide one</li>
+</ul>
+<p>That last point matters more than it sounds. Random names are convenient in demos. They are terrible for idempotency.</p>
+<h2 id="why-swagger-belongs-here">Why Swagger Belongs Here</h2>
+<p>Once we switched the HTTP layer to <code>echo</code>, the control-plane API stopped being “just a few handlers”.</p>
+<p>At that point, the contract deserves to be visible:</p>
+<ul>
+<li>request body shape</li>
+<li>response shape</li>
+<li>status codes</li>
+<li>path parameters</li>
+<li>query parameters</li>
+</ul>
+<p>That is why this chapter adds Swagger now instead of much later.</p>
+<p>This is not about chasing tooling for its own sake. It is about reducing ambiguity while the API surface is still small enough to keep honest.</p>
+<p>The practical result is simple:</p>
+<ul>
+<li>the server now exposes <code>/swagger/index.html</code></li>
+<li>the docs are generated from handler annotations</li>
+<li><code>make swagger</code> and <code>make ci</code> keep the checked-in spec reproducible</li>
+</ul>
+<p>For a teaching project, this matters even more than usual. Readers should be able to inspect the API contract directly, not reverse-engineer it from <code>curl</code> examples and handler code.</p>
+<h2 id="tightening-what-a-job-means">Tightening What A Job Means</h2>
+<p>The job now represents:</p>
+<ul>
+<li>“did the control plane accept this operation?”</li>
+<li>“did it persist the desired state as a <code>StockPool</code> resource?”</li>
+</ul>
+<p>It does <strong>not</strong> mean:</p>
+<ul>
+<li>“the runtime is ready for user traffic”</li>
+</ul>
+<p>That distinction is important.</p>
+<p>The operation contract belongs to the write path.
+Runtime readiness belongs to reconciliation status.</p>
+<p>If you collapse those two ideas into one field too early, the API becomes confusing very quickly.</p>
+<p>So the split is now:</p>
+<ul>
+<li><code>GET /api/v1/operator/jobs/:operationID</code>: operation acceptance/persistence</li>
+<li><code>StockPool.status</code>: reconcile progress, readiness, and failure details</li>
+</ul>
+<p>That is a much cleaner boundary.</p>
+<h2 id="the-controller-owns-more-of-the-lifecycle-now">The Controller Owns More Of The Lifecycle Now</h2>
+<p>In Part 5, the controller only created a <code>Deployment</code>.</p>
+<p>That was enough to prove the architecture, but it was still thin:</p>
+<ul>
+<li>no stable service endpoint for a runtime pod</li>
+<li>no explicit failed phase</li>
+<li>no readable condition message for invalid desired state</li>
+</ul>
+<p>Part 6 extends controller ownership in two practical ways.</p>
+<h3 id="1-reconcile-the-service-not-just-the-deployment">1. Reconcile the <code>Service</code>, not just the <code>Deployment</code></h3>
+<p>If the runtime template exposes ports, the controller now creates a matching <code>ClusterIP</code> <code>Service</code>.</p>
+<p>That is the first step toward a real runtime boundary:</p>
+<ul>
+<li>pods can restart and be replaced</li>
+<li>the service name stays stable</li>
+<li>later chapters can attach access policy, probes, ingress, or sidecar communication to a stable endpoint</li>
+</ul>
+<p>This is why the service belongs in the controller instead of being created ad hoc somewhere in the API layer.</p>
+<p>The controller owns workload lifecycle. A service is part of that lifecycle.</p>
+<h3 id="2-report-explicit-failure-and-readiness-conditions">2. Report explicit failure and readiness conditions</h3>
+<p>The <code>StockPool</code> status now includes:</p>
+<ul>
+<li><code>phase</code></li>
+<li><code>serviceName</code></li>
+<li><code>conditions</code></li>
+<li><code>observedGeneration</code></li>
+<li><code>lastSyncTime</code></li>
+</ul>
+<p>And the controller sets a <code>Ready</code> condition with reasons such as:</p>
+<ul>
+<li><code>DeploymentProgressing</code></li>
+<li><code>DeploymentReady</code></li>
+<li><code>ScaledToZero</code></li>
+<li><code>InvalidSpec</code></li>
+<li><code>PodStartupFailed</code></li>
+<li><code>PodStatusSyncFailed</code></li>
+<li><code>ServiceSyncFailed</code></li>
+<li><code>DeploymentSyncFailed</code></li>
+</ul>
+<p>That means invalid desired state is no longer just a log line.</p>
+<p>If <code>memory: "not-a-quantity"</code> is sent, the controller marks the resource as <code>Failed</code> with an <code>InvalidSpec</code> reason instead of endlessly returning a parse error and hoping someone notices.</p>
+<p>That is a very production-shaped change. Operators should explain failure in resource status whenever they can.</p>
+<p>This chapter also goes one step further: when the deployment exists but a runtime pod is failing to start, the controller inspects the owned pods and copies the most useful failure message into the <code>Ready</code> condition.</p>
+<p>So instead of only seeing:</p>
+<ul>
+<li><code>phase: Failed</code></li>
+</ul>
+<p>you can now get something much closer to the real problem, for example:</p>
+<ul>
+<li>image pull failures</li>
+<li>crash loop messages</li>
+<li>the last terminated container message when startup logic fails</li>
+</ul>
+<p>That is the difference between “status exists” and “status helps you debug production”.</p>
+<h2 id="preparing-for-real-runtime-pods">Preparing For Real Runtime Pods</h2>
+<p>The old pod template was intentionally primitive:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">Command: []</span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#F8F8F2">{</span><span style="color:#E9F284">"</span><span style="color:#F1FA8C">sh</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">, </span><span style="color:#E9F284">"</span><span style="color:#F1FA8C">-c</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">, </span><span style="color:#E9F284">"</span><span style="color:#F1FA8C">sleep 3600</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>That was fine in Part 5 because the goal was proving the control loop.</p>
+<p>It is not fine anymore.</p>
+<p>If the controller hardcodes the workload shape, every future runtime feature becomes awkward:</p>
+<ul>
+<li>ports</li>
+<li>startup command</li>
+<li>env injection</li>
+<li>probes</li>
+<li>storage mounts</li>
+<li>sidecars</li>
+</ul>
+<p>So this iteration introduces the first real runtime-facing template:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#FF79C6">type</span><span style="color:#8BE9FD;font-style:italic"> StockPoolTemplate</span><span style="color:#FF79C6"> struct</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    Command []</span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">          `</span><span style="color:#F1FA8C">json:"command,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Args    []</span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">          `</span><span style="color:#F1FA8C">json:"args,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Envs    []</span><span style="color:#8BE9FD;font-style:italic">StockPoolEnvVar</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"envs,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Ports   []</span><span style="color:#8BE9FD;font-style:italic">StockPoolPortSpec</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"ports,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>That does not mean we are done. It means we now have the right place to put runtime concerns.</p>
+<p>The controller still falls back to the placeholder sleep command when no template command or args are provided. That is intentional. We are not pretending to have a finished runtime image contract yet.</p>
+<p>What changed is the direction of the architecture:</p>
+<ul>
+<li>workload shape is now part of desired state</li>
+<li>the controller translates that shape into container config and service ports</li>
+<li>later chapters can extend the template instead of rewriting the control flow again</li>
+</ul>
+<h2 id="flow-after-part-6">Flow After Part 6</h2>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span>+-----------------------------+</span></span>
+<span class="line"><span>| Echo HTTP API               |</span></span>
+<span class="line"><span>| POST /operator/stockpools   |</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>              |</span></span>
+<span class="line"><span>              v</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>| service layer               |</span></span>
+<span class="line"><span>| validate request            |</span></span>
+<span class="line"><span>| require operationID         |</span></span>
+<span class="line"><span>| detect duplicate payload    |</span></span>
+<span class="line"><span>| create StockPool CR         |</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>              |</span></span>
+<span class="line"><span>              v</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>| StockPool                    |</span></span>
+<span class="line"><span>| spec.template                |</span></span>
+<span class="line"><span>| operation annotations        |</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>              |</span></span>
+<span class="line"><span>              v</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>| controller                    |</span></span>
+<span class="line"><span>| reconcile Deployment         |</span></span>
+<span class="line"><span>| reconcile Service            |</span></span>
+<span class="line"><span>| update phase + conditions    |</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>              |</span></span>
+<span class="line"><span>              v</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>| runtime worker pods          |</span></span>
+<span class="line"><span>| stable ClusterIP service     |</span></span>
+<span class="line"><span>+-----------------------------+</span></span></code></pre>
+<h2 id="code-walkthrough">Code Walkthrough</h2>
+<h3 id="request-validation-moved-before-the-queue">Request validation moved before the queue</h3>
+<p>This is the right time to reject:</p>
+<ul>
+<li>missing <code>operationID</code></li>
+<li>invalid <code>memory</code></li>
+<li>negative replica or GPU values</li>
+<li>invalid or duplicate template env/port definitions</li>
+</ul>
+<p>If the request is clearly wrong, the system should say so immediately. There is no value in accepting garbage, writing a CR, and forcing the
+controller to discover the mistake later.</p>
+<h3 id="idempotency-is-anchored-in-kubernetes-state">Idempotency is anchored in Kubernetes state</h3>
+<p>The request hash is stored on the <code>StockPool</code> annotations, not only in an in-memory map.</p>
+<p>That matters because the in-memory job store is only a convenience for this single-process stage. The custom resource is the durable system record.</p>
+<p>This is one of the subtle lessons in production work:</p>
+<ul>
+<li>process memory is operationally useful</li>
+<li>Kubernetes objects are the contract boundary</li>
+</ul>
+<h3 id="status-is-now-for-humans-not-just-code">Status is now for humans, not just code</h3>
+<p>The controller uses <code>phase</code> and <code>conditions</code> together.</p>
+<p>That is deliberate:</p>
+<ul>
+<li><code>phase</code> is good for quick scanning</li>
+<li><code>conditions</code> are good for precise diagnosis</li>
+</ul>
+<p>This is why many mature Kubernetes APIs use both a compact summary and condition detail.</p>
+<h2 id="run-and-verify">Run And Verify</h2>
+<p>Run the code:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#8BE9FD">cd</span><span style="color:#F1FA8C"> /Users/haotingyi/Documents/workspaces/loki/gpu-operator-runtime</span></span>
+<span class="line"><span style="color:#50FA7B">make</span><span style="color:#F1FA8C"> ci</span></span>
+<span class="line"><span style="color:#50FA7B">make</span><span style="color:#F1FA8C"> run</span></span></code></pre>
+<p>Before you test a request with <code>"gpu": 1</code>, make sure the cluster already exposes <code>nvidia.com/gpu</code>.</p>
+<p>For most readers, that means installing NVIDIA GPU Operator first. A manually prepared cluster also works, but only if the NVIDIA drivers, runtime integration, and device plugin are already in place.</p>
+<p>If the cluster does not expose <code>nvidia.com/gpu</code>, keep the tutorial request at <code>gpu: 0</code> while you work on the API and controller flow.</p>
+<p>Open the API docs:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">open</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/swagger/index.html</span></span></code></pre>
+<p>Create a stock pool with a real runtime template:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/operator/stockpools</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{</span></span>
+<span class="line"><span style="color:#F1FA8C">    "operationID": "stock-g1-demo-001",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "name": "pool-g1-demo",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "namespace": "default",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "specName": "g1.1",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "image": "python:3.12-slim",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "memory": "16Gi",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "gpu": 1,</span></span>
+<span class="line"><span style="color:#F1FA8C">    "replicas": 1,</span></span>
+<span class="line"><span style="color:#F1FA8C">    "template": {</span></span>
+<span class="line"><span style="color:#F1FA8C">      "command": ["python"],</span></span>
+<span class="line"><span style="color:#F1FA8C">      "args": ["-m", "http.server", "8080"],</span></span>
+<span class="line"><span style="color:#F1FA8C">      "envs": [</span></span>
+<span class="line"><span style="color:#F1FA8C">        {"name": "MODEL_ID", "value": "demo-model"}</span></span>
+<span class="line"><span style="color:#F1FA8C">      ],</span></span>
+<span class="line"><span style="color:#F1FA8C">      "ports": [</span></span>
+<span class="line"><span style="color:#F1FA8C">        {"name": "http", "port": 8080, "protocol": "TCP"}</span></span>
+<span class="line"><span style="color:#F1FA8C">      ]</span></span>
+<span class="line"><span style="color:#F1FA8C">    }</span></span>
+<span class="line"><span style="color:#F1FA8C">  }</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>Send the same request again:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/operator/stockpools</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#F1FA8C"> @same-request.json</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>Expected result:</p>
+<ul>
+<li>first request returns <code>202 Accepted</code></li>
+<li>second request returns <code>200 OK</code></li>
+<li>both refer to the same <code>operationID</code></li>
+</ul>
+<p>Try reusing the same <code>operationID</code> with a different payload:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/operator/stockpools</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{</span></span>
+<span class="line"><span style="color:#F1FA8C">    "operationID": "stock-g1-demo-001",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "name": "pool-g1-demo",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "namespace": "default",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "specName": "g2.1",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "replicas": 1</span></span>
+<span class="line"><span style="color:#F1FA8C">  }</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>Expected result:</p>
+<ul>
+<li><code>409 Conflict</code></li>
+</ul>
+<p>Inspect the cluster objects:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> stockpool</span><span style="color:#F1FA8C"> pool-g1-demo</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> default</span><span style="color:#BD93F9"> -o</span><span style="color:#F1FA8C"> yaml</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> deployment</span><span style="color:#F1FA8C"> pool-pool-g1-demo</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> default</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> service</span><span style="color:#F1FA8C"> pool-pool-g1-demo</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> default</span></span></code></pre>
+<p>Useful fields to inspect:</p>
+<ul>
+<li><code>.metadata.annotations["runtime.lokiwager.io/operation-id"]</code></li>
+<li><code>.status.phase</code></li>
+<li><code>.status.serviceName</code></li>
+<li><code>.status.conditions</code></li>
+</ul>
+<p>If a pod is crashing, inspect the failure message directly from the condition:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> stockpool</span><span style="color:#F1FA8C"> pool-g1-demo</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> default</span><span style="color:#BD93F9"> -o</span><span style="color:#F1FA8C"> jsonpath=</span><span style="color:#E9F284">'</span><span style="color:#F1FA8C">{.status.conditions[?(@.type=="Ready")].message}</span><span style="color:#E9F284">'</span></span></code></pre>
+<p>If you want to force a failure path, send an invalid memory quantity:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/operator/stockpools</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{</span></span>
+<span class="line"><span style="color:#F1FA8C">    "operationID": "stock-invalid-001",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "name": "pool-invalid",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "namespace": "default",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "specName": "g1.1",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "memory": "not-a-quantity",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "replicas": 1</span></span>
+<span class="line"><span style="color:#F1FA8C">  }</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>That request should now fail fast at the API boundary instead of sneaking into reconciliation.</p>
+<p>If a bad CR is created manually, the controller should mark it <code>Failed</code> with an <code>InvalidSpec</code> reason.</p>
+<h2 id="summary">Summary</h2>
+<p>Part 6 is where the Operator stops being merely correct in architecture and starts becoming trustworthy in behavior.</p>
+<p>We now have:</p>
+<ul>
+<li>operation-level idempotency</li>
+<li>deterministic write semantics under retry</li>
+<li>a clearer split between write acceptance and runtime readiness</li>
+<li>controller-owned <code>Service</code> reconciliation</li>
+<li>explicit failure status and readiness conditions</li>
+<li>pod startup failure messages surfaced into status</li>
+<li>a first runtime template for command, args, envs, and ports</li>
+<li>Swagger documentation published from the Echo server</li>
+</ul>
+<p>That is the right foundation for the next stage.</p>
+<p>We can now start talking about storage and real runtime mounting without pretending the pod contract still lives in controller code.</p>
+<h2 id="next-chapter-preview">Next Chapter Preview</h2>
+<p>Part 7 is where we move from stock capacity to real user-facing GPU instances.</p>
+<p>Right now, we only create stock. We do not yet create the actual GPU instance a user can access. That is the next step. Once we reach that point, the system starts to feel much closer to a real runtime product.</p>
+<p>In the next chapter, we will implement:</p>
+<ul>
+<li>the flow that turns a stock unit into a real GPU instance</li>
+<li>how users reach that GPU instance</li>
+<li>GPU instance status reporting</li>
+<li>the GPU instance deletion flow</li>
+<li>the GPU instance update flow</li>
+</ul>
+<h2 id="repository">Repository</h2>
+<p>Code for this chapter:</p>
+<ul>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow, noopener, noreferrer" target="_blank">gpu-operator-runtime</a></li>
+</ul>   </div> </article> <aside class="sticky top-20 order-2 hidden lg:block"> <h2 class="font-semibold">Table of Contents</h2> <ul class="mt-4 text-sm"> <li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#chapter-goal" aria-label="Scroll to section: Chapter Goal">Chapter Goal</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#the-real-problem-we-were-hiding" aria-label="Scroll to section: The Real Problem We Were Hiding">The Real Problem We Were Hiding</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#why-operationid-matters" aria-label="Scroll to section: Why operationID Matters">Why operationID Matters</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#why-swagger-belongs-here" aria-label="Scroll to section: Why Swagger Belongs Here">Why Swagger Belongs Here</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#tightening-what-a-job-means" aria-label="Scroll to section: Tightening What A Job Means">Tightening What A Job Means</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#the-controller-owns-more-of-the-lifecycle-now" aria-label="Scroll to section: The Controller Owns More Of The Lifecycle Now">The Controller Owns More Of The Lifecycle Now</a> <ul> <li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#1-reconcile-the-service-not-just-the-deployment" aria-label="Scroll to section: 1. Reconcile the Service, not just the Deployment">1. Reconcile the Service, not just the Deployment</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#2-report-explicit-failure-and-readiness-conditions" aria-label="Scroll to section: 2. Report explicit failure and readiness conditions">2. Report explicit failure and readiness conditions</a>  </li> </ul> </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#preparing-for-real-runtime-pods" aria-label="Scroll to section: Preparing For Real Runtime Pods">Preparing For Real Runtime Pods</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#flow-after-part-6" aria-label="Scroll to section: Flow After Part 6">Flow After Part 6</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#code-walkthrough" aria-label="Scroll to section: Code Walkthrough">Code Walkthrough</a> <ul> <li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#request-validation-moved-before-the-queue" aria-label="Scroll to section: Request validation moved before the queue">Request validation moved before the queue</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#idempotency-is-anchored-in-kubernetes-state" aria-label="Scroll to section: Idempotency is anchored in Kubernetes state">Idempotency is anchored in Kubernetes state</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#status-is-now-for-humans-not-just-code" aria-label="Scroll to section: Status is now for humans, not just code">Status is now for humans, not just code</a>  </li> </ul> </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#run-and-verify" aria-label="Scroll to section: Run And Verify">Run And Verify</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#summary" aria-label="Scroll to section: Summary">Summary</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#next-chapter-preview" aria-label="Scroll to section: Next Chapter Preview">Next Chapter Preview</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#repository" aria-label="Scroll to section: Repository">Repository</a>  </li> </ul> </aside> </div> <button id="to-top-btn" class="z-90 fixed bottom-8 end-4 flex h-10 w-10 translate-y-28 items-center justify-center rounded-full border-2 border-transparent bg-zinc-200 text-3xl opacity-0 transition-all duration-300 hover:border-zinc-400 data-[show=true]:translate-y-0 data-[show=true]:opacity-100 dark:bg-zinc-700 sm:end-8 sm:h-12 sm:w-12" aria-label="Back to Top" data-show="false"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6"> <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path> </svg> </button>  </main> <footer class="mt-auto flex w-full flex-col items-center justify-center gap-y-2 px-8 pb-4 pt-20 text-center align-top font-semibold text-gray-600 dark:text-gray-400 sm:flex-row sm:justify-between sm:text-xs lg:px-0"> <div class="me-0 sm:me-4">
+Copyright &copy; 2026  Loki&#39;s Wager </div> <nav aria-label="More on this site" class="flex gap-x-2 sm:gap-x-0 sm:divide-x sm:divide-gray-500"> <!--{--> <!--	menuLinks.map((link) => (--> <!--		<a--> <!--			href={link.path}--> <!--			class="px-4 py-2 sm:px-2 sm:py-0 sm:hover:text-textColor sm:hover:underline"--> <!--		>--> <!--			{link.title}--> <!--		</a>--> <!--	))--> <!--}--> <div class="flex flex-wrap items-end gap-x-4"> <!--<p>Find me on</p>--> <ul class="flex flex-1 items-center gap-x-2 sm:flex-initial"> <li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://github.com/LokiWager" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:github"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg> <span class="sr-only">Github</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://twitter.com/loki66118227" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:twitter"><path fill="currentColor" d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/></svg> <span class="sr-only">Twitter</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="mailto:lokitingyi@gmail.com" target="_blank" rel="noopener noreferrer me authn"> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:email"><path fill="currentColor" d="m20 8-8 5-8-5V6l8 5 8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/></svg> <span class="sr-only">email</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://space.bilibili.com/4810234" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="ri:bilibili-fill"><path fill="currentColor" d="M18.223 3.086a1.25 1.25 0 0 1 0 1.768L17.08 5.996h1.17A3.75 3.75 0 0 1 22 9.747v7.5a3.75 3.75 0 0 1-3.75 3.75H5.75A3.75 3.75 0 0 1 2 17.247v-7.5a3.75 3.75 0 0 1 3.75-3.75h1.166L5.775 4.855a1.25 1.25 0 1 1 1.767-1.768l2.652 2.652c.079.079.145.165.198.257h3.213c.053-.092.12-.18.199-.258l2.651-2.652a1.25 1.25 0 0 1 1.768 0zm.027 5.42H5.75a1.25 1.25 0 0 0-1.247 1.157l-.003.094v7.5c0 .659.51 1.199 1.157 1.246l.093.004h12.5a1.25 1.25 0 0 0 1.247-1.157l.003-.093v-7.5c0-.69-.56-1.25-1.25-1.25zm-10 2.5c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25zm7.5 0c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25z"/></svg> <span class="sr-only">Bilibili</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://www.instagram.com/lokiwager/" target="_blank" rel="noopener noreferrer "> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="h-6 w-6" astro-icon="mdi:instagram"><path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg> <span class="sr-only">Instagram</span> </a> </li> </ul> </div> </nav> </footer> </body></html> 
