@@ -1,6 +1,6 @@
 ---
 title: "Building a GPU SaaS Platform - Useful Operator Contracts"
-publishDate: "9 March 2026"
+publishDate: "14 March 2026"
 description: "Part 6: add operation idempotency, Swagger docs, clearer controller failure status, and the first runtime template."
 tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator"]
 ---

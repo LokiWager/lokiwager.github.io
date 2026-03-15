@@ -98,20 +98,28 @@ import "@pagefind/default-ui/css/ui.css";
 		}
 
 		onWindowClick = (event: MouseEvent) => {
-			// check if it's a link
-			const isLink = "href" in (event.target || {});
+			const target = event.target;
+			const isLinkClick =
+				target instanceof Element && Boolean(target.closest("a[href], button[data-close-modal]"));
 			// make sure the click is either a link or outside of the dialog
 			if (
-				isLink ||
-				(document.body.contains(event.target as Node) &&
-					!this.dialogFrame.contains(event.target as Node))
+				isLinkClick ||
+				(document.body.contains(target as Node) && !this.dialogFrame.contains(target as Node))
 			)
 				this.closeModal();
 		};
 
 		onWindowKeydown = (e: KeyboardEvent) => {
-			// check if it's the / key
-			if (e.key === "/" && !this.dialog.open) {
+			const target = e.target;
+			const isTypingTarget =
+				target instanceof HTMLElement &&
+				(target.isContentEditable ||
+					target instanceof HTMLInputElement ||
+					target instanceof HTMLTextAreaElement ||
+					target instanceof HTMLSelectElement);
+
+			// only use "/" as a shortcut when the user is not typing into another field
+			if (e.key === "/" && !this.dialog.open && !isTypingTarget) {
 				this.openModal();
 				e.preventDefault();
 			}
