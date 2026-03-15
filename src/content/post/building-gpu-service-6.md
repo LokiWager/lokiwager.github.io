@@ -338,7 +338,7 @@ This is why many mature Kubernetes APIs use both a compact summary and condition
 Run the code:
 
 ```bash
-cd /Users/haotingyi/Documents/workspaces/loki/gpu-operator-runtime
+cd ./gpu-operator-runtime
 make ci
 make run
 ```
