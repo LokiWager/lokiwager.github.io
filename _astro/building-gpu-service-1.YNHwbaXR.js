@@ -1,4 +1,4 @@
-import{c as t,r as s,m as a}from"./render-template.EUycRu7A.js";import{u as r}from"./hoisted.vDHagUjq.js";import"./astro/assets-service.wdzbVTWi.js";const o=`<h3 id="our-driving-example">Our Driving Example</h3>
+import{c as t,r as s,m as a}from"./render-template.Ks9IiMRG.js";import{u as r}from"./hoisted.aGwo1f6n.js";import"./astro/assets-service.wdzbVTWi.js";const o=`<h3 id="our-driving-example">Our Driving Example</h3>
 <p>Nowadays, GPUs are widely used in many fields, such as deep learning, drawing, and video processing. Especially when OpenAI released ChatGPT, our
 daily life has been influenced by AI technology more than ever. However, the cost of GPU is still high, and it is not easy to get a GPU server.
 Therefore, we want to build a GPU SaaS platform to provide GPU services.</p>

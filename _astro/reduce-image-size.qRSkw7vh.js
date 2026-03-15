@@ -1,4 +1,4 @@
-import{c as a,r as e,m as p}from"./render-template.EUycRu7A.js";import{u as l}from"./hoisted.vDHagUjq.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<h3 id="the-problem">The problem</h3>
+import{c as a,r as e,m as p}from"./render-template.Ks9IiMRG.js";import{u as l}from"./hoisted.aGwo1f6n.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<h3 id="the-problem">The problem</h3>
 <p>Kubernetes has an extraction timeout, which means there is a upper limit for the image size, approximately around 15GB. In my GPU SaaS platform, I
 use the Nvidia Docker image to provide GPU services. In the case of Stable Diffusion WebUI</p>
 <ul>

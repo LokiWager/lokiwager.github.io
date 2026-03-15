@@ -1,4 +1,4 @@
-import{c as s,r as t,m as a}from"./render-template.EUycRu7A.js";import{u as o}from"./hoisted.vDHagUjq.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<p>Part 5 gave us a real control loop:</p>
+import{c as s,r as t,m as a}from"./render-template.Ks9IiMRG.js";import{u as o}from"./hoisted.aGwo1f6n.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<p>Part 5 gave us a real control loop:</p>
 <ul>
 <li>HTTP request</li>
 <li><code>StockPool</code> custom resource</li>
@@ -260,7 +260,7 @@ controller to discover the mistake later.</p>
 <p>This is why many mature Kubernetes APIs use both a compact summary and condition detail.</p>
 <h2 id="run-and-verify">Run And Verify</h2>
 <p>Run the code:</p>
-<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#8BE9FD">cd</span><span style="color:#F1FA8C"> /Users/haotingyi/Documents/workspaces/loki/gpu-operator-runtime</span></span>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0"><code><span class="line"><span style="color:#8BE9FD">cd</span><span style="color:#F1FA8C"> ./gpu-operator-runtime</span></span>
 <span class="line"><span style="color:#50FA7B">make</span><span style="color:#F1FA8C"> ci</span></span>
 <span class="line"><span style="color:#50FA7B">make</span><span style="color:#F1FA8C"> run</span></span></code></pre>
 <p>Before you test a request with <code>"gpu": 1</code>, make sure the cluster already exposes <code>nvidia.com/gpu</code>.</p>
@@ -705,7 +705,7 @@ This is why many mature Kubernetes APIs use both a compact summary and condition
 Run the code:
 
 \`\`\`bash
-cd /Users/haotingyi/Documents/workspaces/loki/gpu-operator-runtime
+cd ./gpu-operator-runtime
 make ci
 make run
 \`\`\`

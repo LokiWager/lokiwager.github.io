@@ -332,7 +332,7 @@ This is why many mature Kubernetes APIs use both a compact summary and condition
 Run the code:
 
 \`\`\`bash
-cd /Users/haotingyi/Documents/workspaces/loki/gpu-operator-runtime
+cd ./gpu-operator-runtime
 make ci
 make run
 \`\`\`
@@ -486,4 +486,4 @@ In the next chapter, we will implement:
 Code for this chapter:
 
 - [gpu-operator-runtime](https://github.com/LokiWager/gpu-operator-runtime)
-`,a={title:"Building a GPU SaaS Platform - Useful Operator Contracts",description:"Part 6: add operation idempotency, Swagger docs, clearer controller failure status, and the first runtime template.",publishDate:new Date(17734464e5),draft:!1,tags:["gpu","saas","kubernetes","golang","operator"]},s={type:"content",filePath:"/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-6.md",rawData:void 0};export{s as _internal,o as body,n as collection,a as data,e as id,t as slug};
+`,a={title:"Building a GPU SaaS Platform - Useful Operator Contracts",description:"Part 6: add operation idempotency, Swagger docs, clearer controller failure status, and the first runtime template.",publishDate:new Date(17734464e5),draft:!1,tags:["gpu","saas","kubernetes","golang","operator"]},r={type:"content",filePath:"/home/runner/work/lokiwager.github.io/lokiwager.github.io/src/content/post/building-gpu-service-6.md",rawData:void 0};export{r as _internal,o as body,n as collection,a as data,e as id,t as slug};

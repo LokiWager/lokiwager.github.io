@@ -1,4 +1,4 @@
-import{c as s,r as t,m as o}from"./render-template.EUycRu7A.js";import{u as a}from"./hoisted.vDHagUjq.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<p>Part 4 gave us a service-shaped project.</p>
+import{c as s,r as t,m as o}from"./render-template.Ks9IiMRG.js";import{u as a}from"./hoisted.aGwo1f6n.js";import"./astro/assets-service.wdzbVTWi.js";const n=`<p>Part 4 gave us a service-shaped project.</p>
 <p>Part 5 is where it starts acting like a Kubernetes system instead of a well-organized mock.</p>
 <p>The high-level change is simple:</p>
 <ul>
