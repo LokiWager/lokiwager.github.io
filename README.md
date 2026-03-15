@@ -6,7 +6,7 @@ This repository is the publishing site for the blog and long-form engineering se
 
 ## Stack
 
-- Astro 4
+- Astro 6
 - Tailwind CSS
 - Markdown content collections
 - MDX support
@@ -18,7 +18,7 @@ This repository is the publishing site for the blog and long-form engineering se
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js `20.19.1+` or `22.12.0+`
 - `pnpm` 8.x
 
 Install dependencies:
@@ -55,7 +55,7 @@ Posts live in:
 
 The content schema is defined in:
 
-- `src/content/config.ts`
+- `src/content.config.ts`
 
 Each post is a Markdown file with frontmatter. The important fields are:
 

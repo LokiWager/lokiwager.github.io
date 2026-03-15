@@ -71,7 +71,7 @@ to build it by myself.
 I found the [nvidia/cuda Dockerfile](https://gitlab.com/nvidia/container-images/cuda/-/tree/master/dist/11.8.0/ubuntu2204?ref_type=heads). I
 merged it like this:
 
-```Dockerfile
+```dockerfile
 FROM ubuntu:22.04 as builder
 
 ENV NVARCH x86_64
@@ -93,7 +93,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 then I added the cuda-toolkit, python and others:
 
-```Dockerfile
+```dockerfile
 RUN apt-get update && apt-get install -y --no-install-recommends \
     cuda-toolkit-11-8 \
     && apt-mark hold ${NV_CUDNN_PACKAGE_NAME} && \
@@ -147,7 +147,7 @@ docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:
 
 From the result, I've made sure that I can remove the `/usr/local/cuda-11.8` and `/opt/nvidia` from the image.
 
-```Dockerfile
+```dockerfile
 FROM builder as tmp
 
 RUN mkdir /data && mv /usr/local/cuda-11.8 /data/cuda-11.8 && \
@@ -165,7 +165,7 @@ COPY --from=tmp /run /run
 
 The next step is to add pytorch to the image.
 
-```Dockerfile
+```dockerfile
 FROM builder as builder-torch201
 
 RUN pip install torch==2.0.1+cu118 torchvision==0.15.2+cu118 torchaudio==2.0.2+cu118 --index-url https://download.pytorch.org/whl/cu118 && \
