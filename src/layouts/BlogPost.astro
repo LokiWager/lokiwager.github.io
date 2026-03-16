@@ -3,6 +3,7 @@ import type { CollectionEntry } from "astro:content";
 import { render } from "astro:content";
 
 import BaseLayout from "./Base.astro";
+import GiscusComments from "@/components/blog/GiscusComments";
 import BlogHero from "@/components/blog/Hero";
 import TOC from "@/components/blog/TOC";
 import WebMentions from "@/components/blog/webmentions/index";
@@ -28,6 +29,7 @@ const { headings } = await render(post);
 				class="prose prose-sm prose-cactus mt-12 max-w-none prose-headings:font-semibold prose-headings:text-accent-2 prose-th:before:content-none"
 			>
 				<slot />
+				<GiscusComments />
 				<WebMentions />
 			</div>
 		</article>

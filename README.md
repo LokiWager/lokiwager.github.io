@@ -103,6 +103,7 @@ That file controls:
 - description
 - locale
 - date formatting
+- giscus comments integration
 - webmention endpoint
 - header and footer menu links
 
@@ -144,6 +145,32 @@ RSS and sitemap generation are handled automatically during the Astro build.
 The site includes webmention components, but the build can still succeed without a webmention token in local development.
 
 If you want webmentions enabled in a deployed environment, make sure the endpoint in `src/site.config.ts` and any required environment configuration are set correctly.
+
+## Comments
+
+The blog can embed GitHub Discussions comments through [giscus](https://giscus.app/).
+
+Setup checklist:
+
+1. Enable GitHub Discussions for the repository you want to use for comments.
+2. Install/configure the giscus app for that repository and pick a discussion category.
+3. Optionally override the defaults in `.env.example` if you want to use a different repository or category.
+
+Current defaults are already wired to this repository:
+
+- `PUBLIC_GISCUS_REPO`
+- `PUBLIC_GISCUS_REPO_ID`
+- `PUBLIC_GISCUS_CATEGORY`
+- `PUBLIC_GISCUS_CATEGORY_ID`
+
+Defaults already match the current post URL structure:
+
+- `PUBLIC_GISCUS_MAPPING=pathname`
+- `PUBLIC_GISCUS_INPUT_POSITION=top`
+- `PUBLIC_GISCUS_THEME_LIGHT=light`
+- `PUBLIC_GISCUS_THEME_DARK=dark_dimmed`
+
+If you switch to `PUBLIC_GISCUS_MAPPING=specific` or `PUBLIC_GISCUS_MAPPING=number`, also set `PUBLIC_GISCUS_TERM`.
 
 ## Deployment
 

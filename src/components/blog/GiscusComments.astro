@@ -1,0 +1,139 @@
+---
+import { siteConfig } from "@/site-config";
+
+const giscusConfig = siteConfig.giscus;
+const showSetupHint = import.meta.env.DEV && !giscusConfig;
+---
+
+{
+	giscusConfig && (
+		<section class="not-prose mt-16" aria-labelledby="comments-heading">
+			<hr class="border-solid" />
+			<div class="mt-10 space-y-5">
+				<div class="space-y-2">
+					<h2 id="comments-heading" class="text-xl font-semibold text-accent-2">
+						Comments
+					</h2>
+					<p class="text-sm text-textColor/80">
+						Join the discussion with your GitHub account. Powered by{" "}
+						<a href="https://giscus.app" target="_blank" rel="noreferrer">
+							giscus
+						</a>
+						.
+					</p>
+				</div>
+				<div class="rounded-2xl border border-zinc-300/70 bg-bgColor/40 p-3 dark:border-zinc-700/80">
+					<giscus-comments class="block">
+						<div class="giscus" />
+					</giscus-comments>
+					<noscript>
+						<p class="px-3 py-2 text-sm text-textColor/80">
+							Enable JavaScript to load the comment thread.
+						</p>
+					</noscript>
+				</div>
+			</div>
+		</section>
+	)
+}
+
+{
+	showSetupHint && (
+		<section class="not-prose mt-16" aria-labelledby="comments-heading">
+			<hr class="border-solid" />
+			<div class="mt-10 rounded-2xl border border-dashed border-accent/30 bg-accent/5 p-4">
+				<h2 id="comments-heading" class="text-xl font-semibold text-accent-2">
+					Comments
+				</h2>
+				<p class="mt-2 text-sm text-textColor/80">
+					Set the `PUBLIC_GISCUS_*` variables to enable GitHub-powered comments for posts.
+				</p>
+			</div>
+		</section>
+	)
+}
+
+<script is:inline define:vars={{ giscusConfig }}>
+	class GiscusComments extends HTMLElement {
+		container = null;
+
+		handleThemeChange = (event) => {
+			const nextTheme =
+				event instanceof CustomEvent && typeof event.detail?.theme === "string"
+					? event.detail.theme
+					: undefined;
+			this.syncTheme(nextTheme);
+		};
+
+		connectedCallback() {
+			this.container = this.querySelector(".giscus");
+			this.loadWidget();
+			document.addEventListener("theme-change", this.handleThemeChange);
+		}
+
+		disconnectedCallback() {
+			document.removeEventListener("theme-change", this.handleThemeChange);
+		}
+
+		loadWidget() {
+			if (!giscusConfig || !this.container || this.container.dataset.loaded === "true") {
+				return;
+			}
+
+			const script = document.createElement("script");
+			script.src = "https://giscus.app/client.js";
+			script.async = true;
+			script.crossOrigin = "anonymous";
+			script.dataset.giscusScript = "true";
+			script.setAttribute("data-repo", giscusConfig.repo);
+			script.setAttribute("data-repo-id", giscusConfig.repoId);
+			script.setAttribute("data-category", giscusConfig.category);
+			script.setAttribute("data-category-id", giscusConfig.categoryId);
+			script.setAttribute("data-mapping", giscusConfig.mapping);
+			script.setAttribute("data-strict", giscusConfig.strict);
+			script.setAttribute("data-reactions-enabled", giscusConfig.reactionsEnabled);
+			script.setAttribute("data-emit-metadata", giscusConfig.emitMetadata);
+			script.setAttribute("data-input-position", giscusConfig.inputPosition);
+			script.setAttribute("data-lang", giscusConfig.lang);
+			script.setAttribute("data-loading", giscusConfig.loading);
+			script.setAttribute("data-theme", this.resolveTheme());
+
+			if (giscusConfig.term) {
+				script.setAttribute("data-term", giscusConfig.term);
+			}
+
+			this.container.append(script);
+			this.container.dataset.loaded = "true";
+		}
+
+		resolveTheme(theme) {
+			const activeTheme =
+				theme ?? (document.documentElement.classList.contains("dark") ? "dark" : "light");
+			return activeTheme === "dark" ? giscusConfig.theme.dark : giscusConfig.theme.light;
+		}
+
+		syncTheme(theme) {
+			const iframe = this.container?.querySelector("iframe.giscus-frame");
+
+			if (!iframe?.contentWindow) {
+				return;
+			}
+
+			// giscus updates live through a postMessage bridge after the iframe has mounted.
+			iframe.contentWindow.postMessage(
+				{
+					giscus: {
+						setConfig: {
+							theme: this.resolveTheme(theme),
+						},
+					},
+				},
+				"https://giscus.app",
+			);
+		}
+	}
+
+	if (!customElements.get("giscus-comments")) {
+		customElements.define("giscus-comments", GiscusComments);
+	}
+</script>

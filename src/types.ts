@@ -12,6 +12,28 @@ export type SiteConfig = {
 		link: string;
 		pingback?: string;
 	};
+	giscus?: GiscusConfig;
+};
+
+export type GiscusMapping = "pathname" | "url" | "title" | "og:title" | "specific" | "number";
+
+export type GiscusConfig = {
+	repo: string;
+	repoId: string;
+	category: string;
+	categoryId: string;
+	mapping: GiscusMapping;
+	strict: "0" | "1";
+	reactionsEnabled: "0" | "1";
+	emitMetadata: "0" | "1";
+	inputPosition: "top" | "bottom";
+	lang: string;
+	loading: "lazy" | "eager";
+	term?: string;
+	theme: {
+		light: string;
+		dark: string;
+	};
 };
 
 export type PaginationLink = {
