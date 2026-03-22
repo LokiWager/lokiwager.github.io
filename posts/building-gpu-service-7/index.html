@@ -1,0 +1,378 @@
+<!DOCTYPE html><html lang="en-GB"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Building a GPU SaaS Platform - One Unit, One Controller • Loki&#39;s Wager</title><link rel="icon" href="/logo.png" sizes="any"><!--<link rel="icon" href="/icon.svg" type="image/svg+xml" />--><!--<link rel="apple-touch-icon" href="/apple-touch-icon.png" />--><!--<link rel="manifest" href="/manifest.webmanifest" />--><!--<link rel="canonical" href={canonicalURL} />--><meta name="title" content="Building a GPU SaaS Platform - One Unit, One Controller • Loki's Wager"><meta name="description" content="Part 7: collapse stock and runtime into one GPUUnit resource, seed stock explicitly, and hand off warm units into active runtime."><meta name="author" content="Loki's Wager"><meta name="theme-color" content=""><meta property="og:type" content="article"><meta property="og:title" content="Building a GPU SaaS Platform - One Unit, One Controller"><meta property="og:description" content="Part 7: collapse stock and runtime into one GPUUnit resource, seed stock explicitly, and hand off warm units into active runtime."><meta property="og:url" content="https://lokiwager.app/posts/building-gpu-service-7/"><meta property="og:site_name" content="Loki's Wager"><meta property="og:locale" content="en_GB"><meta property="og:image" content="https://lokiwager.app/og-image/building-gpu-service-7.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="article:author" content="Loki's Wager"><meta property="article:published_time" content="2026-03-21T00:00:00.000Z"><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://lokiwager.app/posts/building-gpu-service-7/"><meta property="twitter:title" content="Building a GPU SaaS Platform - One Unit, One Controller"><meta property="twitter:description" content="Part 7: collapse stock and runtime into one GPUUnit resource, seed stock explicitly, and hand off warm units into active runtime."><meta property="twitter:image" content="https://lokiwager.app/og-image/building-gpu-service-7.png"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="Loki's Wager" href="/rss.xml"><link rel="webmention" href="https://webmention.io/lokiwager.github.io/webmention"><meta name="generator" content="Astro v6.0.4"><link rel="stylesheet" href="/_astro/Base.AkgSh0Q3.css"><script type="module" src="/_astro/page.DHhHZKgE.js"></script></head> <body> <script>
+	function getUserPref() {
+		const storedTheme = typeof localStorage !== "undefined" && localStorage.getItem("theme");
+		return (
+			storedTheme || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+		);
+	}
+
+	function setTheme(newTheme) {
+		if (!newTheme || (newTheme !== "light" && newTheme !== "dark")) {
+			return console.warn(
+				`Incorrect theme value received. Expected 'light' or 'dark', received ${newTheme}`,
+			);
+		}
+
+		const root = document.documentElement;
+
+		// class already set to newTheme, exit early
+		if (
+			(newTheme === "dark" && root.classList.contains("dark")) ||
+			(newTheme === "light" && !root.classList.contains("dark"))
+		) {
+			return;
+		}
+
+		const colorThemeMetaTag = document.querySelector("meta[name='theme-color']");
+		document.documentElement.classList.toggle("dark", newTheme === "dark");
+		const bgColour = getComputedStyle(document.body).getPropertyValue("--theme-bg");
+
+		colorThemeMetaTag.setAttribute("content", `hsl(${bgColour})`);
+		if (typeof localStorage !== "undefined") {
+			localStorage.setItem("theme", newTheme);
+		}
+	}
+
+	// initial setup
+	setTheme(getUserPref());
+
+	// View Transitions hook to restore theme
+	document.addEventListener("astro:after-swap", () => setTheme(getUserPref()));
+
+	// listen for theme-change custom event, fired in src/components/ThemeToggle.astro
+	document.addEventListener("theme-change", (e) => {
+		setTheme(e.detail.theme);
+	});
+</script> <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:start-1 focus:top-1.5">skip to content
+</a> <header id="main-header" class="group relative mb-2 flex items-start px-8 lg:px-0"> <div class="flex items-start gap-4 sm:gap-6"> <a href="/" class="inline-flex shrink-0 grayscale hover:filter-none" aria-current="false"> <img src="/_astro/logo.BGWHXvnm_Z1DWcL4.png" alt="logo" loading="lazy" decoding="async" width="824" height="1115" class="w-8 sm:w-12"> </a> <div class="flex flex-col items-start"> <a href="/" class="inline-flex items-center" aria-current="false"> <span class="text-xl font-bold sm:text-2xl">Loki's Wager</span> </a> <nav id="navigation-menu" class="absolute -inset-x-4 top-14 hidden flex-col items-start gap-y-4 rounded-md bg-bgColor/[.85] py-4 text-accent shadow backdrop-blur group-[.menu-open]:z-50 group-[.menu-open]:flex sm:static sm:inset-auto sm:mt-1 sm:flex sm:flex-row sm:items-center sm:divide-x sm:divide-dashed sm:divide-accent sm:rounded-none sm:bg-transparent sm:py-0 sm:shadow-none sm:backdrop-blur-none" aria-label="Main menu"> <a href="/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:pl-0 sm:pr-4" aria-current="false" data-astro-prefetch> Home </a><a href="/about/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:px-4" aria-current="false" data-astro-prefetch> About </a><a href="/posts/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:pl-4 sm:pr-0" aria-current="false" data-astro-prefetch> Blog </a> </nav> </div> </div> <div class="ms-auto flex items-center"> <site-search id="search" data-astro-cid-otpdt6jm="true"> <button data-open-modal disabled class="flex h-9 w-9 items-center justify-center rounded-md ring-zinc-400 transition-all hover:ring-2" data-astro-cid-otpdt6jm> <svg aria-label="search" class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" data-astro-cid-otpdt6jm> <path stroke="none" d="M0 0h24v24H0z" data-astro-cid-otpdt6jm></path> <path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" data-astro-cid-otpdt6jm></path> </svg> </button> <dialog aria-label="search" class="h-full max-h-full w-full max-w-full border border-zinc-400 bg-bgColor shadow backdrop:backdrop-blur sm:mx-auto sm:mb-auto sm:mt-16 sm:h-max sm:max-h-[calc(100%-8rem)] sm:min-h-[15rem] sm:w-5/6 sm:max-w-[48rem] sm:rounded-md" data-astro-cid-otpdt6jm> <div class="dialog-frame flex flex-col gap-4 p-6 pt-12 sm:pt-6" data-astro-cid-otpdt6jm> <button data-close-modal class="ms-auto cursor-pointer rounded-md bg-zinc-200 p-2 font-semibold dark:bg-zinc-700" data-astro-cid-otpdt6jm>Close</button> <div class="search-container" data-astro-cid-otpdt6jm> <div id="cactus__search" data-astro-cid-otpdt6jm></div> </div> </div> </dialog> </site-search> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.Cr3prLuB.js"></script>  <theme-toggle class="ms-2 sm:ms-4"> <button type="button" id="toggle-theme" class="relative h-9 w-9 rounded-md p-2 ring-zinc-400 transition-all hover:ring-2" aria-label="Toggle Dark Mode"> <svg id="sun-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-100 opacity-100 transition-all dark:scale-0 dark:opacity-0" aria-hidden="true" focusable="false" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg id="moon-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100" aria-hidden="true" focusable="false" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path> <path d="M19 11h2m-1 -1v2"></path> </svg> </button> </theme-toggle> <script type="module" src="/_astro/ThemeToggle.astro_astro_type_script_index_0_lang.BeM4B2Da.js"></script> <mobile-button> <button id="toggle-navigation-menu" class="group relative ms-4 h-7 w-7 sm:invisible sm:hidden" type="button" aria-label="Open main menu" aria-expanded="false" aria-haspopup="menu"> <svg id="line-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transition-all group-aria-expanded:scale-0 group-aria-expanded:opacity-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"></path> </svg> <svg id="cross-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 text-accent opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path> </svg> </button> </mobile-button> </div> </header> <script type="module" src="/_astro/Header.astro_astro_type_script_index_0_lang.DcNQI66r.js"></script> <main id="main" class="mt-8 px-8 sm:mt-10 lg:px-0">  <div class="grid w-full max-w-none gap-x-10 lg:grid-cols-[5fr_1.4fr] lg:items-start"> <article class="min-w-0 break-words" data-pagefind-body> <div id="blog-hero"><h1 class="title mb-3 sm:mb-1"> Building a GPU SaaS Platform - One Unit, One Controller </h1> <div class="flex flex-wrap items-center gap-x-3 gap-y-2"> <p class="font-semibold"> <time datetime="2026-03-21T00:00:00.000Z"> 21 March 2026 </time> /  9 min read </p>  </div> <div class="mt-3"> <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" class="me-1 inline-block h-6 w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z"></path> <path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116"></path> <path d="M6 9h-.01"></path> </svg>  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag gpu" href="/tags/gpu/" data-pagefind-filter="tag"> gpu </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag saas" href="/tags/saas/" data-pagefind-filter="tag"> saas </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag kubernetes" href="/tags/kubernetes/" data-pagefind-filter="tag"> kubernetes </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag golang" href="/tags/golang/" data-pagefind-filter="tag"> golang </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag operator" href="/tags/operator/" data-pagefind-filter="tag"> operator </a>  </div></div> <div class="prose prose-sm prose-cactus mt-12 max-w-none prose-headings:font-semibold prose-headings:text-accent-2 prose-th:before:content-none">  <p>By the end of Part 6, we already had a workable GPU runtime skeleton. We could seed stock and manage it through the control plane. But stock was still
+only a reservation pod used to occupy resources ahead of time. It did not run user logic, and it did not serve traffic.</p>
+<p>I already noted in earlier chapters that this is not a perfect production design. It is conservative because idle GPU capacity is still being held
+even when no user is using it. For teaching the control-plane model, though, it is good enough. The point is not to optimize everything at once. The
+point is to make the lifecycle visible.</p>
+<p>This chapter is where the application side begins. When a user request arrives, we no longer stop at “there is stock in the cluster.” We consume one
+stock unit and turn it into a real user-facing runtime.</p>
+<p>Of course, better inventory strategies exist. We could put a queue in front of admission, build on Volcano + Kubernetes DRA, use lazy pulling or
+image prewarming to cut startup time, or improve utilization with GPU slicing and time-sharing. Those are all valid directions. They are just not the
+focus yet. Here we want the smallest model that still teaches the right control-plane shape. Once that foundation is solid, we can add more
+sophisticated machinery in later chapters.</p>
+<h2 id="chapter-goal">Chapter Goal</h2>
+<p>By the end of Part 7, the runtime model has five properties:</p>
+<ol>
+<li>there is only one runtime resource: <code>GPUUnit</code></li>
+<li>there is only one runtime controller: <code>GPUUnitReconciler</code></li>
+<li>stock and active runtime use the same resource kind, but not the same workload payload</li>
+<li>stock is seeded explicitly into <code>runtime-stock</code></li>
+<li>creating runtime means consuming one ready stock unit and injecting the real user image into <code>runtime-instance</code></li>
+</ol>
+<p>That is a much stronger foundation than trying to make stock and runtime look like different products.</p>
+<h2 id="one-resource-two-roles">One Resource, Two Roles</h2>
+<p><code>GPUUnit.spec</code> now describes the runtime itself and nothing else:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#FF79C6">type</span><span style="color:#8BE9FD;font-style:italic"> GPUUnitSpec</span><span style="color:#FF79C6"> struct</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    SpecName </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">          `</span><span style="color:#F1FA8C">json:"specName"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Image    </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">          `</span><span style="color:#F1FA8C">json:"image,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Memory   </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">          `</span><span style="color:#F1FA8C">json:"memory,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    GPU      </span><span style="color:#8BE9FD;font-style:italic">int32</span><span style="color:#E9F284">           `</span><span style="color:#F1FA8C">json:"gpu,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Template </span><span style="color:#8BE9FD;font-style:italic">GPUUnitTemplate</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"template,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Access   </span><span style="color:#8BE9FD;font-style:italic">GPUUnitAccess</span><span style="color:#E9F284">   `</span><span style="color:#F1FA8C">json:"access,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>At first glance, that may look like stock and active runtime now carry the exact same workload shape. They do not.</p>
+<p>The important split is this:</p>
+<ul>
+<li>a stock unit uses the built-in reservation image</li>
+<li>a stock unit mainly exists to hold the resource envelope: <code>specName</code>, <code>memory</code>, and <code>gpu</code></li>
+<li>an active unit keeps that reserved envelope, but gets the real user image, template, and access settings at create time</li>
+</ul>
+<p>That means the project now has one resource kind, but a clearer boundary inside the API contract. We stopped pretending that a warm reservation pod
+and a real user runtime are the same thing operationally.</p>
+<h2 id="one-controller">One Controller</h2>
+<p>There is now one runtime controller as well.</p>
+<p>It reconciles the same <code>GPUUnit</code> kind in both namespaces and derives behavior from placement:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#FF79C6">func</span><span style="color:#50FA7B"> isStockUnit</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">unit</span><span style="color:#8BE9FD;font-style:italic"> runtimev1alpha1</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">GPUUnit</span><span style="color:#F8F8F2">) </span><span style="color:#8BE9FD;font-style:italic">bool</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#FF79C6">    return</span><span style="color:#F8F8F2"> unit.Namespace </span><span style="color:#FF79C6">==</span><span style="color:#F8F8F2"> runtimev1alpha1.DefaultStockNamespace</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>That sounds almost too simple, but the simplicity is the point.</p>
+<p>The controller no longer needs two spec branches. It implements the workload contract once and changes only the exposure policy:</p>
+<ul>
+<li>a stock unit gets a <code>Deployment</code></li>
+<li>an active unit gets a <code>Deployment</code> and a <code>Service</code></li>
+<li>both update status through the same condition model</li>
+<li>both surface pod startup failures through the same controller-owned logic</li>
+</ul>
+<p>This is exactly the kind of simplification we want in an operator. Less special casing, fewer conceptual seams, and fewer places for behavior to
+drift.</p>
+<h2 id="why-the-api-had-to-split-reservation-from-runtime">Why The API Had To Split Reservation From Runtime</h2>
+<p>At this point, we clearly need two APIs: one for inventory management and one for user runtime management. They may share the same underlying
+resource kind, but they do not mean the same thing. If we force them into one awkward contract, the code gets messy very quickly.</p>
+<p>I tend to use a simple rule here: once I have to rely on <code>if</code> branches or small state-machine tricks just to separate business behavior, it is
+usually time to split the boundary instead of hiding the difference.</p>
+<p>The stock seeding request is intentionally small:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#FF79C6">type</span><span style="color:#8BE9FD;font-style:italic"> CreateStockUnitsRequest</span><span style="color:#FF79C6"> struct</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    OperationID    </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"operationID"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    SpecName       </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"specName"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Memory         </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"memory,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    GPU            </span><span style="color:#8BE9FD;font-style:italic">int32</span><span style="color:#E9F284">  `</span><span style="color:#F1FA8C">json:"gpu,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Replicas       </span><span style="color:#8BE9FD;font-style:italic">int32</span><span style="color:#E9F284">  `</span><span style="color:#F1FA8C">json:"replicas"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>That request does not accept <code>image</code>, <code>template</code>, or <code>access</code>, because stock is not the user application. It is only a reservation unit created with
+the built-in stock image.</p>
+<p>The active create request is where the user runtime shows up:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#FF79C6">type</span><span style="color:#8BE9FD;font-style:italic"> CreateGPUUnitRequest</span><span style="color:#FF79C6"> struct</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    OperationID    </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">          `</span><span style="color:#F1FA8C">json:"operationID"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Name           </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">          `</span><span style="color:#F1FA8C">json:"name"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Namespace      </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">          `</span><span style="color:#F1FA8C">json:"namespace,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    SpecName       </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">          `</span><span style="color:#F1FA8C">json:"specName"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    StockNamespace </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">          `</span><span style="color:#F1FA8C">json:"stockNamespace,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Image          </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">          `</span><span style="color:#F1FA8C">json:"image"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Template       </span><span style="color:#8BE9FD;font-style:italic">GPUUnitTemplate</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"template,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Access         </span><span style="color:#8BE9FD;font-style:italic">GPUUnitAccess</span><span style="color:#E9F284">   `</span><span style="color:#F1FA8C">json:"access,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<h2 id="the-flow-after-part-7">The Flow After Part 7</h2>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="text"><code><span class="line"><span>+-----------------------------+</span></span>
+<span class="line"><span>| Echo HTTP API               |</span></span>
+<span class="line"><span>| POST /operator/stock-units  |</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>              |</span></span>
+<span class="line"><span>              v</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>| service layer               |</span></span>
+<span class="line"><span>| validate request            |</span></span>
+<span class="line"><span>| create stock GPUUnits       |</span></span>
+<span class="line"><span>| track async job status      |</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>              |</span></span>
+<span class="line"><span>              v</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>| GPUUnit (runtime-stock)     |</span></span>
+<span class="line"><span>| reservation unit            |</span></span>
+<span class="line"><span>| built-in stock image        |</span></span>
+<span class="line"><span>| reserved specName/memory/gpu|</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>              |</span></span>
+<span class="line"><span>              v</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>| Echo HTTP API               |</span></span>
+<span class="line"><span>| POST /gpu-units             |</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>              |</span></span>
+<span class="line"><span>              v</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>| service layer               |</span></span>
+<span class="line"><span>| validate request            |</span></span>
+<span class="line"><span>| find ready stock            |</span></span>
+<span class="line"><span>| claim stock                 |</span></span>
+<span class="line"><span>| delete stock                |</span></span>
+<span class="line"><span>| create active GPUUnit       |</span></span>
+<span class="line"><span>| inject image/template/access|</span></span>
+<span class="line"><span>| restore stock on failure    |</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>              |</span></span>
+<span class="line"><span>              v</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>| GPUUnit (runtime-instance)  |</span></span>
+<span class="line"><span>| active runtime unit         |</span></span>
+<span class="line"><span>| user application runtime    |</span></span>
+<span class="line"><span>| keeps reserved memory/gpu   |</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>              |</span></span>
+<span class="line"><span>              v</span></span>
+<span class="line"><span>+-------------+---------------+</span></span>
+<span class="line"><span>| GPUUnit controller          |</span></span>
+<span class="line"><span>| Deployment / Service / URL  |</span></span>
+<span class="line"><span>| readiness / failure status  |</span></span>
+<span class="line"><span>+-----------------------------+</span></span></code></pre>
+<p>You may look at this chapter and think the architecture is almost the same as the previous one, so why spend time on it at all. The answer is that
+stopping feature work for a moment and refactoring the code for readability and maintainability is often one of the most valuable things we can do.
+It makes the next round of feature work much easier. In this chapter, the refactor also improved the actual behavior, so it was well worth doing.</p>
+<p>It is hard not to mention that vibe coding is popular right now. From an LLM’s point of view, piling everything into one function or one file can
+sometimes look attractive because it simplifies context handling. There is a kind of locality advantage there. Humans work differently. We usually
+want modules, boundaries, and code that is easier to reason about over time.</p>
+<p>I am not against vibe coding. In a workflow where humans barely touch the code, a pure vibe-coding loop may even be acceptable in some cases. I
+just do not think it is the right default, especially with the current state of LLM capability. Once the product grows and traffic becomes real, I
+do not think today’s models are strong enough to carry that style on their own.</p>
+<p>That is not meant as a dismissal of LLMs. The point is simply that they are trained on real-world data and generate code by probabilistic reasoning
+over context. They do not invent engineering judgment from scratch, and they do not truly understand the business meaning behind a requirement.
+What they are very good at is mapping your prompt and your code onto patterns that already exist. For established patterns, that can still be very
+useful, a bit like an extremely fast Stack Overflow loop with adaptation.</p>
+<p>That was a bit of a detour, but the conclusion is straightforward. This chapter does not introduce much flashy new functionality. The main addition
+is the handoff from stock to instance. If this area interests you, I strongly recommend looking into Volcano and Kubernetes DRA. DRA is especially
+worth studying for its architecture. Ask yourself why it exists, why it was designed this way, and what you would do differently. Since this series
+is meant to teach how real systems are built, that habit of asking “why this design?” is one of the best habits you can form.</p>
+<h2 id="api-walkthrough">API Walkthrough</h2>
+<p>Seed two stock reservations:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/operator/stock-units</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{</span></span>
+<span class="line"><span style="color:#F1FA8C">    "operationID":"stock-g1-demo-001",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "specName":"g1.1",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "memory":"16Gi",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "gpu":1,</span></span>
+<span class="line"><span style="color:#F1FA8C">    "replicas":2</span></span>
+<span class="line"><span style="color:#F1FA8C">  }</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>Check the operator job:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/operator/jobs/stock-g1-demo-001</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>Consume one ready stock unit:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/gpu-units</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{</span></span>
+<span class="line"><span style="color:#F1FA8C">    "operationID":"unit-demo-001",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "name":"demo-instance",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "namespace":"runtime-instance",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "specName":"g1.1",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "image":"python:3.12",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "access":{</span></span>
+<span class="line"><span style="color:#F1FA8C">      "primaryPort":"http",</span></span>
+<span class="line"><span style="color:#F1FA8C">      "scheme":"http"</span></span>
+<span class="line"><span style="color:#F1FA8C">    },</span></span>
+<span class="line"><span style="color:#F1FA8C">    "template":{</span></span>
+<span class="line"><span style="color:#F1FA8C">      "command":["python"],</span></span>
+<span class="line"><span style="color:#F1FA8C">      "args":["-m","http.server","8080"],</span></span>
+<span class="line"><span style="color:#F1FA8C">      "ports":[{"name":"http","port":8080}]</span></span>
+<span class="line"><span style="color:#F1FA8C">    }</span></span>
+<span class="line"><span style="color:#F1FA8C">  }</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>Inspect the active unit:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> gpuunits</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> gpuunit</span><span style="color:#F1FA8C"> demo-instance</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span><span style="color:#BD93F9"> -o</span><span style="color:#F1FA8C"> yaml</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> deploy,svc,pod</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> grep</span><span style="color:#F1FA8C"> demo-instance</span></span></code></pre>
+<h2 id="how-to-verify-the-model">How To Verify the Model</h2>
+<p>The easiest way to verify this chapter is to look for symmetry.</p>
+<p>Check stock:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> gpuunits</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-stock</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> gpuunit</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-stock</span></span></code></pre>
+<p>Check active runtime:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> gpuunits</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> gpuunit</span><span style="color:#F1FA8C"> demo-instance</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span><span style="color:#BD93F9"> -o</span><span style="color:#F1FA8C"> yaml</span></span></code></pre>
+<p>What you should see:</p>
+<ul>
+<li>stock and active units share one resource kind and one controller</li>
+<li>stock units keep the reserved resource envelope</li>
+<li>active units keep that same reserved envelope, but carry the real user image, template, and access settings</li>
+<li>stock units do not publish <code>serviceName</code> or <code>accessURL</code></li>
+<li>active units do publish <code>serviceName</code> and <code>accessURL</code></li>
+<li>the active unit carries source-stock provenance in annotations, not in spec</li>
+<li>failed startup details surface through the same <code>Ready</code> condition path</li>
+</ul>
+<p>That last point matters a lot. The reader should be able to debug stock and active runtime with the same habits.</p>
+<h2 id="summary">Summary</h2>
+<p>Part 7 is where the project stops pretending stock and active runtime are different resource models.</p>
+<p>We now have:</p>
+<ul>
+<li>one runtime resource</li>
+<li>one runtime controller</li>
+<li>explicit stock seeding</li>
+<li>stock reservation separated from user runtime definition</li>
+<li>stock consumption plus runtime image injection</li>
+<li>namespace-based role separation</li>
+<li>better failure visibility without adding a second lifecycle model</li>
+</ul>
+<p>This is a smaller architecture than the first draft, but it is a stronger one.</p>
+<p>That is an important lesson for production engineering: the better design is often not the one with more layers. It is the one that matches the real
+lifecycle most directly.</p>
+<h2 id="next-chapter-preview">Next Chapter Preview</h2>
+<p>Part 8 is where persistent state starts to matter.</p>
+<p>Now that the unit model is finally stable, we can attach storage to the right object instead of guessing first and refactoring later.</p>
+<p>That means the next chapter will focus on:</p>
+<ul>
+<li>introducing the first storage resource</li>
+<li>mounting persistent data into <code>GPUUnit</code></li>
+<li>deciding which storage details belong in the API and which belong in controller-owned mechanics</li>
+<li>revisiting deletion once runtime can own real data</li>
+</ul>
+<h2 id="repository">Repository</h2>
+<p>Code for this chapter:</p>
+<ul>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank">gpu-operator-runtime</a></li>
+</ul>  <section class="not-prose mt-16" aria-labelledby="comments-heading"><hr class="border-solid"><div class="mt-10 space-y-5"><div class="space-y-2"><h2 id="comments-heading" class="text-xl font-semibold text-accent-2">
+Comments
+</h2><p class="text-sm text-textColor/80">
+Join the discussion with your GitHub account. Powered by <a href="https://giscus.app" target="_blank" rel="noreferrer">
+giscus
+</a>
+.
+</p></div><div class="rounded-2xl border border-zinc-300/70 bg-bgColor/40 p-3 dark:border-zinc-700/80"><giscus-comments class="block"><div class="giscus"></div></giscus-comments><noscript><p class="px-3 py-2 text-sm text-textColor/80">
+Enable JavaScript to load the comment thread.
+</p></noscript></div></div></section><script>(function(){const giscusConfig = {"repo":"LokiWager/lokiwager.github.io","repoId":"R_kgDOK5t_Dg","category":"Announcements","categoryId":"DIC_kwDOK5t_Ds4C4eyH","mapping":"pathname","strict":"0","reactionsEnabled":"1","emitMetadata":"0","inputPosition":"top","lang":"en","loading":"lazy","theme":{"light":"light","dark":"dark_dimmed"}};
+
+	class GiscusComments extends HTMLElement {
+		container = null;
+
+		handleThemeChange = (event) => {
+			const nextTheme =
+				event instanceof CustomEvent && typeof event.detail?.theme === "string"
+					? event.detail.theme
+					: undefined;
+			this.syncTheme(nextTheme);
+		};
+
+		connectedCallback() {
+			this.container = this.querySelector(".giscus");
+			this.loadWidget();
+			document.addEventListener("theme-change", this.handleThemeChange);
+		}
+
+		disconnectedCallback() {
+			document.removeEventListener("theme-change", this.handleThemeChange);
+		}
+
+		loadWidget() {
+			if (!giscusConfig || !this.container || this.container.dataset.loaded === "true") {
+				return;
+			}
+
+			const script = document.createElement("script");
+			script.src = "https://giscus.app/client.js";
+			script.async = true;
+			script.crossOrigin = "anonymous";
+			script.dataset.giscusScript = "true";
+			script.setAttribute("data-repo", giscusConfig.repo);
+			script.setAttribute("data-repo-id", giscusConfig.repoId);
+			script.setAttribute("data-category", giscusConfig.category);
+			script.setAttribute("data-category-id", giscusConfig.categoryId);
+			script.setAttribute("data-mapping", giscusConfig.mapping);
+			script.setAttribute("data-strict", giscusConfig.strict);
+			script.setAttribute("data-reactions-enabled", giscusConfig.reactionsEnabled);
+			script.setAttribute("data-emit-metadata", giscusConfig.emitMetadata);
+			script.setAttribute("data-input-position", giscusConfig.inputPosition);
+			script.setAttribute("data-lang", giscusConfig.lang);
+			script.setAttribute("data-loading", giscusConfig.loading);
+			script.setAttribute("data-theme", this.resolveTheme());
+
+			if (giscusConfig.term) {
+				script.setAttribute("data-term", giscusConfig.term);
+			}
+
+			this.container.append(script);
+			this.container.dataset.loaded = "true";
+		}
+
+		resolveTheme(theme) {
+			const activeTheme =
+				theme ?? (document.documentElement.classList.contains("dark") ? "dark" : "light");
+			return activeTheme === "dark" ? giscusConfig.theme.dark : giscusConfig.theme.light;
+		}
+
+		syncTheme(theme) {
+			const iframe = this.container?.querySelector("iframe.giscus-frame");
+
+			if (!iframe?.contentWindow) {
+				return;
+			}
+
+			// giscus updates live through a postMessage bridge after the iframe has mounted.
+			iframe.contentWindow.postMessage(
+				{
+					giscus: {
+						setConfig: {
+							theme: this.resolveTheme(theme),
+						},
+					},
+				},
+				"https://giscus.app",
+			);
+		}
+	}
+
+	if (!customElements.get("giscus-comments")) {
+		customElements.define("giscus-comments", GiscusComments);
+	}
+})();</script>  </div> </article> <aside class="sticky top-20 order-2 hidden lg:block"> <h2 class="font-semibold">Table of Contents</h2> <ul class="mt-4 text-sm"> <li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#chapter-goal" aria-label="Scroll to section: Chapter Goal">Chapter Goal</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#one-resource-two-roles" aria-label="Scroll to section: One Resource, Two Roles">One Resource, Two Roles</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#one-controller" aria-label="Scroll to section: One Controller">One Controller</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#why-the-api-had-to-split-reservation-from-runtime" aria-label="Scroll to section: Why The API Had To Split Reservation From Runtime">Why The API Had To Split Reservation From Runtime</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#the-flow-after-part-7" aria-label="Scroll to section: The Flow After Part 7">The Flow After Part 7</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#api-walkthrough" aria-label="Scroll to section: API Walkthrough">API Walkthrough</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#how-to-verify-the-model" aria-label="Scroll to section: How To Verify the Model">How To Verify the Model</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#summary" aria-label="Scroll to section: Summary">Summary</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#next-chapter-preview" aria-label="Scroll to section: Next Chapter Preview">Next Chapter Preview</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#repository" aria-label="Scroll to section: Repository">Repository</a>  </li> </ul> </aside> </div> <button id="to-top-btn" class="z-90 fixed bottom-8 end-4 flex h-10 w-10 translate-y-28 items-center justify-center rounded-full border-2 border-transparent bg-zinc-200 text-3xl opacity-0 transition-all duration-300 hover:border-zinc-400 data-[show=true]:translate-y-0 data-[show=true]:opacity-100 dark:bg-zinc-700 sm:end-8 sm:h-12 sm:w-12" aria-label="Back to Top" data-show="false"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6"> <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path> </svg> </button>  </main> <footer class="mt-auto flex w-full flex-col items-center justify-center gap-y-2 px-8 pb-4 pt-20 text-center align-top font-semibold text-gray-600 dark:text-gray-400 sm:flex-row sm:justify-between sm:text-xs lg:px-0"> <div class="me-0 sm:me-4">
+Copyright &copy; 2026  Loki&#39;s Wager </div> <nav aria-label="More on this site" class="flex gap-x-2 sm:gap-x-0 sm:divide-x sm:divide-gray-500"> <!--{--> <!--	menuLinks.map((link) => (--> <!--		<a--> <!--			href={link.path}--> <!--			class="px-4 py-2 sm:px-2 sm:py-0 sm:hover:text-textColor sm:hover:underline"--> <!--		>--> <!--			{link.title}--> <!--		</a>--> <!--	))--> <!--}--> <div class="flex flex-wrap items-end gap-x-4"> <!--<p>Find me on</p>--> <ul class="flex flex-1 items-center gap-x-2 sm:flex-initial"> <li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://github.com/LokiWager" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:github">   <symbol id="ai:mdi:github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5c.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34c-.46-1.16-1.11-1.47-1.11-1.47c-.91-.62.07-.6.07-.6c1 .07 1.53 1.03 1.53 1.03c.87 1.52 2.34 1.07 2.91.83c.09-.65.35-1.09.63-1.34c-2.22-.25-4.55-1.11-4.55-4.92c0-1.11.38-2 1.03-2.71c-.1-.25-.45-1.29.1-2.64c0 0 .84-.27 2.75 1.02c.79-.22 1.65-.33 2.5-.33s1.71.11 2.5.33c1.91-1.29 2.75-1.02 2.75-1.02c.55 1.35.2 2.39.1 2.64c.65.71 1.03 1.6 1.03 2.71c0 3.82-2.34 4.66-4.57 4.91c.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2"/></symbol><use href="#ai:mdi:github"></use>  </svg> <span class="sr-only">Github</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://twitter.com/loki66118227" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:twitter">   <symbol id="ai:mdi:twitter" viewBox="0 0 24 24"><path fill="currentColor" d="M22.46 6c-.77.35-1.6.58-2.46.69c.88-.53 1.56-1.37 1.88-2.38c-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29c0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15c0 1.49.75 2.81 1.91 3.56c-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.2 4.2 0 0 1-1.93.07a4.28 4.28 0 0 0 4 2.98a8.52 8.52 0 0 1-5.33 1.84q-.51 0-1.02-.06C3.44 20.29 5.7 21 8.12 21C16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56c.84-.6 1.56-1.36 2.14-2.23"/></symbol><use href="#ai:mdi:twitter"></use>  </svg> <span class="sr-only">Twitter</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="mailto:lokitingyi@gmail.com" target="_blank" rel="noopener noreferrer me authn"> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:email">   <symbol id="ai:mdi:email" viewBox="0 0 24 24"><path fill="currentColor" d="m20 8l-8 5l-8-5V6l8 5l8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"/></symbol><use href="#ai:mdi:email"></use>  </svg> <span class="sr-only">email</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://space.bilibili.com/4810234" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="ri:bilibili-fill">   <symbol id="ai:ri:bilibili-fill" viewBox="0 0 24 24"><path fill="currentColor" d="M18.223 3.086a1.25 1.25 0 0 1 0 1.768L17.08 5.996h1.17A3.75 3.75 0 0 1 22 9.747v7.5a3.75 3.75 0 0 1-3.75 3.75H5.75A3.75 3.75 0 0 1 2 17.247v-7.5a3.75 3.75 0 0 1 3.75-3.75h1.166L5.775 4.855a1.25 1.25 0 0 1 1.767-1.768l2.652 2.652q.119.119.198.257h3.213q.08-.14.199-.258l2.651-2.652a1.25 1.25 0 0 1 1.768 0m.027 5.42H5.75a1.25 1.25 0 0 0-1.247 1.157l-.003.094v7.5c0 .659.51 1.198 1.157 1.246l.093.004h12.5a1.25 1.25 0 0 0 1.247-1.157l.003-.093v-7.5c0-.69-.56-1.25-1.25-1.25m-10 2.5c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25m7.5 0c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25"/></symbol><use href="#ai:ri:bilibili-fill"></use>  </svg> <span class="sr-only">Bilibili</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://www.instagram.com/lokiwager/" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:instagram">   <symbol id="ai:mdi:instagram" viewBox="0 0 24 24"><path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4zm9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3"/></symbol><use href="#ai:mdi:instagram"></use>  </svg> <span class="sr-only">Instagram</span> </a> </li> </ul> </div> </nav> </footer> </body></html> <script type="module">const e=document.getElementById("to-top-btn"),n=document.getElementById("blog-hero");function c(t){t.forEach(o=>{e.dataset.show=(!o.isIntersecting).toString()})}e.addEventListener("click",()=>{document.documentElement.scrollTo({top:0,behavior:"smooth"})});const r=new IntersectionObserver(c);r.observe(n);</script>
