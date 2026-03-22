@@ -2,7 +2,7 @@
 title: "Building a GPU SaaS Platform - One Unit, One Controller"
 publishDate: "21 March 2026"
 description: "Part 7: collapse stock and runtime into one GPUUnit resource, seed stock explicitly, and hand off warm units into active runtime."
-tags: [ "GPU", "SaaS", "Kubernetes", "Golang", "Operator" ]
+tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator"]
 ---
 
 By the end of Part 6, we already had a workable GPU runtime skeleton. We could seed stock and manage it through the control plane. But stock was still
