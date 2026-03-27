@@ -1,8 +1,8 @@
 ---
 title: "关于 AI Coding 的吐槽"
 publishDate: "26 March 2026"
-description: "这是一篇关于 AI Coding 的吐槽与一些思考"
-tags: [ "AI", "Vibe Coding" ]
+description: "从开源质量、架构演进、生产可靠性和工程责任的角度，聊聊我为什么反对在缺少 review 与验证时把 AI Coding 全权交给 agent。"
+tags: ["AI", "Vibe Coding"]
 ---
 
 最近在中文软件科技行业的圈子里经常听到一个声音，就是完全放开让 AI Coding，人类不 review， 只提供少量的编程指导，甚至是只参与 Engineer Design
