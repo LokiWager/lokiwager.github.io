@@ -90,7 +90,6 @@ That split is deliberate.
 
 This is a much better boundary than mixing volume provisioning and container mount policy into the same object.
 
-
 ## What The Controller Owns
 
 Once `GPUStorage` exists, the controller can own the Kubernetes-specific details that should not leak too far into the API.
@@ -172,7 +171,6 @@ That gives us a clean division:
 One more constraint appears now that the default storage path is RBD-backed: the same `GPUStorage` cannot be attached to multiple active
 `GPUUnit` objects at the same time. If a storage object is already mounted by one active runtime, another attach request is rejected with
 `409 Conflict`.
-
 
 ## API Walkthrough
 
