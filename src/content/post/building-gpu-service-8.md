@@ -1,6 +1,6 @@
 ---
 title: "Building a GPU SaaS Platform - Storage Lifecycle"
-publishDate: "23 March 2026"
+publishDate: "28 March 2026"
 description: "Part 8: introduce GPUStorage, mount persistent data into GPUUnit, and separate data lifecycle from runtime lifecycle."
 tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator"]
 ---
