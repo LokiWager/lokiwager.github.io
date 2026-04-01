@@ -47,8 +47,8 @@ devDependencies:
     specifier: 1.2.10
     version: 1.2.10
   '@pagefind/default-ui':
-    specifier: ^1.0.4
-    version: 1.0.4
+    specifier: ^1.4.0
+    version: 1.4.0
   '@resvg/resvg-js':
     specifier: ^2.6.0
     version: 2.6.0
@@ -435,8 +435,8 @@ packages:
     dev: false
     optional: true
 
-  /@emnapi/runtime@1.9.0:
-    resolution: {integrity: sha512-QN75eB0IH2ywSpRpNddCRfQIhmJYBCJ1x5Lb3IscKAL8bMnVAKnRg8dCoXbHzVLLH7P38N2Z3mtulB7W0J0FKw==}
+  /@emnapi/runtime@1.9.1:
+    resolution: {integrity: sha512-VYi5+ZVLhpgK4hQ0TAjiQiZ6ol0oe4mBx7mVv7IflsiEp0OWoVsp/+f9Vc1hOhE0TtkORVrI1GvzyreqpgWtkA==}
     requiresBuild: true
     dependencies:
       tslib: 2.8.1
@@ -1152,7 +1152,7 @@ packages:
     cpu: [wasm32]
     requiresBuild: true
     dependencies:
-      '@emnapi/runtime': 1.9.0
+      '@emnapi/runtime': 1.9.1
     dev: false
     optional: true
 
@@ -1306,8 +1306,8 @@ packages:
     dev: true
     optional: true
 
-  /@pagefind/default-ui@1.0.4:
-    resolution: {integrity: sha512-edkcaPSKq67C49Vehjo+LQCpT615v4d7JRhfGzFPccePvdklaL+VXrfghN/uIfsdoG+HoLI1PcYy2iFcB9CTkw==}
+  /@pagefind/default-ui@1.4.0:
+    resolution: {integrity: sha512-wie82VWn3cnGEdIjh4YwNESyS1G6vRHwL6cNjy9CFgNnWW/PGRjsLq300xjVH5sfPFK3iK36UxvIBymtQIEiSQ==}
     dev: true
 
   /@pagefind/linux-arm64@1.0.4:
