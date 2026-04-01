@@ -12,8 +12,8 @@ dependencies:
     specifier: 4.0.17
     version: 4.0.17
   '@astrojs/sitemap':
-    specifier: 3.7.1
-    version: 3.7.1
+    specifier: 3.7.2
+    version: 3.7.2
   '@astrojs/tailwind':
     specifier: 6.0.2
     version: 6.0.2(astro@6.0.4)(tailwindcss@3.3.6)
@@ -293,8 +293,8 @@ packages:
       zod: 4.3.6
     dev: false
 
-  /@astrojs/sitemap@3.7.1:
-    resolution: {integrity: sha512-IzQqdTeskaMX+QDZCzMuJIp8A8C1vgzMBp/NmHNnadepHYNHcxQdGLQZYfkbd2EbRXUfOS+UDIKx8sKg0oWVdw==}
+  /@astrojs/sitemap@3.7.2:
+    resolution: {integrity: sha512-PqkzkcZTb5ICiyIR8VoKbIAP/laNRXi5tw616N1Ckk+40oNB8Can1AzVV56lrbC5GKSZFCyJYUVYqVivMisvpA==}
     dependencies:
       sitemap: 9.0.1
       stream-replace-string: 2.0.0
@@ -435,8 +435,8 @@ packages:
     dev: false
     optional: true
 
-  /@emnapi/runtime@1.9.0:
-    resolution: {integrity: sha512-QN75eB0IH2ywSpRpNddCRfQIhmJYBCJ1x5Lb3IscKAL8bMnVAKnRg8dCoXbHzVLLH7P38N2Z3mtulB7W0J0FKw==}
+  /@emnapi/runtime@1.9.1:
+    resolution: {integrity: sha512-VYi5+ZVLhpgK4hQ0TAjiQiZ6ol0oe4mBx7mVv7IflsiEp0OWoVsp/+f9Vc1hOhE0TtkORVrI1GvzyreqpgWtkA==}
     requiresBuild: true
     dependencies:
       tslib: 2.8.1
@@ -1152,7 +1152,7 @@ packages:
     cpu: [wasm32]
     requiresBuild: true
     dependencies:
-      '@emnapi/runtime': 1.9.0
+      '@emnapi/runtime': 1.9.1
     dev: false
     optional: true
 
@@ -1859,10 +1859,16 @@ packages:
       undici-types: 7.16.0
     dev: false
 
+  /@types/node@25.5.0:
+    resolution: {integrity: sha512-jp2P3tQMSxWugkCUKLRPVUpGaL5MVFwF8RDuSRztfwgN1wmqJeMSbKlnEtQqU8UrhTmzEmZdu2I6v2dpp7XIxw==}
+    dependencies:
+      undici-types: 7.18.2
+    dev: false
+
   /@types/sax@1.2.7:
     resolution: {integrity: sha512-rO73L89PJxeYM3s3pPPjiPgVVcymqU490g0YO5n5By0k2Erzj6tay/4lr1CHAAU4JyOWd1rpQ8bCf6cZfHU96A==}
     dependencies:
-      '@types/node': 24.12.0
+      '@types/node': 25.5.0
     dev: false
 
   /@types/semver@7.5.6:
@@ -1880,7 +1886,7 @@ packages:
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
     requiresBuild: true
     dependencies:
-      '@types/node': 24.12.0
+      '@types/node': 25.5.0
     dev: false
     optional: true
 
@@ -6289,8 +6295,8 @@ packages:
       yoga-wasm-web: 0.3.3
     dev: false
 
-  /sax@1.5.0:
-    resolution: {integrity: sha512-21IYA3Q5cQf089Z6tgaUTr7lDAyzoTPx5HRtbhsME8Udispad8dC/+sziTNugOEx54ilvatQ9YCzl4KQLPcRHA==}
+  /sax@1.6.0:
+    resolution: {integrity: sha512-6R3J5M4AcbtLUdZmRv2SygeVaM7IhrLXu9BmnOGmmACak8fiUtOsYNWUS4uK7upbmHIBbLBeFeI//477BKLBzA==}
     engines: {node: '>=11.0.0'}
     dev: false
 
@@ -6448,7 +6454,7 @@ packages:
       '@types/node': 24.12.0
       '@types/sax': 1.2.7
       arg: 5.0.2
-      sax: 1.5.0
+      sax: 1.6.0
     dev: false
 
   /slash@3.0.0:
@@ -6602,7 +6608,7 @@ packages:
       css-what: 6.1.0
       csso: 5.0.5
       picocolors: 1.1.1
-      sax: 1.5.0
+      sax: 1.6.0
     dev: false
 
   /svgo@4.0.1:
@@ -6616,7 +6622,7 @@ packages:
       css-what: 6.1.0
       csso: 5.0.5
       picocolors: 1.1.1
-      sax: 1.5.0
+      sax: 1.6.0
     dev: false
 
   /synckit@0.8.8:
@@ -6859,6 +6865,10 @@ packages:
 
   /undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
+    dev: false
+
+  /undici-types@7.18.2:
+    resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
     dev: false
 
   /undici@7.24.3:

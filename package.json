@@ -19,7 +19,7 @@
 	"dependencies": {
 		"@astrojs/mdx": "5.0.0",
 		"@astrojs/rss": "4.0.17",
-		"@astrojs/sitemap": "3.7.1",
+		"@astrojs/sitemap": "3.7.2",
 		"@astrojs/tailwind": "6.0.2",
 		"astro": "6.0.4",
 		"astro-icon": "^1.1.5",
