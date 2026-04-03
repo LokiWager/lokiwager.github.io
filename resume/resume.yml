@@ -1,0 +1,136 @@
+# yaml-language-server: $schema=https://yamlresume.dev/schema.json
+---
+content:
+  basics:
+    name: Loki Wager
+    headline: Staff Software Engineer · Distributed Systems · Cloud Native
+    email: lokitingyi@gmail.com
+    url: https://lokiwager.app
+    summary: |
+      - Experienced developer with a 10-year background in software development.
+      - Proficient in various languages such as Golang, Python, Rust and Java.
+      - Engineer focused on cloud-native platforms, observability, storage, Linux internals, and data-heavy systems.
+      - Calm under ambiguity, comfortable moving between architecture direction, implementation details, and team enablement.
+  location:
+    city: Waterloo
+    region: Ontario
+    country: Canada
+  education:
+    - institution: University of Waterloo
+      degree: Master
+      area: Electrical and Computer Engineering
+      startDate: Sep 2024
+      endDate: Sep 2025
+    - institution: University of Chinese Academy of Science
+      degree: Master
+      area: Computer Science and Technology
+      startDate: Sep 2013
+      endDate: Jun 2016
+  work:
+    - name: Suger Inc.
+      url: https://www.suger.io/
+      startDate: Nov 2025
+      position: Senior Software Engineer
+      summary: |
+        - Led development of a CRM workflow system (Golang + TypeScript), enabling flexible business process automation (similar to n8n).
+        - Built a usage-based billing platform, supporting configurable pricing, metering, and end-to-end billing (offer, entitlement, invoice).
+        - Developed a CRM AI platform with agent orchestration (memory, tools, knowledge, multi-agent, MCP), delivered via chatbot and Chrome
+        extension.
+        - Reduced system complexity by standardizing observability and operational patterns across multiple services.
+      keywords:
+        - N8N
+        - Salesforce/Hubspot
+        - AWS/GCP/Azure
+        - AI Agent
+        - RDS/TIDB
+        - Chrome-extension
+    - name: Megaese Inc.
+      url: https://megaease.cn/
+      startDate: Nov 2025
+      endDate: Dec 2022
+      position: Technological Partner
+      summary: |
+        - Led development of a GPU SaaS platform from 0→1, building the runtime system with serverless cold start (seconds-level), GPU virtualization, distributed execution/communication, and model caching.
+        - Contributed to private cloud PaaS development, focusing on a programmable cloud gateway and observability in cloud environments.
+      keywords:
+        - Startup
+        - Kubernetes
+        - Ceph
+        - OCI/CRI/CNI/CSI
+        - GPU
+        - API Gateway
+        - Nats
+        - Frp/Websocket/WASM
+        - OTel/Prometheus/Grafana
+        - ClickHouse/ES
+        - Cuda/Pytorch
+    - name: Netease Inc
+      url: https://ir.netease.com/
+      startDate: Jul 2016
+      endDate: Dec 2022
+      position: Senior Staff software engineer & Engineering Manager
+      summary: |
+        - Game Monitoring Platform (200K+ hosts, 1M+ metrics/sec)
+          - Built a custom data collection agent with KCP-based command channel for real-time host management
+          - Designed streaming pipeline with Kafka + Flink for data processing
+          - Extended VictoriaMetrics with CMDB integration
+          - Developed a rule-based alerting system
+          - Built an eBPF-based HIDS for host security
+          - Led AIOps including anomaly detection, root cause analysis
+        - Real-time in-game memory inspection tool, enabling hot patching and performance analysis
+        - Game Data Platform
+          - Led offline analytics using Spark + Iceberg + Doris
+          - Built real-time BI platform with Flink + ClickHouse + Metabase
+        - Game AI Platform
+          - Led AI art pipeline using Stable Diffusion + Kubeflow to auto-generate game assets (icons, drafts)
+          - Built AI coding assistant trained on game engine + codebase, with custom Copilot-style IDE plugin
+      keywords:
+        - Kafka/RabbitMQ/Pulsar
+        - MongoDB/Redis/Postgres
+        - Linux/Lxc/eBPF/Netlink
+        - DevOps/AIOps
+        - VictoriaMetrics/ScyllaDB
+        - Spark/Flink
+        - Iceberg/Doris/ClickHouse
+        - Metabase
+        - Kubeflow
+        - Stable Diffusion/ComfyUI
+        - HIDS
+  projects:
+    - name: Easegress
+      url: https://github.com/easegress-io/easegress
+      description: Easegress is a Cloud Native traffic orchestration system
+      startDate: Dec 2022
+      endDate:
+      summary: |
+        - Core maintainer of Easegress, a CNCF Sandbox cloud-native gateway project
+  skills:
+    - name: Platform and Distributed Systems
+      level: Expert
+    - name: Cloud Native and Observability
+      level: Expert
+    - name: Systems and Languages
+      level: Expert
+    - name: Data and Analytics Infrastructure
+      level: Advanced
+    - name: AI and Developer Platforms
+      level: Advanced
+    - name: Business Systems and Monetization
+      level: Advanced
+  interests:
+    - name: Outside Work
+      keywords:
+        - Cooking
+        - Reading
+        - Running
+        - Nintendo
+        - Open Source
+
+locale:
+  language: en
+
+layouts:
+  - engine: html
+    template: calm
+    typography:
+      fontSize: 15px

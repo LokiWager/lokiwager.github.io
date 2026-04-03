@@ -1,0 +1,18 @@
+---
+import PageLayout from "@/layouts/Base";
+
+const meta = {
+	title: "Resume",
+	description: "Resume",
+};
+---
+
+<PageLayout meta={meta} mainClass="mt-8 px-4 sm:mt-10 lg:px-0">
+	<section class="border-accent/15 overflow-hidden rounded-2xl border bg-white shadow-sm">
+		<iframe
+			src="/resume-preview/resume.html"
+			title="Resume"
+			class="h-[1600px] w-full"
+			loading="lazy"></iframe>
+	</section>
+</PageLayout>

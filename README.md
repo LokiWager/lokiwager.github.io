@@ -47,6 +47,21 @@ Useful commands:
 | `pnpm format`       | Format the repo with Prettier                                |
 | `pnpm format:check` | Check formatting without rewriting files                     |
 
+## Resume
+
+The resume source lives in:
+
+- `resume/resume.yml`
+
+It is generated automatically during local development and production builds:
+
+- `pnpm dev` triggers `predev`, which generates `public/resume-preview/resume.html`
+- `pnpm build` triggers `prebuild`, which generates the same HTML before Astro builds the site
+
+CI deployment only needs the normal site build:
+
+- `pnpm build`
+
 ## Content Model
 
 Posts live in:

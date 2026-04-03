@@ -25,3 +25,4 @@ pnpm-debug.log*
 .astro
 .idea/
 .playwright-cli/
+public/resume-preview/
