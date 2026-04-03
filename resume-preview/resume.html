@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="YAMLResume (https://yamlresume.dev)">
+
+
+  <title>Loki Wager Resume</title>
+  <style>
+    :root {
+      --text-font-size: 15px;
+      --text-font-family: var(--text-default-font-family);
+      --line-height: 1.5;
+    }
+
+    /* Modified from: https://www.joshwcomeau.com/css/custom-css-reset/ */
+
+    /* 1. Use a more-intuitive box-sizing model */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    /* 2. Remove default margin */
+    *:not(dialog) {
+      margin: 0;
+    }
+
+    body {
+      /* 3. Improve text rendering */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    :root {
+      --border-color: #d0d0d0;
+
+      /* text colors */
+      --text-color-primary: #000000;
+      --text-color-secondary: #333333;
+
+      /* spacing */
+      --spacing-xss: 2px;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 12px;
+      --spacing-lg: 16px;
+      --spacing-xl: 24px;
+      --spacing-xxl: 40px;
+      --spacing-xxxl: 80px;
+
+      /* font sizes */
+      --font-size-xs: 0.8rem;
+      --font-size-sm: 0.9rem;
+      --font-size-md: 1rem;
+      --font-size-lg: 1.1rem;
+      --font-size-xl: 1.25rem;
+      --font-size-xxl: 2.5rem;
+
+      /* layout */
+      --page-max-width: 900px;
+
+      /* typography */
+      --text-default-font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+        Cantarell, sans-serif;
+    }
+
+    html {
+      font-size: var(--text-font-size);
+    }
+
+    body {
+      /* font & text */
+      color: var(--text-color-primary);
+      font-family: var(--text-font-family);
+      /* this variable is defined by `typography.fontSize` in resume html layout */
+      text-autospace: normal;
+
+      /* layout */
+      line-height: var(--line-height);
+      max-width: var(--page-max-width);
+      margin: 0 auto;
+      padding: var(--spacing-xxxl) var(--spacing-xxl) var(--spacing-xxl);
+    }
+
+    /* header */
+    .resume-header {
+      margin-bottom: var(--spacing-xxl);
+      text-align: center;
+    }
+
+    .resume-name {
+      font-size: var(--font-size-xxl);
+      font-weight: 600;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .resume-headline {
+      font-size: var(--font-size-lg);
+      margin-bottom: var(--spacing-md);
+    }
+
+    /* contact info */
+    .resume-contact-info {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      column-gap: var(--spacing-lg);
+      row-gap: var(--spacing-xs);
+      margin-top: var(--spacing-sm);
+    }
+
+    .resume-contact-icon,
+    .resume-contact-label {
+      margin-right: var(--spacing-sm);
+      vertical-align: middle;
+    }
+
+    /* links: modern typographic style */
+    a {
+      color: var(--text-color-primary);
+      text-decoration: underline;
+      text-decoration-color: var(--border-color);
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+      text-decoration-skip-ink: auto;
+      transition: text-decoration-color 0.2s;
+    }
+
+    a:hover {
+      text-decoration-color: var(--text-color-primary);
+    }
+
+    /* sections */
+    .resume-section {
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .resume-section-title {
+      font-size: var(--font-size-xl);
+      font-weight: 500;
+      margin-bottom: var(--spacing-md);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: var(--spacing-xs);
+    }
+
+    /* entries */
+    .resume-entry {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .resume-entry:last-child {
+      margin-bottom: 0;
+    }
+
+    .resume-entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .resume-entry-title {
+      font-weight: 500;
+      margin-bottom: var(--spacing-xss);
+    }
+
+    .resume-entry-summary p,
+    .resume-summary-content p {
+      margin-bottom: var(--spacing-xs);
+    }
+
+    /* lists */
+    .resume-entry-summary ul,
+    .resume-entry-summary ol,
+    .resume-summary-content ul,
+    .resume-summary-content ol {
+      padding-left: var(--spacing-lg);
+      list-style-type: circle;
+    }
+
+    /* labeled lists (courses, keywords, etc.) */
+    .resume-labeled-list span {
+      font-weight: 500;
+    }
+
+    /* skills grid */
+    .resume-skill-item,
+    .resume-language-item {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .resume-skill-name,
+    .resume-language-name {
+      font-weight: 500;
+    }
+
+    .resume-skill-level,
+    .resume-language-fluency {
+      font-weight: 400;
+    }
+
+    /* mobile */
+    @media (max-width: 768px) {
+      body {
+        padding: var(--spacing-xl);
+      }
+
+      .resume-header {
+        margin-bottom: var(--spacing-xl);
+      }
+
+      .resume-contact-info {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .resume-entry-header {
+        flex-wrap: wrap;
+      }
+
+      .resume-skill-item,
+      .resume-language-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    /* footer */
+    .resume-footer {
+      margin-top: var(--spacing-xxl);
+      padding-top: var(--spacing-xl);
+      border-top: 1px solid var(--border-color);
+      font-size: var(--font-size-sm);
+      color: var(--text-color-secondary);
+    }
+
+    @media print {
+      .resume-footer {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="resume-header">
+    <h1 class="resume-name">Loki Wager</h1>
+    <p class="resume-headline">Staff Software Engineer · Distributed Systems · Cloud Native</p>
+    <div class="resume-contact-info">
+      <span class="resume-contact-item"><span class="resume-contact-icon">📧</span><a href="mailto:lokitingyi@gmail.com" class="resume-contact-link">lokitingyi@gmail.com</a></span>
+      <span class="resume-contact-item"><span class="resume-contact-icon">🔗</span><a href="https://lokiwager.app" target="_blank" rel="noopener noreferrer" class="resume-contact-link">https://lokiwager.app</a></span>
+    </div>
+    <div class="resume-contact-info resume-location-info">
+      <span class="resume-contact-item"><span class="resume-contact-icon">📍</span>Waterloo, Ontario, Canada</span>
+    </div>
+
+  </header>
+  <section class="resume-section" data-section="summary">
+    <h2 class="resume-section-title">Basics</h2>
+    <div class="resume-section-content">
+      <div class="resume-summary-content">
+        <ul>
+          <li>
+            <p>Experienced developer with a 10-year background in software development.</p>
+          </li>
+          <li>
+            <p>Proficient in various languages such as Golang, Python, Rust and Java.</p>
+          </li>
+          <li>
+            <p>Engineer focused on cloud-native platforms, observability, storage, Linux internals, and data-heavy systems.</p>
+          </li>
+          <li>
+            <p>Calm under ambiguity, comfortable moving between architecture direction, implementation details, and team enablement.</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="resume-section" data-section="education">
+    <h2 class="resume-section-title">Education</h2>
+    <div class="resume-section-content">
+      <div class="resume-entry">
+        <div class="resume-entry-header">
+          <div>
+            <div class="resume-entry-title">University of Waterloo</div>
+            <div class="resume-entry-organization">Master, Electrical and Computer Engineering</div>
+          </div>
+          <div class="resume-entry-date">Sep 2024–Sep 2025</div>
+        </div>
+      </div>
+      <div class="resume-entry">
+        <div class="resume-entry-header">
+          <div>
+            <div class="resume-entry-title">University of Chinese Academy of Science</div>
+            <div class="resume-entry-organization">Master, Computer Science and Technology</div>
+          </div>
+          <div class="resume-entry-date">Sep 2013–Jun 2016</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="resume-section" data-section="work">
+    <h2 class="resume-section-title">Work</h2>
+    <div class="resume-section-content">
+      <div class="resume-entry">
+        <div class="resume-entry-header">
+          <div>
+            <div class="resume-entry-title"><a href="https://www.suger.io/" target="_blank" rel="noopener noreferrer">Suger Inc.</a></div>
+            <div class="resume-entry-organization">Senior Software Engineer</div>
+          </div>
+          <div class="resume-entry-date">Nov 2025–Present</div>
+        </div>
+        <div class="resume-entry-summary">
+          <ul>
+            <li>
+              <p>Led development of a CRM workflow system (Golang + TypeScript), enabling flexible business process automation (similar to n8n).</p>
+            </li>
+            <li>
+              <p>Built a usage-based billing platform, supporting configurable pricing, metering, and end-to-end billing (offer, entitlement, invoice).</p>
+            </li>
+            <li>
+              <p>Developed a CRM AI platform with agent orchestration (memory, tools, knowledge, multi-agent, MCP), delivered via chatbot and Chrome
+                extension.</p>
+            </li>
+            <li>
+              <p>Reduced system complexity by standardizing observability and operational patterns across multiple services.</p>
+            </li>
+          </ul>
+        </div>
+        <div class="resume-labeled-list"><span>Keywords</span>: N8N, Salesforce/Hubspot, AWS/GCP/Azure, AI Agent, RDS/TIDB, Chrome-extension</div>
+      </div>
+      <div class="resume-entry">
+        <div class="resume-entry-header">
+          <div>
+            <div class="resume-entry-title"><a href="https://megaease.cn/" target="_blank" rel="noopener noreferrer">Megaese Inc.</a></div>
+            <div class="resume-entry-organization">Technological Partner</div>
+          </div>
+          <div class="resume-entry-date">Nov 2025–Dec 2022</div>
+        </div>
+        <div class="resume-entry-summary">
+          <ul>
+            <li>
+              <p>Led development of a GPU SaaS platform from 0→1, building the runtime system with serverless cold start (seconds-level), GPU virtualization, distributed execution/communication, and model caching.</p>
+            </li>
+            <li>
+              <p>Contributed to private cloud PaaS development, focusing on a programmable cloud gateway and observability in cloud environments.</p>
+            </li>
+          </ul>
+        </div>
+        <div class="resume-labeled-list"><span>Keywords</span>: Startup, Kubernetes, Ceph, OCI/CRI/CNI/CSI, GPU, API Gateway, Nats, Frp/Websocket/WASM, OTel/Prometheus/Grafana, ClickHouse/ES, Cuda/Pytorch</div>
+      </div>
+      <div class="resume-entry">
+        <div class="resume-entry-header">
+          <div>
+            <div class="resume-entry-title"><a href="https://ir.netease.com/" target="_blank" rel="noopener noreferrer">Netease Inc</a></div>
+            <div class="resume-entry-organization">Senior Staff software engineer &amp; Engineering Manager</div>
+          </div>
+          <div class="resume-entry-date">Jul 2016–Dec 2022</div>
+        </div>
+        <div class="resume-entry-summary">
+          <ul>
+            <li>
+              <p>Game Monitoring Platform (200K+ hosts, 1M+ metrics/sec)</p>
+              <ul>
+                <li>
+                  <p>Built a custom data collection agent with KCP-based command channel for real-time host management</p>
+                </li>
+                <li>
+                  <p>Designed streaming pipeline with Kafka + Flink for data processing</p>
+                </li>
+                <li>
+                  <p>Extended VictoriaMetrics with CMDB integration</p>
+                </li>
+                <li>
+                  <p>Developed a rule-based alerting system</p>
+                </li>
+                <li>
+                  <p>Built an eBPF-based HIDS for host security</p>
+                </li>
+                <li>
+                  <p>Led AIOps including anomaly detection, root cause analysis</p>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <p>Real-time in-game memory inspection tool, enabling hot patching and performance analysis</p>
+            </li>
+            <li>
+              <p>Game Data Platform</p>
+              <ul>
+                <li>
+                  <p>Led offline analytics using Spark + Iceberg + Doris</p>
+                </li>
+                <li>
+                  <p>Built real-time BI platform with Flink + ClickHouse + Metabase</p>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <p>Game AI Platform</p>
+              <ul>
+                <li>
+                  <p>Led AI art pipeline using Stable Diffusion + Kubeflow to auto-generate game assets (icons, drafts)</p>
+                </li>
+                <li>
+                  <p>Built AI coding assistant trained on game engine + codebase, with custom Copilot-style IDE plugin</p>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <div class="resume-labeled-list"><span>Keywords</span>: Kafka/RabbitMQ/Pulsar, MongoDB/Redis/Postgres, Linux/Lxc/eBPF/Netlink, DevOps/AIOps, VictoriaMetrics/ScyllaDB, Spark/Flink, Iceberg/Doris/ClickHouse, Metabase, Kubeflow, Stable Diffusion/ComfyUI, HIDS</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="resume-section" data-section="skills">
+    <h2 class="resume-section-title">Skills</h2>
+    <div class="resume-section-content">
+      <div class="resume-skill-item">
+        <div class="resume-skill-name">Platform and Distributed Systems<span class="resume-skill-level">: Expert</span></div>
+      </div>
+      <div class="resume-skill-item">
+        <div class="resume-skill-name">Cloud Native and Observability<span class="resume-skill-level">: Expert</span></div>
+      </div>
+      <div class="resume-skill-item">
+        <div class="resume-skill-name">Systems and Languages<span class="resume-skill-level">: Expert</span></div>
+      </div>
+      <div class="resume-skill-item">
+        <div class="resume-skill-name">Data and Analytics Infrastructure<span class="resume-skill-level">: Advanced</span></div>
+      </div>
+      <div class="resume-skill-item">
+        <div class="resume-skill-name">AI and Developer Platforms<span class="resume-skill-level">: Advanced</span></div>
+      </div>
+      <div class="resume-skill-item">
+        <div class="resume-skill-name">Business Systems and Monetization<span class="resume-skill-level">: Advanced</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="resume-section" data-section="projects">
+    <h2 class="resume-section-title">Projects</h2>
+    <div class="resume-section-content">
+      <div class="resume-entry">
+        <div class="resume-entry-header">
+          <div>
+            <div class="resume-entry-title"><a href="https://github.com/easegress-io/easegress" target="_blank" rel="noopener noreferrer">Easegress</a></div>
+            <div class="resume-entry-description">Easegress is a Cloud Native traffic orchestration system</div>
+          </div>
+          <div class="resume-entry-date">Dec 2022–Present</div>
+        </div>
+        <div class="resume-entry-summary">
+          <ul>
+            <li>
+              <p>Core maintainer of Easegress, a CNCF Sandbox cloud-native gateway project</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="resume-section" data-section="interests">
+    <h2 class="resume-section-title">Interests</h2>
+    <div class="resume-section-content">
+      <div class="resume-interest-item"><span class="resume-interest-name">Outside Work</span>: Cooking, Reading, Running, Nintendo, Open Source</div>
+    </div>
+  </section>
+  <footer class="resume-footer">Generated by <a href="https://yamlresume.dev" target="_blank" rel="noopener noreferrer">YAMLResume</a></footer>
+</body>
+
+</html>
