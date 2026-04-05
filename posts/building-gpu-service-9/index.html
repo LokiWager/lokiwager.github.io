@@ -1,0 +1,387 @@
+<!DOCTYPE html><html lang="en-GB"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Building a GPU SaaS Platform - Storage Data Jobs • Loki&#39;s Wager</title><link rel="icon" href="/logo.png" sizes="any"><!--<link rel="icon" href="/icon.svg" type="image/svg+xml" />--><!--<link rel="apple-touch-icon" href="/apple-touch-icon.png" />--><!--<link rel="manifest" href="/manifest.webmanifest" />--><!--<link rel="canonical" href={canonicalURL} />--><meta name="title" content="Building a GPU SaaS Platform - Storage Data Jobs • Loki's Wager"><meta name="description" content="Part 9: add storage prepare jobs, the first accessor path, and recovery state to GPUStorage."><meta name="author" content="Loki's Wager"><meta name="theme-color" content=""><meta property="og:type" content="article"><meta property="og:title" content="Building a GPU SaaS Platform - Storage Data Jobs"><meta property="og:description" content="Part 9: add storage prepare jobs, the first accessor path, and recovery state to GPUStorage."><meta property="og:url" content="https://lokiwager.app/posts/building-gpu-service-9/"><meta property="og:site_name" content="Loki's Wager"><meta property="og:locale" content="en_GB"><meta property="og:image" content="https://lokiwager.app/og-image/building-gpu-service-9.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="article:author" content="Loki's Wager"><meta property="article:published_time" content="2026-04-04T00:00:00.000Z"><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://lokiwager.app/posts/building-gpu-service-9/"><meta property="twitter:title" content="Building a GPU SaaS Platform - Storage Data Jobs"><meta property="twitter:description" content="Part 9: add storage prepare jobs, the first accessor path, and recovery state to GPUStorage."><meta property="twitter:image" content="https://lokiwager.app/og-image/building-gpu-service-9.png"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="Loki's Wager" href="/rss.xml"><link rel="webmention" href="https://webmention.io/lokiwager.github.io/webmention"><meta name="generator" content="Astro v6.0.4"><link rel="stylesheet" href="/_astro/Base.BJw5bl6Q.css"><script type="module" src="/_astro/page.DHhHZKgE.js"></script></head> <body> <script>
+	function getUserPref() {
+		const storedTheme = typeof localStorage !== "undefined" && localStorage.getItem("theme");
+		return (
+			storedTheme || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+		);
+	}
+
+	function setTheme(newTheme) {
+		if (!newTheme || (newTheme !== "light" && newTheme !== "dark")) {
+			return console.warn(
+				`Incorrect theme value received. Expected 'light' or 'dark', received ${newTheme}`,
+			);
+		}
+
+		const root = document.documentElement;
+
+		// class already set to newTheme, exit early
+		if (
+			(newTheme === "dark" && root.classList.contains("dark")) ||
+			(newTheme === "light" && !root.classList.contains("dark"))
+		) {
+			return;
+		}
+
+		const colorThemeMetaTag = document.querySelector("meta[name='theme-color']");
+		document.documentElement.classList.toggle("dark", newTheme === "dark");
+		const bgColour = getComputedStyle(document.body).getPropertyValue("--theme-bg");
+
+		colorThemeMetaTag.setAttribute("content", `hsl(${bgColour})`);
+		if (typeof localStorage !== "undefined") {
+			localStorage.setItem("theme", newTheme);
+		}
+	}
+
+	// initial setup
+	setTheme(getUserPref());
+
+	// View Transitions hook to restore theme
+	document.addEventListener("astro:after-swap", () => setTheme(getUserPref()));
+
+	// listen for theme-change custom event, fired in src/components/ThemeToggle.astro
+	document.addEventListener("theme-change", (e) => {
+		setTheme(e.detail.theme);
+	});
+</script> <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:start-1 focus:top-1.5">skip to content
+</a> <header id="main-header" class="group relative mb-2 flex items-start px-8 lg:px-0"> <div class="flex items-start gap-4 sm:gap-6"> <a href="/" class="inline-flex shrink-0 grayscale hover:filter-none" aria-current="false"> <img src="/_astro/logo.BGWHXvnm_Z1DWcL4.png" alt="logo" loading="lazy" decoding="async" width="824" height="1115" class="w-8 sm:w-12"> </a> <div class="flex flex-col items-start"> <a href="/" class="inline-flex items-center" aria-current="false"> <span class="text-xl font-bold sm:text-2xl">Loki's Wager</span> </a> <nav id="navigation-menu" class="absolute -inset-x-4 top-14 hidden flex-col items-start gap-y-4 rounded-md bg-bgColor/[.85] py-4 text-accent shadow backdrop-blur group-[.menu-open]:z-50 group-[.menu-open]:flex sm:static sm:inset-auto sm:mt-1 sm:flex sm:flex-row sm:items-center sm:divide-x sm:divide-dashed sm:divide-accent sm:rounded-none sm:bg-transparent sm:py-0 sm:shadow-none sm:backdrop-blur-none" aria-label="Main menu"> <a href="/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:pl-0 sm:pr-4" aria-current="false" data-astro-prefetch> Home </a><a href="/about/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:px-4" aria-current="false" data-astro-prefetch> About </a><a href="/resume/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:px-4" aria-current="false" data-astro-prefetch> Resume </a><a href="/posts/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:pl-4 sm:pr-0" aria-current="false" data-astro-prefetch> Blog </a> </nav> </div> </div> <div class="ms-auto flex items-center"> <site-search id="search" data-astro-cid-otpdt6jm="true"> <button data-open-modal disabled class="flex h-9 w-9 items-center justify-center rounded-md ring-zinc-400 transition-all hover:ring-2" data-astro-cid-otpdt6jm> <svg aria-label="search" class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" data-astro-cid-otpdt6jm> <path stroke="none" d="M0 0h24v24H0z" data-astro-cid-otpdt6jm></path> <path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" data-astro-cid-otpdt6jm></path> </svg> </button> <dialog aria-label="search" class="h-full max-h-full w-full max-w-full border border-zinc-400 bg-bgColor shadow backdrop:backdrop-blur sm:mx-auto sm:mb-auto sm:mt-16 sm:h-max sm:max-h-[calc(100%-8rem)] sm:min-h-[15rem] sm:w-5/6 sm:max-w-[48rem] sm:rounded-md" data-astro-cid-otpdt6jm> <div class="dialog-frame flex flex-col gap-4 p-6 pt-12 sm:pt-6" data-astro-cid-otpdt6jm> <button data-close-modal class="ms-auto cursor-pointer rounded-md bg-zinc-200 p-2 font-semibold dark:bg-zinc-700" data-astro-cid-otpdt6jm>Close</button> <div class="search-container" data-astro-cid-otpdt6jm> <div id="cactus__search" data-astro-cid-otpdt6jm></div> </div> </div> </dialog> </site-search> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.Cr3prLuB.js"></script>  <theme-toggle class="ms-2 sm:ms-4"> <button type="button" id="toggle-theme" class="relative h-9 w-9 rounded-md p-2 ring-zinc-400 transition-all hover:ring-2" aria-label="Toggle Dark Mode"> <svg id="sun-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-100 opacity-100 transition-all dark:scale-0 dark:opacity-0" aria-hidden="true" focusable="false" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg id="moon-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100" aria-hidden="true" focusable="false" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path> <path d="M19 11h2m-1 -1v2"></path> </svg> </button> </theme-toggle> <script type="module" src="/_astro/ThemeToggle.astro_astro_type_script_index_0_lang.BeM4B2Da.js"></script> <mobile-button> <button id="toggle-navigation-menu" class="group relative ms-4 h-7 w-7 sm:invisible sm:hidden" type="button" aria-label="Open main menu" aria-expanded="false" aria-haspopup="menu"> <svg id="line-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transition-all group-aria-expanded:scale-0 group-aria-expanded:opacity-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"></path> </svg> <svg id="cross-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 text-accent opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path> </svg> </button> </mobile-button> </div> </header> <script type="module" src="/_astro/Header.astro_astro_type_script_index_0_lang.DcNQI66r.js"></script> <main id="main" class="mt-8 px-8 sm:mt-10 lg:px-0">  <div class="grid w-full max-w-none gap-x-10 lg:grid-cols-[5fr_1.4fr] lg:items-start"> <article class="min-w-0 break-words" data-pagefind-body> <div id="blog-hero"><h1 class="title mb-3 sm:mb-1"> Building a GPU SaaS Platform - Storage Data Jobs </h1> <div class="flex flex-wrap items-center gap-x-3 gap-y-2"> <p class="font-semibold"> <time datetime="2026-04-04T00:00:00.000Z"> 4 April 2026 </time> /  7 min read </p>  </div> <div class="mt-3"> <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" class="me-1 inline-block h-6 w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z"></path> <path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116"></path> <path d="M6 9h-.01"></path> </svg>  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag gpu" href="/tags/gpu/" data-pagefind-filter="tag"> gpu </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag saas" href="/tags/saas/" data-pagefind-filter="tag"> saas </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag kubernetes" href="/tags/kubernetes/" data-pagefind-filter="tag"> kubernetes </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag golang" href="/tags/golang/" data-pagefind-filter="tag"> golang </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag operator" href="/tags/operator/" data-pagefind-filter="tag"> operator </a>  </div></div> <div class="prose prose-sm prose-cactus mt-12 max-w-none prose-headings:font-semibold prose-headings:text-accent-2 prose-th:before:content-none">  <p>In Part 8, we introduced persistent storage, but in a real platform many users prefer to initialize storage from a template instead of starting from an empty volume. Team environments often need a common directory layout, a small set of shared bootstrap files, or even a shared base model. We also need a practical way to inspect and operate on that data, for example through a file server with a simple UI.</p>
+<h2 id="chapter-goal">Chapter Goal</h2>
+<p>By the end of Part 9, the storage model has four new properties:</p>
+<ol>
+<li><code>GPUStorage</code> can be prepared from an image or from an existing storage object</li>
+<li>data preparation runs through a controller-owned Kubernetes <code>Job</code></li>
+<li><code>GPUStorage</code> can publish a first built-in accessor path</li>
+<li>failed data jobs surface explicit recovery state instead of hiding inside pod logs</li>
+</ol>
+<p>That is the real step forward here. We are not just adding one more field. We are teaching the platform how to move data in a controlled way.</p>
+<h2 id="why-data-preparation-cannot-live-inside-gpuunit">Why Data Preparation Cannot Live Inside <code>GPUUnit</code></h2>
+<p>It is tempting to say: just let the runtime container populate its own volume on startup.</p>
+<p>That sounds simple, but it creates the wrong ownership model very quickly.</p>
+<p>There are several reasons for that:</p>
+<ul>
+<li>we do not want to consume GPU resources while preparing storage.</li>
+<li>status becomes harder to reason about because data failures and runtime failures get mixed together.</li>
+<li>the data may need to exist before the runtime even starts.</li>
+</ul>
+<p>This is exactly why Part 8 separated data lifecycle from process lifecycle in the first place. Part 9 follows that logic to its natural conclusion:
+if data preparation is a platform concern, the controller should own it.</p>
+<h2 id="the-new-storage-contract">The New Storage Contract</h2>
+<p><code>GPUStorage</code> now grows in two directions.</p>
+<p>The first is <code>prepare</code>:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#FF79C6">type</span><span style="color:#8BE9FD;font-style:italic"> GPUStoragePrepareSpec</span><span style="color:#FF79C6"> struct</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    FromImage       </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">   `</span><span style="color:#F1FA8C">json:"fromImage,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    FromStorageName </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284">   `</span><span style="color:#F1FA8C">json:"fromStorageName,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Command         []</span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"command,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">    Args            []</span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"args,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>The second is <code>accessor</code>:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#FF79C6">type</span><span style="color:#8BE9FD;font-style:italic"> GPUStorageAccessorSpec</span><span style="color:#FF79C6"> struct</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    Enabled </span><span style="color:#8BE9FD;font-style:italic">bool</span><span style="color:#E9F284"> `</span><span style="color:#F1FA8C">json:"enabled,omitempty"</span><span style="color:#E9F284">`</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>That split is deliberate.</p>
+<p><code>prepare</code> answers:</p>
+<ul>
+<li>where does the initial data come from</li>
+<li>what job should write that data into the volume</li>
+<li>what should count as a recovery boundary if the job fails</li>
+</ul>
+<p><code>accessor</code> answers:</p>
+<ul>
+<li>should the platform publish a simple built-in path for browsing the prepared data</li>
+</ul>
+<p>Everything else stays controller-owned:</p>
+<ul>
+<li>the Kubernetes <code>Job</code></li>
+<li>the accessor <code>Deployment</code></li>
+<li>the accessor <code>Service</code></li>
+<li>the status transitions</li>
+<li>the recovery signal</li>
+</ul>
+<p>The API stays small, but the control plane becomes much more useful.</p>
+<h2 id="two-prepare-paths-one-recovery-model">Two Prepare Paths, One Recovery Model</h2>
+<p>The first prepare path is “copy from image.”</p>
+<p>That means we run a controller-owned <code>Job</code>, mount the target PVC at <code>/workspace</code>, and let the requested image write its data there.</p>
+<p>The second prepare path is “copy from existing storage.”</p>
+<p>That means we mount both the source PVC and the target PVC into a controller-owned copy job and let the platform duplicate the contents from one to the other.</p>
+<p>What matters is not that these two paths use different containers. What matters is that they converge into one operational model:</p>
+<ul>
+<li>preparation is asynchronous</li>
+<li>preparation is observable</li>
+<li>preparation is retryable</li>
+<li>preparation belongs to <code>GPUStorage</code>, not to the runtime</li>
+</ul>
+<p>That last point is the architectural one. The same storage may be prepared before any runtime exists, and the same prepared storage may outlive many
+runtimes after that.</p>
+<h2 id="why-recovery-is-a-separate-action">Why Recovery Is A Separate Action</h2>
+<p>Once we accept that data preparation is an asynchronous platform job, we also have to accept that it can fail.</p>
+<p>If the copy job fails, the user needs more than “some pod failed somewhere.” They need a stable recovery boundary.</p>
+<p>That is why this chapter adds an explicit recover action:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="text"><code><span class="line"><span>POST /api/v1/gpu-storages/{name}/recover</span></span></code></pre>
+<p>This does not redefine the storage contract. It does not change <code>prepare</code>. It just asks the controller to start a new preparation attempt for the same
+storage object.</p>
+<p>That boundary matters.</p>
+<p>A regular update should describe the desired object. Recovery is an operational action. Mixing those two ideas into the same API usually creates
+confusing semantics.</p>
+<h2 id="the-first-accessor-path">The First Accessor Path</h2>
+<p>There is one more practical problem once storage can hold real data: how do we inspect it?</p>
+<p>In a real platform, there may eventually be many answers:</p>
+<ul>
+<li>SFTP or SSH</li>
+<li>a file browser</li>
+<li>object-storage sync</li>
+<li>a dedicated data gateway</li>
+<li>tenant-specific sidecars</li>
+</ul>
+<p>But we do not need all of that yet.</p>
+<p>For this chapter, we add the first minimal accessor path:</p>
+<ul>
+<li>controller-owned</li>
+<li>HTTP only</li>
+<li>read-only</li>
+<li>internal cluster URL</li>
+</ul>
+<p>That is enough to prove the lifecycle and teach the boundary. The accessor is not “the storage product.” It is just the first controlled way to reach
+prepared data without coupling the answer to one runtime.</p>
+<p>In the next chapter, we will introduce a file server and a small proxy layer so users can manage storage more directly. That chapter will also cover how to proxy SSH traffic with <code>frp</code>.</p>
+<h2 id="api-walkthrough">API Walkthrough</h2>
+<p>Seed stock first, just like before:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/operator/stock-units</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{</span></span>
+<span class="line"><span style="color:#F1FA8C">    "operationID":"stock-g1-demo-001",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "specName":"g1.1",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "memory":"16Gi",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "gpu":1,</span></span>
+<span class="line"><span style="color:#F1FA8C">    "replicas":1</span></span>
+<span class="line"><span style="color:#F1FA8C">  }</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>Create storage from an image and turn on the built-in accessor:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/gpu-storages</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{</span></span>
+<span class="line"><span style="color:#F1FA8C">    "name":"model-cache",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "namespace":"runtime-instance",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "size":"20Gi",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "storageClassName":"rook-ceph-block",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "prepare":{</span></span>
+<span class="line"><span style="color:#F1FA8C">      "fromImage":"busybox:1.36",</span></span>
+<span class="line"><span style="color:#F1FA8C">      "command":["sh","-c"],</span></span>
+<span class="line"><span style="color:#F1FA8C">      "args":["mkdir -p /workspace/model &#x26;&#x26; echo seeded > /workspace/model/README.txt"]</span></span>
+<span class="line"><span style="color:#F1FA8C">    },</span></span>
+<span class="line"><span style="color:#F1FA8C">    "accessor":{</span></span>
+<span class="line"><span style="color:#F1FA8C">      "enabled":true</span></span>
+<span class="line"><span style="color:#F1FA8C">    }</span></span>
+<span class="line"><span style="color:#F1FA8C">  }</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>Inspect the storage object, the prepare job, and the accessor:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">http://127.0.0.1:8080/api/v1/gpu-storages/model-cache?namespace=runtime-instance</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> gpustorages</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> jobs</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span><span style="color:#BD93F9"> -l</span><span style="color:#F1FA8C"> runtime.lokiwager.io/storage=model-cache</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> deploy,svc</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> grep</span><span style="color:#F1FA8C"> storage-accessor-model-cache</span></span></code></pre>
+<p>Clone a second storage object from the first one:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/gpu-storages</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{</span></span>
+<span class="line"><span style="color:#F1FA8C">    "name":"model-cache-copy",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "namespace":"runtime-instance",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "size":"20Gi",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "prepare":{</span></span>
+<span class="line"><span style="color:#F1FA8C">      "fromStorageName":"model-cache"</span></span>
+<span class="line"><span style="color:#F1FA8C">    }</span></span>
+<span class="line"><span style="color:#F1FA8C">  }</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>Mount the prepared storage into an active runtime:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/gpu-units</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{</span></span>
+<span class="line"><span style="color:#F1FA8C">    "operationID":"unit-demo-001",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "name":"demo-instance",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "namespace":"runtime-instance",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "specName":"g1.1",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "image":"python:3.12",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "access":{</span></span>
+<span class="line"><span style="color:#F1FA8C">      "primaryPort":"http",</span></span>
+<span class="line"><span style="color:#F1FA8C">      "scheme":"http"</span></span>
+<span class="line"><span style="color:#F1FA8C">    },</span></span>
+<span class="line"><span style="color:#F1FA8C">    "template":{</span></span>
+<span class="line"><span style="color:#F1FA8C">      "command":["python"],</span></span>
+<span class="line"><span style="color:#F1FA8C">      "args":["-m","http.server","8080"],</span></span>
+<span class="line"><span style="color:#F1FA8C">      "ports":[{"name":"http","port":8080}]</span></span>
+<span class="line"><span style="color:#F1FA8C">    },</span></span>
+<span class="line"><span style="color:#F1FA8C">    "storageMounts":[</span></span>
+<span class="line"><span style="color:#F1FA8C">      {</span></span>
+<span class="line"><span style="color:#F1FA8C">        "name":"model-cache",</span></span>
+<span class="line"><span style="color:#F1FA8C">        "mountPath":"/workspace/cache"</span></span>
+<span class="line"><span style="color:#F1FA8C">      }</span></span>
+<span class="line"><span style="color:#F1FA8C">    ]</span></span>
+<span class="line"><span style="color:#F1FA8C">  }</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>If the prepare job fails and you want to start a new attempt:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">http://127.0.0.1:8080/api/v1/gpu-storages/model-cache/recover?namespace=runtime-instance</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<h2 id="how-to-verify-the-model">How To Verify The Model</h2>
+<p>There are four things worth checking after this chapter.</p>
+<p>First, the storage resource:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> gpustorage</span><span style="color:#F1FA8C"> model-cache</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span><span style="color:#BD93F9"> -o</span><span style="color:#F1FA8C"> yaml</span></span></code></pre>
+<p>You should see:</p>
+<ul>
+<li>the PVC identity</li>
+<li>prepare status</li>
+<li>recovery status</li>
+<li>accessor status</li>
+</ul>
+<p>Second, the prepare job:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> jobs</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span><span style="color:#BD93F9"> -l</span><span style="color:#F1FA8C"> runtime.lokiwager.io/storage=model-cache</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> describe</span><span style="color:#F1FA8C"> job</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span></span></code></pre>
+<p>You should see:</p>
+<ul>
+<li>one controller-owned job for the current preparation attempt</li>
+<li>status moving from <code>Pending</code> to <code>Running</code> to <code>Succeeded</code>, or to <code>Failed</code></li>
+</ul>
+<p>Third, the accessor path:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> deploy,svc</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> grep</span><span style="color:#F1FA8C"> storage-accessor-model-cache</span></span></code></pre>
+<p>You should see:</p>
+<ul>
+<li>one controller-owned <code>Deployment</code></li>
+<li>one controller-owned <code>Service</code></li>
+<li>the in-cluster accessor URL reported in <code>GPUStorage.status</code></li>
+</ul>
+<p>Fourth, the recovery boundary:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">http://127.0.0.1:8080/api/v1/gpu-storages/model-cache?namespace=runtime-instance</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>If preparation failed, the object should say that directly. You should not have to infer it from random pod logs.</p>
+<p>That is the whole point of this chapter.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="the-pvc-is-bound-but-prepare-never-starts">The PVC is bound, but prepare never starts</h3>
+<p>Check the prepare contract first:</p>
+<ul>
+<li>does <code>prepare.fromImage</code> exist</li>
+<li>does the image have a valid command and args</li>
+<li>if <code>prepare.fromStorageName</code> is used, does the source storage exist and reach <code>Ready</code></li>
+</ul>
+<h3 id="the-prepare-job-fails-immediately">The prepare job fails immediately</h3>
+<p>Inspect the job:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> jobs</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span><span style="color:#BD93F9"> -l</span><span style="color:#F1FA8C"> runtime.lokiwager.io/storage=model-cache</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> describe</span><span style="color:#F1FA8C"> job</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span></span></code></pre>
+<p>The most common causes are:</p>
+<ul>
+<li>the image command is wrong</li>
+<li>the image does not write data into <code>/workspace</code></li>
+<li>the source storage was not actually ready for cloning</li>
+</ul>
+<h3 id="the-accessor-never-becomes-ready">The accessor never becomes ready</h3>
+<p>Check the accessor <code>Deployment</code> and <code>Service</code>:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> deploy,svc</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> grep</span><span style="color:#F1FA8C"> storage-accessor-model-cache</span></span>
+<span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> describe</span><span style="color:#F1FA8C"> deploy</span><span style="color:#F1FA8C"> storage-accessor-model-cache</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span></span></code></pre>
+<p>Remember the accessor only comes up after the PVC is ready and the prepare step is finished.</p>
+<h3 id="recovery-does-not-seem-to-do-anything">Recovery does not seem to do anything</h3>
+<p>Recovery only asks for a new prepare attempt. It does not silently rewrite the storage contract.</p>
+<p>If the same bad command is still configured, the next attempt will fail for the same reason. That is expected. Recovery retries the operation; it does
+not invent a new one.</p>
+<h2 id="summary">Summary</h2>
+<p>Part 9 is where storage becomes a real control-plane workflow.</p>
+<p>We now have:</p>
+<ul>
+<li>storage preparation from image or from existing storage</li>
+<li>controller-owned prepare jobs</li>
+<li>explicit prepare and recovery state on <code>GPUStorage</code></li>
+<li>the first built-in accessor path</li>
+<li>a clean recover action instead of implicit retry behavior</li>
+</ul>
+<p>That is a much stronger model than “make the app copy files into its own volume when it starts.”</p>
+<p>The better design is not the one with fewer objects. It is the one that makes ownership, failure, and retry boundaries visible.</p>
+<h2 id="next-chapter-preview">Next Chapter Preview</h2>
+<p>Part 10 will pause the original roadmap for a moment and add a network proxy service so users can reach storage and compute resources more directly.</p>
+<h2 id="repository">Repository</h2>
+<p>Code for this chapter:</p>
+<ul>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank">gpu-operator-runtime</a></li>
+</ul>  <section class="not-prose mt-16" aria-labelledby="comments-heading"><hr class="border-solid"><div class="mt-10 space-y-5"><div class="space-y-2"><h2 id="comments-heading" class="text-xl font-semibold text-accent-2">
+Comments
+</h2><p class="text-sm text-textColor/80">
+Join the discussion with your GitHub account. Powered by <a href="https://giscus.app" target="_blank" rel="noreferrer">
+giscus
+</a>
+.
+</p></div><div class="rounded-2xl border border-zinc-300/70 bg-bgColor/40 p-3 dark:border-zinc-700/80"><giscus-comments class="block"><div class="giscus"></div></giscus-comments><noscript><p class="px-3 py-2 text-sm text-textColor/80">
+Enable JavaScript to load the comment thread.
+</p></noscript></div></div></section><script>(function(){const giscusConfig = {"repo":"LokiWager/lokiwager.github.io","repoId":"R_kgDOK5t_Dg","category":"Announcements","categoryId":"DIC_kwDOK5t_Ds4C4eyH","mapping":"pathname","strict":"0","reactionsEnabled":"1","emitMetadata":"0","inputPosition":"top","lang":"en","loading":"lazy","theme":{"light":"light","dark":"dark_dimmed"}};
+
+	class GiscusComments extends HTMLElement {
+		container = null;
+
+		handleThemeChange = (event) => {
+			const nextTheme =
+				event instanceof CustomEvent && typeof event.detail?.theme === "string"
+					? event.detail.theme
+					: undefined;
+			this.syncTheme(nextTheme);
+		};
+
+		connectedCallback() {
+			this.container = this.querySelector(".giscus");
+			this.loadWidget();
+			document.addEventListener("theme-change", this.handleThemeChange);
+		}
+
+		disconnectedCallback() {
+			document.removeEventListener("theme-change", this.handleThemeChange);
+		}
+
+		loadWidget() {
+			if (!giscusConfig || !this.container || this.container.dataset.loaded === "true") {
+				return;
+			}
+
+			const script = document.createElement("script");
+			script.src = "https://giscus.app/client.js";
+			script.async = true;
+			script.crossOrigin = "anonymous";
+			script.dataset.giscusScript = "true";
+			script.setAttribute("data-repo", giscusConfig.repo);
+			script.setAttribute("data-repo-id", giscusConfig.repoId);
+			script.setAttribute("data-category", giscusConfig.category);
+			script.setAttribute("data-category-id", giscusConfig.categoryId);
+			script.setAttribute("data-mapping", giscusConfig.mapping);
+			script.setAttribute("data-strict", giscusConfig.strict);
+			script.setAttribute("data-reactions-enabled", giscusConfig.reactionsEnabled);
+			script.setAttribute("data-emit-metadata", giscusConfig.emitMetadata);
+			script.setAttribute("data-input-position", giscusConfig.inputPosition);
+			script.setAttribute("data-lang", giscusConfig.lang);
+			script.setAttribute("data-loading", giscusConfig.loading);
+			script.setAttribute("data-theme", this.resolveTheme());
+
+			if (giscusConfig.term) {
+				script.setAttribute("data-term", giscusConfig.term);
+			}
+
+			this.container.append(script);
+			this.container.dataset.loaded = "true";
+		}
+
+		resolveTheme(theme) {
+			const activeTheme =
+				theme ?? (document.documentElement.classList.contains("dark") ? "dark" : "light");
+			return activeTheme === "dark" ? giscusConfig.theme.dark : giscusConfig.theme.light;
+		}
+
+		syncTheme(theme) {
+			const iframe = this.container?.querySelector("iframe.giscus-frame");
+
+			if (!iframe?.contentWindow) {
+				return;
+			}
+
+			// giscus updates live through a postMessage bridge after the iframe has mounted.
+			iframe.contentWindow.postMessage(
+				{
+					giscus: {
+						setConfig: {
+							theme: this.resolveTheme(theme),
+						},
+					},
+				},
+				"https://giscus.app",
+			);
+		}
+	}
+
+	if (!customElements.get("giscus-comments")) {
+		customElements.define("giscus-comments", GiscusComments);
+	}
+})();</script>  </div> </article> <aside class="sticky top-20 order-2 hidden lg:block"> <h2 class="font-semibold">Table of Contents</h2> <ul class="mt-4 text-sm"> <li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#chapter-goal" aria-label="Scroll to section: Chapter Goal">Chapter Goal</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#why-data-preparation-cannot-live-inside-gpuunit" aria-label="Scroll to section: Why Data Preparation Cannot Live Inside GPUUnit">Why Data Preparation Cannot Live Inside GPUUnit</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#the-new-storage-contract" aria-label="Scroll to section: The New Storage Contract">The New Storage Contract</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#two-prepare-paths-one-recovery-model" aria-label="Scroll to section: Two Prepare Paths, One Recovery Model">Two Prepare Paths, One Recovery Model</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#why-recovery-is-a-separate-action" aria-label="Scroll to section: Why Recovery Is A Separate Action">Why Recovery Is A Separate Action</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#the-first-accessor-path" aria-label="Scroll to section: The First Accessor Path">The First Accessor Path</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#api-walkthrough" aria-label="Scroll to section: API Walkthrough">API Walkthrough</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#how-to-verify-the-model" aria-label="Scroll to section: How To Verify The Model">How To Verify The Model</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#troubleshooting" aria-label="Scroll to section: Troubleshooting">Troubleshooting</a> <ul> <li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#the-pvc-is-bound-but-prepare-never-starts" aria-label="Scroll to section: The PVC is bound, but prepare never starts">The PVC is bound, but prepare never starts</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#the-prepare-job-fails-immediately" aria-label="Scroll to section: The prepare job fails immediately">The prepare job fails immediately</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#the-accessor-never-becomes-ready" aria-label="Scroll to section: The accessor never becomes ready">The accessor never becomes ready</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#recovery-does-not-seem-to-do-anything" aria-label="Scroll to section: Recovery does not seem to do anything">Recovery does not seem to do anything</a>  </li> </ul> </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#summary" aria-label="Scroll to section: Summary">Summary</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#next-chapter-preview" aria-label="Scroll to section: Next Chapter Preview">Next Chapter Preview</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#repository" aria-label="Scroll to section: Repository">Repository</a>  </li> </ul> </aside> </div> <button id="to-top-btn" class="z-90 fixed bottom-8 end-4 flex h-10 w-10 translate-y-28 items-center justify-center rounded-full border-2 border-transparent bg-zinc-200 text-3xl opacity-0 transition-all duration-300 hover:border-zinc-400 data-[show=true]:translate-y-0 data-[show=true]:opacity-100 dark:bg-zinc-700 sm:end-8 sm:h-12 sm:w-12" aria-label="Back to Top" data-show="false"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6"> <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path> </svg> </button>  </main> <footer class="mt-auto flex w-full flex-col items-center justify-center gap-y-2 px-8 pb-4 pt-20 text-center align-top font-semibold text-gray-600 dark:text-gray-400 sm:flex-row sm:justify-between sm:text-xs lg:px-0"> <div class="me-0 sm:me-4">
+Copyright &copy; 2026  Loki&#39;s Wager </div> <nav aria-label="More on this site" class="flex gap-x-2 sm:gap-x-0 sm:divide-x sm:divide-gray-500"> <!--{--> <!--	menuLinks.map((link) => (--> <!--		<a--> <!--			href={link.path}--> <!--			class="px-4 py-2 sm:px-2 sm:py-0 sm:hover:text-textColor sm:hover:underline"--> <!--		>--> <!--			{link.title}--> <!--		</a>--> <!--	))--> <!--}--> <div class="flex flex-wrap items-end gap-x-4"> <!--<p>Find me on</p>--> <ul class="flex flex-1 items-center gap-x-2 sm:flex-initial"> <li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://github.com/LokiWager" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:github">   <symbol id="ai:mdi:github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5c.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34c-.46-1.16-1.11-1.47-1.11-1.47c-.91-.62.07-.6.07-.6c1 .07 1.53 1.03 1.53 1.03c.87 1.52 2.34 1.07 2.91.83c.09-.65.35-1.09.63-1.34c-2.22-.25-4.55-1.11-4.55-4.92c0-1.11.38-2 1.03-2.71c-.1-.25-.45-1.29.1-2.64c0 0 .84-.27 2.75 1.02c.79-.22 1.65-.33 2.5-.33s1.71.11 2.5.33c1.91-1.29 2.75-1.02 2.75-1.02c.55 1.35.2 2.39.1 2.64c.65.71 1.03 1.6 1.03 2.71c0 3.82-2.34 4.66-4.57 4.91c.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2"/></symbol><use href="#ai:mdi:github"></use>  </svg> <span class="sr-only">Github</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://twitter.com/loki66118227" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:twitter">   <symbol id="ai:mdi:twitter" viewBox="0 0 24 24"><path fill="currentColor" d="M22.46 6c-.77.35-1.6.58-2.46.69c.88-.53 1.56-1.37 1.88-2.38c-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29c0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15c0 1.49.75 2.81 1.91 3.56c-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.2 4.2 0 0 1-1.93.07a4.28 4.28 0 0 0 4 2.98a8.52 8.52 0 0 1-5.33 1.84q-.51 0-1.02-.06C3.44 20.29 5.7 21 8.12 21C16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56c.84-.6 1.56-1.36 2.14-2.23"/></symbol><use href="#ai:mdi:twitter"></use>  </svg> <span class="sr-only">Twitter</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="mailto:lokitingyi@gmail.com" target="_blank" rel="noopener noreferrer me authn"> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:email">   <symbol id="ai:mdi:email" viewBox="0 0 24 24"><path fill="currentColor" d="m20 8l-8 5l-8-5V6l8 5l8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"/></symbol><use href="#ai:mdi:email"></use>  </svg> <span class="sr-only">email</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://space.bilibili.com/4810234" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="ri:bilibili-fill">   <symbol id="ai:ri:bilibili-fill" viewBox="0 0 24 24"><path fill="currentColor" d="M18.223 3.086a1.25 1.25 0 0 1 0 1.768L17.08 5.996h1.17A3.75 3.75 0 0 1 22 9.747v7.5a3.75 3.75 0 0 1-3.75 3.75H5.75A3.75 3.75 0 0 1 2 17.247v-7.5a3.75 3.75 0 0 1 3.75-3.75h1.166L5.775 4.855a1.25 1.25 0 0 1 1.767-1.768l2.652 2.652q.119.119.198.257h3.213q.08-.14.199-.258l2.651-2.652a1.25 1.25 0 0 1 1.768 0m.027 5.42H5.75a1.25 1.25 0 0 0-1.247 1.157l-.003.094v7.5c0 .659.51 1.198 1.157 1.246l.093.004h12.5a1.25 1.25 0 0 0 1.247-1.157l.003-.093v-7.5c0-.69-.56-1.25-1.25-1.25m-10 2.5c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25m7.5 0c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25"/></symbol><use href="#ai:ri:bilibili-fill"></use>  </svg> <span class="sr-only">Bilibili</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://www.instagram.com/lokiwager/" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:instagram">   <symbol id="ai:mdi:instagram" viewBox="0 0 24 24"><path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4zm9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3"/></symbol><use href="#ai:mdi:instagram"></use>  </svg> <span class="sr-only">Instagram</span> </a> </li> </ul> </div> </nav> </footer> </body></html> <script type="module">const e=document.getElementById("to-top-btn"),n=document.getElementById("blog-hero");function c(t){t.forEach(o=>{e.dataset.show=(!o.isIntersecting).toString()})}e.addEventListener("click",()=>{document.documentElement.scrollTo({top:0,behavior:"smooth"})});const r=new IntersectionObserver(c);r.observe(n);</script>
