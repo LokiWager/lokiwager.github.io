@@ -1,8 +1,8 @@
 ---
 title: "Building a GPU SaaS Platform - Storage Data Jobs"
-publishDate: "1 April 2026"
+publishDate: "4 April 2026"
 description: "Part 9: add storage prepare jobs, the first accessor path, and recovery state to GPUStorage."
-tags: [ "GPU", "SaaS", "Kubernetes", "Golang", "Operator" ]
+tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator"]
 ---
 
 In Part 8, we introduced persistent storage, but in a real platform many users prefer to initialize storage from a template instead of starting from an empty volume. Team environments often need a common directory layout, a small set of shared bootstrap files, or even a shared base model. We also need a practical way to inspect and operate on that data, for example through a file server with a simple UI.
@@ -143,7 +143,6 @@ That is enough to prove the lifecycle and teach the boundary. The accessor is no
 prepared data without coupling the answer to one runtime.
 
 In the next chapter, we will introduce a file server and a small proxy layer so users can manage storage more directly. That chapter will also cover how to proxy SSH traffic with `frp`.
-
 
 ## API Walkthrough
 
