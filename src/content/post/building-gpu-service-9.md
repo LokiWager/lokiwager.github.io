@@ -301,39 +301,6 @@ Check the prepare contract first:
 - does the image have a valid command and args
 - if `prepare.fromStorageName` is used, does the source storage exist and reach `Ready`
 
-### The prepare job fails immediately
-
-Inspect the job:
-
-```bash
-kubectl get jobs -n runtime-instance -l runtime.lokiwager.io/storage=model-cache
-kubectl describe job -n runtime-instance
-```
-
-The most common causes are:
-
-- the image command is wrong
-- the image does not write data into `/workspace`
-- the source storage was not actually ready for cloning
-
-### The accessor never becomes ready
-
-Check the accessor `Deployment` and `Service`:
-
-```bash
-kubectl get deploy,svc -n runtime-instance | grep storage-accessor-model-cache
-kubectl describe deploy storage-accessor-model-cache -n runtime-instance
-```
-
-Remember the accessor only comes up after the PVC is ready and the prepare step is finished.
-
-### Recovery does not seem to do anything
-
-Recovery only asks for a new prepare attempt. It does not silently rewrite the storage contract.
-
-If the same bad command is still configured, the next attempt will fail for the same reason. That is expected. Recovery retries the operation; it does
-not invent a new one.
-
 ## Summary
 
 Part 9 is where storage becomes a real control-plane workflow.
