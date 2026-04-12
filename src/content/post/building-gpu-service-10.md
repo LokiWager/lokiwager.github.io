@@ -24,7 +24,6 @@ This chapter introduces a new proxy application that handles both user SSH traff
 - for SSH requests, the proxy forwards traffic to a machine running `frps`, which then routes it to the matching `frpc` sidecar
 - for storage requests, the path is simpler: the proxy forwards directly to the corresponding accessor Service
 
-
 ## Why SSH Should Not Live Inside The Runtime Image
 
 There is an older pattern that says:
