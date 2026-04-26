@@ -1,0 +1,388 @@
+<!DOCTYPE html><html lang="en-GB"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Building a GPU SaaS Platform - Security and Metrics • Loki&#39;s Wager</title><link rel="icon" href="/logo.png" sizes="any"><!--<link rel="icon" href="/icon.svg" type="image/svg+xml" />--><!--<link rel="apple-touch-icon" href="/apple-touch-icon.png" />--><!--<link rel="manifest" href="/manifest.webmanifest" />--><!--<link rel="canonical" href={canonicalURL} />--><meta name="title" content="Building a GPU SaaS Platform - Security and Metrics • Loki's Wager"><meta name="description" content="Part 11: harden runtime workloads with capability drops, shared-memory sizing, egress isolation, and expose runtime and Nvidia GPU metrics."><meta name="author" content="Loki's Wager"><meta name="theme-color" content=""><meta property="og:type" content="article"><meta property="og:title" content="Building a GPU SaaS Platform - Security and Metrics"><meta property="og:description" content="Part 11: harden runtime workloads with capability drops, shared-memory sizing, egress isolation, and expose runtime and Nvidia GPU metrics."><meta property="og:url" content="https://lokiwager.app/posts/building-gpu-service-11/"><meta property="og:site_name" content="Loki's Wager"><meta property="og:locale" content="en_GB"><meta property="og:image" content="https://lokiwager.app/og-image/building-gpu-service-11.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="article:author" content="Loki's Wager"><meta property="article:published_time" content="2026-04-26T00:00:00.000Z"><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://lokiwager.app/posts/building-gpu-service-11/"><meta property="twitter:title" content="Building a GPU SaaS Platform - Security and Metrics"><meta property="twitter:description" content="Part 11: harden runtime workloads with capability drops, shared-memory sizing, egress isolation, and expose runtime and Nvidia GPU metrics."><meta property="twitter:image" content="https://lokiwager.app/og-image/building-gpu-service-11.png"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="Loki's Wager" href="/rss.xml"><link rel="webmention" href="https://webmention.io/lokiwager.github.io/webmention"><meta name="generator" content="Astro v6.0.4"><link rel="stylesheet" href="/_astro/Base.BJw5bl6Q.css"><script type="module" src="/_astro/page.DHhHZKgE.js"></script></head> <body> <script>
+	function getUserPref() {
+		const storedTheme = typeof localStorage !== "undefined" && localStorage.getItem("theme");
+		return (
+			storedTheme || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+		);
+	}
+
+	function setTheme(newTheme) {
+		if (!newTheme || (newTheme !== "light" && newTheme !== "dark")) {
+			return console.warn(
+				`Incorrect theme value received. Expected 'light' or 'dark', received ${newTheme}`,
+			);
+		}
+
+		const root = document.documentElement;
+
+		// class already set to newTheme, exit early
+		if (
+			(newTheme === "dark" && root.classList.contains("dark")) ||
+			(newTheme === "light" && !root.classList.contains("dark"))
+		) {
+			return;
+		}
+
+		const colorThemeMetaTag = document.querySelector("meta[name='theme-color']");
+		document.documentElement.classList.toggle("dark", newTheme === "dark");
+		const bgColour = getComputedStyle(document.body).getPropertyValue("--theme-bg");
+
+		colorThemeMetaTag.setAttribute("content", `hsl(${bgColour})`);
+		if (typeof localStorage !== "undefined") {
+			localStorage.setItem("theme", newTheme);
+		}
+	}
+
+	// initial setup
+	setTheme(getUserPref());
+
+	// View Transitions hook to restore theme
+	document.addEventListener("astro:after-swap", () => setTheme(getUserPref()));
+
+	// listen for theme-change custom event, fired in src/components/ThemeToggle.astro
+	document.addEventListener("theme-change", (e) => {
+		setTheme(e.detail.theme);
+	});
+</script> <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:start-1 focus:top-1.5">skip to content
+</a> <header id="main-header" class="group relative mb-2 flex items-start px-8 lg:px-0"> <div class="flex items-start gap-4 sm:gap-6"> <a href="/" class="inline-flex shrink-0 grayscale hover:filter-none" aria-current="false"> <img src="/_astro/logo.BGWHXvnm_Z1DWcL4.png" alt="logo" loading="lazy" decoding="async" width="824" height="1115" class="w-8 sm:w-12"> </a> <div class="flex flex-col items-start"> <a href="/" class="inline-flex items-center" aria-current="false"> <span class="text-xl font-bold sm:text-2xl">Loki's Wager</span> </a> <nav id="navigation-menu" class="absolute -inset-x-4 top-14 hidden flex-col items-start gap-y-4 rounded-md bg-bgColor/[.85] py-4 text-accent shadow backdrop-blur group-[.menu-open]:z-50 group-[.menu-open]:flex sm:static sm:inset-auto sm:mt-1 sm:flex sm:flex-row sm:items-center sm:divide-x sm:divide-dashed sm:divide-accent sm:rounded-none sm:bg-transparent sm:py-0 sm:shadow-none sm:backdrop-blur-none" aria-label="Main menu"> <a href="/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:pl-0 sm:pr-4" aria-current="false" data-astro-prefetch> Home </a><a href="/about/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:px-4" aria-current="false" data-astro-prefetch> About </a><a href="/resume/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:px-4" aria-current="false" data-astro-prefetch> Resume </a><a href="/posts/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:pl-4 sm:pr-0" aria-current="false" data-astro-prefetch> Blog </a> </nav> </div> </div> <div class="ms-auto flex items-center"> <site-search id="search" data-astro-cid-otpdt6jm="true"> <button data-open-modal disabled class="flex h-9 w-9 items-center justify-center rounded-md ring-zinc-400 transition-all hover:ring-2" data-astro-cid-otpdt6jm> <svg aria-label="search" class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" data-astro-cid-otpdt6jm> <path stroke="none" d="M0 0h24v24H0z" data-astro-cid-otpdt6jm></path> <path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" data-astro-cid-otpdt6jm></path> </svg> </button> <dialog aria-label="search" class="h-full max-h-full w-full max-w-full border border-zinc-400 bg-bgColor shadow backdrop:backdrop-blur sm:mx-auto sm:mb-auto sm:mt-16 sm:h-max sm:max-h-[calc(100%-8rem)] sm:min-h-[15rem] sm:w-5/6 sm:max-w-[48rem] sm:rounded-md" data-astro-cid-otpdt6jm> <div class="dialog-frame flex flex-col gap-4 p-6 pt-12 sm:pt-6" data-astro-cid-otpdt6jm> <button data-close-modal class="ms-auto cursor-pointer rounded-md bg-zinc-200 p-2 font-semibold dark:bg-zinc-700" data-astro-cid-otpdt6jm>Close</button> <div class="search-container" data-astro-cid-otpdt6jm> <div id="cactus__search" data-astro-cid-otpdt6jm></div> </div> </div> </dialog> </site-search> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.Cr3prLuB.js"></script>  <theme-toggle class="ms-2 sm:ms-4"> <button type="button" id="toggle-theme" class="relative h-9 w-9 rounded-md p-2 ring-zinc-400 transition-all hover:ring-2" aria-label="Toggle Dark Mode"> <svg id="sun-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-100 opacity-100 transition-all dark:scale-0 dark:opacity-0" aria-hidden="true" focusable="false" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg id="moon-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100" aria-hidden="true" focusable="false" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path> <path d="M19 11h2m-1 -1v2"></path> </svg> </button> </theme-toggle> <script type="module" src="/_astro/ThemeToggle.astro_astro_type_script_index_0_lang.BeM4B2Da.js"></script> <mobile-button> <button id="toggle-navigation-menu" class="group relative ms-4 h-7 w-7 sm:invisible sm:hidden" type="button" aria-label="Open main menu" aria-expanded="false" aria-haspopup="menu"> <svg id="line-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transition-all group-aria-expanded:scale-0 group-aria-expanded:opacity-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"></path> </svg> <svg id="cross-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 text-accent opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path> </svg> </button> </mobile-button> </div> </header> <script type="module" src="/_astro/Header.astro_astro_type_script_index_0_lang.DcNQI66r.js"></script> <main id="main" class="mt-8 px-8 sm:mt-10 lg:px-0">  <div class="grid w-full max-w-none gap-x-10 lg:grid-cols-[5fr_1.4fr] lg:items-start"> <article class="min-w-0 break-words" data-pagefind-body> <div id="blog-hero"><h1 class="title mb-3 sm:mb-1"> Building a GPU SaaS Platform - Security and Metrics </h1> <div class="flex flex-wrap items-center gap-x-3 gap-y-2"> <p class="font-semibold"> <time datetime="2026-04-26T00:00:00.000Z"> 26 April 2026 </time> /  8 min read </p>  </div> <div class="mt-3"> <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" class="me-1 inline-block h-6 w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z"></path> <path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116"></path> <path d="M6 9h-.01"></path> </svg>  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag gpu" href="/tags/gpu/" data-pagefind-filter="tag"> gpu </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag saas" href="/tags/saas/" data-pagefind-filter="tag"> saas </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag kubernetes" href="/tags/kubernetes/" data-pagefind-filter="tag"> kubernetes </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag golang" href="/tags/golang/" data-pagefind-filter="tag"> golang </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag operator" href="/tags/operator/" data-pagefind-filter="tag"> operator </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag observability" href="/tags/observability/" data-pagefind-filter="tag"> observability </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag security" href="/tags/security/" data-pagefind-filter="tag"> security </a>  </div></div> <div class="prose prose-sm prose-cactus mt-12 max-w-none prose-headings:font-semibold prose-headings:text-accent-2 prose-th:before:content-none">  <p>In the earlier chapters, we built GPU inventory management, application instance creation, and the storage and access paths around them. Before any real production rollout, though, two topics become non-negotiable: security and monitoring. We do not want either our own data or our users’ data to leak, and we definitely do not want to spend every day after launch fighting attackers.</p>
+<p>I learned this lesson the hard way when I was still a student. I once published a small online storage service with almost no real understanding of security. Not long after it went live, the system started getting slower and slower, even though the obvious host metrics still looked normal. After a lot of digging, I finally discovered that an attacker had replaced some of the commands on the machine and turned the server into a zombie box. Killing the visible malware process did not help because another process kept bringing it back. In the end I had to suspend the service and reinstall the server. That experience stayed with me: security is never something we get to ignore.</p>
+<p>Once a service is running, logs and traces alone are not enough. We need a small set of meaningful signals that tells us whether the system is healthy, whether capacity is drifting, and whether user-facing entrypoints are starting to fail. Structured logs, tracing, and metrics all matter, but more signals are not automatically better. Every metric costs storage, every alert can create noise, and a noisy system makes real failures harder to see. Choosing the right metrics, and the right alerts on top of them, is one of the more demanding parts of SRE work.</p>
+<h2 id="chapter-goal">Chapter Goal</h2>
+<p>By the end of Part 11, the runtime has four new properties:</p>
+<ol>
+<li>managed Pods drop risky Linux capabilities and run with stricter security defaults, reducing direct access to host-level resources</li>
+<li>GPU workloads get a memory-backed <code>/dev/shm</code> sized from the requested memory envelope</li>
+<li>every <code>GPUUnit</code> gets an egress <code>NetworkPolicy</code> that blocks common internal and host-facing ranges by default, so workloads cannot directly reach most Pod, Service, or node addresses</li>
+<li>the manager exports live runtime metrics, including Nvidia GPU inventory plus DCGM-backed device telemetry such as frame-buffer memory usage and GPU utilization</li>
+</ol>
+<h2 id="security-should-be-a-default-not-an-opt-in">Security Should Be A Default, Not An Opt-In</h2>
+<p>The earlier chapters focused on function:</p>
+<ul>
+<li>create a Pod</li>
+<li>mount storage</li>
+<li>expose access</li>
+</ul>
+<p>That is the right order when bootstrapping a platform.
+But once the basics work, “just run the container” is no longer a good enough contract.</p>
+<p>For this chapter, the runtime manager now injects the same baseline security posture into the workloads it owns:</p>
+<ul>
+<li><code>allowPrivilegeEscalation: false</code></li>
+<li><code>seccompProfile: RuntimeDefault</code></li>
+<li>a dropped capability set based on the same hardening approach used in <code>stock-operator</code></li>
+</ul>
+<p>That baseline is applied to:</p>
+<ul>
+<li>the main runtime container</li>
+<li>the SSH sidecar</li>
+<li>the <code>frpc</code> sidecar</li>
+<li>the <code>dufs</code> storage accessor</li>
+<li>the storage-prepare Job container</li>
+</ul>
+<p>This is important because controller-owned support containers are still part of the attack surface.
+It is not enough to harden only the user workload and leave the helper Pods soft.</p>
+<p>One small but intentional detail also changed in the SSH sidecar:</p>
+<ul>
+<li><code>SUDO_ACCESS</code> is now disabled</li>
+</ul>
+<p>The goal of that shell is controlled operator-style access inside the Pod boundary, not a privileged escape hatch.</p>
+<h2 id="devshm-is-a-real-runtime-requirement"><code>/dev/shm</code> Is A Real Runtime Requirement</h2>
+<p>Many AI and GPU applications are unhappy with the tiny default shared-memory space that comes from a plain container setup.</p>
+<p>This shows up in places like:</p>
+<ul>
+<li>PyTorch <code>DataLoader</code></li>
+<li>Python multiprocessing</li>
+<li>IPC-heavy inference servers</li>
+</ul>
+<p>The <code>stock-operator</code> already handled this by mounting a memory-backed <code>emptyDir</code> at <code>/dev/shm</code>.
+The runtime now does the same thing.</p>
+<p>For each <code>GPUUnit</code>:</p>
+<ul>
+<li>the controller mounts <code>/dev/shm</code> as <code>emptyDir{ medium: Memory }</code></li>
+<li>if the unit requests memory, the shared-memory volume is capped at half of that value</li>
+</ul>
+<p>So a unit with:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#8BE9FD">memory</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> 16Gi</span></span></code></pre>
+<p>gets:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#F1FA8C">/dev/shm -> 8Gi memory-backed emptyDir</span></span></code></pre>
+<p>This keeps the behavior predictable and ties shared-memory growth to the same resource envelope the user already asked for.</p>
+<h2 id="egress-isolation-should-be-simple-and-explainable">Egress Isolation Should Be Simple And Explainable</h2>
+<p>The network-isolation design in <code>stock-operator</code> has a good instinct:
+deny dangerous destinations, but avoid building a maze of special cases.</p>
+<p>The runtime now creates a controller-owned <code>NetworkPolicy</code> for each <code>GPUUnit</code>.</p>
+<p>The policy is still egress-focused, but the default local configuration is more opinionated now. It does three things:</p>
+<ol>
+<li>explicitly allows DNS to <code>kube-system</code></li>
+<li>allows general outbound traffic through <code>0.0.0.0/0</code></li>
+<li>subtracts a configurable set of internal and host-facing CIDR ranges from that public path</li>
+</ol>
+<p>The sample manager config now blocks the most common private IPv4 ranges plus link-local addresses:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#8BE9FD">blockedEgressCIDRs</span><span style="color:#FF79C6">:</span></span>
+<span class="line"><span style="color:#FF79C6">  -</span><span style="color:#F1FA8C"> 10.0.0.0/8</span></span>
+<span class="line"><span style="color:#FF79C6">  -</span><span style="color:#F1FA8C"> 100.64.0.0/10</span></span>
+<span class="line"><span style="color:#FF79C6">  -</span><span style="color:#F1FA8C"> 169.254.0.0/16</span></span>
+<span class="line"><span style="color:#FF79C6">  -</span><span style="color:#F1FA8C"> 172.16.0.0/12</span></span>
+<span class="line"><span style="color:#FF79C6">  -</span><span style="color:#F1FA8C"> 192.168.0.0/16</span></span></code></pre>
+<p>With that default, a runtime cannot directly talk to most Pod, Service, or node addresses, and it also loses access to metadata-style link-local endpoints.</p>
+<p>There is one extra SSH-specific rule:</p>
+<ul>
+<li>if the FRP server address is an IP and that IP falls inside the blocked CIDR set, the controller adds one explicit allow rule for the FRP server and port</li>
+</ul>
+<p>That preserves the user-facing SSH path without reopening the entire private network. If the FRP server lives on a private address, using a stable IP in <code>ssh.serverAddr</code> gives the controller enough information to emit that narrow exception.</p>
+<p>This is a deliberately conservative first step.
+It is easy to explain, easy to debug, and easy to extend later with tenant-specific or namespace-specific rules.</p>
+<h2 id="runtime-health-needs-more-than-the-process-is-up">Runtime Health Needs More Than “the Process Is Up”</h2>
+<p>Before this chapter, the health surface was intentionally lightweight.
+It told us whether the process started and whether Kubernetes was reachable.</p>
+<p>Now the health view also answers:</p>
+<ul>
+<li>how many nodes are ready?</li>
+<li>how much GPU capacity exists in the cluster?</li>
+<li>how much is allocatable right now?</li>
+<li>which Nvidia GPU products are currently visible?</li>
+<li>if DCGM metrics are configured, how much GPU memory is used right now and what average utilization the devices are reporting</li>
+</ul>
+<p>The <code>/api/v1/health</code> payload now includes fields like:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#F8F8F2">{</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">kubernetesConnected</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> true</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">nodeCount</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 3</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">readyNodeCount</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 3</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">totalGPUCapacity</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 12</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">totalGPUAllocatable</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 10</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">nvidiaMetricsConnected</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> true</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">gpuDeviceCount</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 8</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">totalGpuMemoryMiB</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 393216</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">usedGpuMemoryMiB</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 126000</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">freeGpuMemoryMiB</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 267216</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">averageGpuUtilizationPercent</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 41.5</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">gpuProducts</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> [</span></span>
+<span class="line"><span style="color:#F8F8F2">		{</span></span>
+<span class="line"><span style="color:#8BE9FE">			"</span><span style="color:#8BE9FD">product</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">NVIDIA-L40S</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">			"</span><span style="color:#8BE9FD">nodeCount</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 2</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">			"</span><span style="color:#8BE9FD">capacity</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 8</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">			"</span><span style="color:#8BE9FD">allocatable</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 6</span></span>
+<span class="line"><span style="color:#F8F8F2">		}</span></span>
+<span class="line"><span style="color:#F8F8F2">	]</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>The inventory data comes from Kubernetes node status plus the standard Nvidia node label:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="text"><code><span class="line"><span>nvidia.com/gpu.product</span></span></code></pre>
+<p>If a DCGM exporter endpoint is configured, the runtime manager also scrapes device-level metrics such as:</p>
+<ul>
+<li><code>DCGM_FI_DEV_FB_USED</code></li>
+<li><code>DCGM_FI_DEV_FB_FREE</code></li>
+<li><code>DCGM_FI_DEV_GPU_UTIL</code></li>
+</ul>
+<p>That gives the control plane a second layer of visibility: not only “some GPUs exist”, but also whether those GPUs are currently busy and how much frame-buffer memory they are consuming.</p>
+<h2 id="exposing-runtime-metrics-through-the-controller-metrics-endpoint">Exposing Runtime Metrics Through The Controller Metrics Endpoint</h2>
+<p>For Part 11, I did not add another custom HTTP server just for metrics.
+Instead, the manager now registers a Prometheus collector on the existing controller-runtime metrics registry.</p>
+<p>That gives us live metrics on the manager metrics endpoint.</p>
+<p>In local development, the sample config now exposes metrics on:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="text"><code><span class="line"><span>:8082</span></span></code></pre>
+<p>If you also want device-level Nvidia telemetry, configure a DCGM exporter endpoint:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#8BE9FD">nvidiaMetricsEndpoint</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">http://dcgm-exporter.kube-system.svc.cluster.local:9400/metrics</span><span style="color:#E9F284">"</span></span></code></pre>
+<p>So you can inspect them with:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#F1FA8C"> http://127.0.0.1:8082/metrics</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> rg</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">^runtime_</span><span style="color:#E9F284">'</span></span></code></pre>
+<p>The new metric families include:</p>
+<ul>
+<li><code>runtime_kubernetes_up</code></li>
+<li><code>runtime_kubernetes_nodes_total</code></li>
+<li><code>runtime_kubernetes_nodes_ready</code></li>
+<li><code>runtime_kubernetes_node_ready{node=...}</code></li>
+<li><code>runtime_kubernetes_node_gpu_capacity{node=...,gpu_product=...}</code></li>
+<li><code>runtime_kubernetes_node_gpu_allocatable{node=...,gpu_product=...}</code></li>
+<li><code>runtime_nvidia_metrics_up</code></li>
+<li><code>runtime_nvidia_gpu_devices_total</code></li>
+<li><code>runtime_nvidia_gpu_memory_used_mib{node=...,gpu=...,uuid=...,gpu_product=...}</code></li>
+<li><code>runtime_nvidia_gpu_memory_free_mib{node=...,gpu=...,uuid=...,gpu_product=...}</code></li>
+<li><code>runtime_nvidia_gpu_memory_total_mib{node=...,gpu=...,uuid=...,gpu_product=...}</code></li>
+<li><code>runtime_nvidia_gpu_utilization_percent{node=...,gpu=...,uuid=...,gpu_product=...}</code></li>
+<li><code>runtime_gpu_units{lifecycle=...,phase=...}</code></li>
+<li><code>runtime_gpu_storages{phase=...}</code></li>
+<li><code>runtime_gpu_storage_prepare{phase=...}</code></li>
+<li><code>runtime_gpu_storage_accessor{phase=...}</code></li>
+</ul>
+<p>This is enough to answer several operational questions immediately:</p>
+<ul>
+<li>did a node disappear?</li>
+<li>did allocatable GPU count drop?</li>
+<li>are GPU devices running hot on memory or utilization?</li>
+<li>are units piling up in <code>Progressing</code> or <code>Failed</code>?</li>
+<li>are storage prepare jobs or accessors getting stuck?</li>
+</ul>
+<h2 id="what-nvidia-gpu-monitoring-means-in-this-chapter">What “Nvidia GPU Monitoring” Means In This Chapter</h2>
+<p>It is worth being precise here.</p>
+<p>Part 11 adds two layers of Nvidia monitoring.</p>
+<p>The first layer is <strong>inventory and schedulable-capacity monitoring</strong>:</p>
+<ul>
+<li>total capacity</li>
+<li>allocatable capacity</li>
+<li>product grouping by <code>nvidia.com/gpu.product</code></li>
+</ul>
+<p>The second layer, when a DCGM exporter endpoint is configured, is <strong>device-level runtime telemetry</strong>:</p>
+<ul>
+<li>used frame-buffer memory</li>
+<li>free frame-buffer memory</li>
+<li>derived total frame-buffer memory</li>
+<li>GPU utilization percent</li>
+</ul>
+<p>It still does <strong>not</strong> yet expose everything that Nvidia telemetry could provide, such as:</p>
+<ul>
+<li>SM occupancy</li>
+<li>memory bandwidth</li>
+<li>power draw</li>
+<li>temperature</li>
+</ul>
+<p>Those richer signals are still a better fit for the Nvidia GPU Operator plus DCGM exporter, and the runtime manager is now consuming a small but useful subset of them.</p>
+<p>So the platform boundary in this chapter is:</p>
+<ul>
+<li>the runtime manager owns cluster-facing inventory and lifecycle metrics</li>
+<li>the runtime manager can also surface a selected slice of device-level GPU telemetry by scraping a DCGM-compatible metrics endpoint</li>
+<li>deeper node-level observability can continue to live in the node telemetry stack</li>
+</ul>
+<p>That split keeps the runtime control plane small while still making both scheduling problems and basic GPU usage drift visible.</p>
+<h2 id="verification">Verification</h2>
+<p>There are a few good checks after implementing this chapter.</p>
+<h3 id="1-inspect-the-hardened-podspec">1. Inspect the hardened PodSpec</h3>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> deploy</span><span style="color:#F1FA8C"> unit-demo-instance</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span><span style="color:#BD93F9"> -o</span><span style="color:#F1FA8C"> yaml</span></span></code></pre>
+<p>Check for:</p>
+<ul>
+<li><code>allowPrivilegeEscalation: false</code></li>
+<li>dropped capabilities</li>
+<li><code>seccompProfile: RuntimeDefault</code></li>
+<li><code>/dev/shm</code> mounted from a memory-backed volume</li>
+</ul>
+<h3 id="2-inspect-the-generated-networkpolicy">2. Inspect the generated <code>NetworkPolicy</code></h3>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> networkpolicy</span><span style="color:#F1FA8C"> egress-demo-instance</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span><span style="color:#BD93F9"> -o</span><span style="color:#F1FA8C"> yaml</span></span></code></pre>
+<p>Check for:</p>
+<ul>
+<li>DNS egress to <code>kube-system</code></li>
+<li>public egress with <code>except</code></li>
+<li>the blocked private and link-local CIDRs</li>
+</ul>
+<h3 id="3-inspect-health">3. Inspect health</h3>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/health</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>Check for:</p>
+<ul>
+<li><code>readyNodeCount</code></li>
+<li><code>totalGPUCapacity</code></li>
+<li><code>totalGPUAllocatable</code></li>
+<li><code>gpuProducts</code></li>
+<li><code>usedGpuMemoryMiB</code></li>
+<li><code>averageGpuUtilizationPercent</code></li>
+</ul>
+<h3 id="4-inspect-metrics">4. Inspect metrics</h3>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#F1FA8C"> http://127.0.0.1:8082/metrics</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> rg</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">^runtime_</span><span style="color:#E9F284">'</span></span></code></pre>
+<p>That should show runtime lifecycle metrics, node GPU inventory metrics, and, when configured, per-device Nvidia memory and utilization metrics.</p>
+<h2 id="summary">Summary</h2>
+<p>Part 11 is where the runtime stops being only a controller that can launch Pods and starts behaving more like a production platform.</p>
+<p>We now have:</p>
+<ul>
+<li>stricter security contexts and capability drops across runtime and helper workloads</li>
+<li>a sized <code>/dev/shm</code> contract for GPU-heavy applications</li>
+<li>egress isolation that blocks common internal and host-facing ranges while preserving narrow FRP exceptions</li>
+<li>richer health output with node readiness and Nvidia GPU inventory</li>
+<li>live Prometheus metrics for unit, storage, cluster GPU capacity, and DCGM-backed device memory and utilization state</li>
+</ul>
+<p>That is a much stronger boundary than “the Pod is running, so it must be fine.”</p>
+<p>A production control plane should not only create workloads. It should also defend them and explain their state.</p>
+<h2 id="next-chapter-preview">Next Chapter Preview</h2>
+<p>Part 12 will move one layer higher and start building the control channels around the runtime plane: sidecar communication paths for NATS, Kafka, and SSH-oriented workflows, along with the first serverless-oriented pieces of the architecture.</p>
+<h2 id="repository">Repository</h2>
+<p>Code for this chapter:</p>
+<ul>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank">gpu-operator-runtime</a></li>
+</ul>  <section class="not-prose mt-16" aria-labelledby="comments-heading"><hr class="border-solid"><div class="mt-10 space-y-5"><div class="space-y-2"><h2 id="comments-heading" class="text-xl font-semibold text-accent-2">
+Comments
+</h2><p class="text-sm text-textColor/80">
+Join the discussion with your GitHub account. Powered by <a href="https://giscus.app" target="_blank" rel="noreferrer">
+giscus
+</a>
+.
+</p></div><div class="rounded-2xl border border-zinc-300/70 bg-bgColor/40 p-3 dark:border-zinc-700/80"><giscus-comments class="block"><div class="giscus"></div></giscus-comments><noscript><p class="px-3 py-2 text-sm text-textColor/80">
+Enable JavaScript to load the comment thread.
+</p></noscript></div></div></section><script>(function(){const giscusConfig = {"repo":"LokiWager/lokiwager.github.io","repoId":"R_kgDOK5t_Dg","category":"Announcements","categoryId":"DIC_kwDOK5t_Ds4C4eyH","mapping":"pathname","strict":"0","reactionsEnabled":"1","emitMetadata":"0","inputPosition":"top","lang":"en","loading":"lazy","theme":{"light":"light","dark":"dark_dimmed"}};
+
+	class GiscusComments extends HTMLElement {
+		container = null;
+
+		handleThemeChange = (event) => {
+			const nextTheme =
+				event instanceof CustomEvent && typeof event.detail?.theme === "string"
+					? event.detail.theme
+					: undefined;
+			this.syncTheme(nextTheme);
+		};
+
+		connectedCallback() {
+			this.container = this.querySelector(".giscus");
+			this.loadWidget();
+			document.addEventListener("theme-change", this.handleThemeChange);
+		}
+
+		disconnectedCallback() {
+			document.removeEventListener("theme-change", this.handleThemeChange);
+		}
+
+		loadWidget() {
+			if (!giscusConfig || !this.container || this.container.dataset.loaded === "true") {
+				return;
+			}
+
+			const script = document.createElement("script");
+			script.src = "https://giscus.app/client.js";
+			script.async = true;
+			script.crossOrigin = "anonymous";
+			script.dataset.giscusScript = "true";
+			script.setAttribute("data-repo", giscusConfig.repo);
+			script.setAttribute("data-repo-id", giscusConfig.repoId);
+			script.setAttribute("data-category", giscusConfig.category);
+			script.setAttribute("data-category-id", giscusConfig.categoryId);
+			script.setAttribute("data-mapping", giscusConfig.mapping);
+			script.setAttribute("data-strict", giscusConfig.strict);
+			script.setAttribute("data-reactions-enabled", giscusConfig.reactionsEnabled);
+			script.setAttribute("data-emit-metadata", giscusConfig.emitMetadata);
+			script.setAttribute("data-input-position", giscusConfig.inputPosition);
+			script.setAttribute("data-lang", giscusConfig.lang);
+			script.setAttribute("data-loading", giscusConfig.loading);
+			script.setAttribute("data-theme", this.resolveTheme());
+
+			if (giscusConfig.term) {
+				script.setAttribute("data-term", giscusConfig.term);
+			}
+
+			this.container.append(script);
+			this.container.dataset.loaded = "true";
+		}
+
+		resolveTheme(theme) {
+			const activeTheme =
+				theme ?? (document.documentElement.classList.contains("dark") ? "dark" : "light");
+			return activeTheme === "dark" ? giscusConfig.theme.dark : giscusConfig.theme.light;
+		}
+
+		syncTheme(theme) {
+			const iframe = this.container?.querySelector("iframe.giscus-frame");
+
+			if (!iframe?.contentWindow) {
+				return;
+			}
+
+			// giscus updates live through a postMessage bridge after the iframe has mounted.
+			iframe.contentWindow.postMessage(
+				{
+					giscus: {
+						setConfig: {
+							theme: this.resolveTheme(theme),
+						},
+					},
+				},
+				"https://giscus.app",
+			);
+		}
+	}
+
+	if (!customElements.get("giscus-comments")) {
+		customElements.define("giscus-comments", GiscusComments);
+	}
+})();</script>  </div> </article> <aside class="sticky top-20 order-2 hidden lg:block"> <h2 class="font-semibold">Table of Contents</h2> <ul class="mt-4 text-sm"> <li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#chapter-goal" aria-label="Scroll to section: Chapter Goal">Chapter Goal</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#security-should-be-a-default-not-an-opt-in" aria-label="Scroll to section: Security Should Be A Default, Not An Opt-In">Security Should Be A Default, Not An Opt-In</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#devshm-is-a-real-runtime-requirement" aria-label="Scroll to section: /dev/shm Is A Real Runtime Requirement">/dev/shm Is A Real Runtime Requirement</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#egress-isolation-should-be-simple-and-explainable" aria-label="Scroll to section: Egress Isolation Should Be Simple And Explainable">Egress Isolation Should Be Simple And Explainable</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#runtime-health-needs-more-than-the-process-is-up" aria-label="Scroll to section: Runtime Health Needs More Than “the Process Is Up”">Runtime Health Needs More Than “the Process Is Up”</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#exposing-runtime-metrics-through-the-controller-metrics-endpoint" aria-label="Scroll to section: Exposing Runtime Metrics Through The Controller Metrics Endpoint">Exposing Runtime Metrics Through The Controller Metrics Endpoint</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#what-nvidia-gpu-monitoring-means-in-this-chapter" aria-label="Scroll to section: What “Nvidia GPU Monitoring” Means In This Chapter">What “Nvidia GPU Monitoring” Means In This Chapter</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#verification" aria-label="Scroll to section: Verification">Verification</a> <ul> <li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#1-inspect-the-hardened-podspec" aria-label="Scroll to section: 1. Inspect the hardened PodSpec">1. Inspect the hardened PodSpec</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#2-inspect-the-generated-networkpolicy" aria-label="Scroll to section: 2. Inspect the generated NetworkPolicy">2. Inspect the generated NetworkPolicy</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#3-inspect-health" aria-label="Scroll to section: 3. Inspect health">3. Inspect health</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#4-inspect-metrics" aria-label="Scroll to section: 4. Inspect metrics">4. Inspect metrics</a>  </li> </ul> </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#summary" aria-label="Scroll to section: Summary">Summary</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#next-chapter-preview" aria-label="Scroll to section: Next Chapter Preview">Next Chapter Preview</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#repository" aria-label="Scroll to section: Repository">Repository</a>  </li> </ul> </aside> </div> <button id="to-top-btn" class="z-90 fixed bottom-8 end-4 flex h-10 w-10 translate-y-28 items-center justify-center rounded-full border-2 border-transparent bg-zinc-200 text-3xl opacity-0 transition-all duration-300 hover:border-zinc-400 data-[show=true]:translate-y-0 data-[show=true]:opacity-100 dark:bg-zinc-700 sm:end-8 sm:h-12 sm:w-12" aria-label="Back to Top" data-show="false"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6"> <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path> </svg> </button>  </main> <footer class="mt-auto flex w-full flex-col items-center justify-center gap-y-2 px-8 pb-4 pt-20 text-center align-top font-semibold text-gray-600 dark:text-gray-400 sm:flex-row sm:justify-between sm:text-xs lg:px-0"> <div class="me-0 sm:me-4">
+Copyright &copy; 2026  Loki&#39;s Wager </div> <nav aria-label="More on this site" class="flex gap-x-2 sm:gap-x-0 sm:divide-x sm:divide-gray-500"> <!--{--> <!--	menuLinks.map((link) => (--> <!--		<a--> <!--			href={link.path}--> <!--			class="px-4 py-2 sm:px-2 sm:py-0 sm:hover:text-textColor sm:hover:underline"--> <!--		>--> <!--			{link.title}--> <!--		</a>--> <!--	))--> <!--}--> <div class="flex flex-wrap items-end gap-x-4"> <!--<p>Find me on</p>--> <ul class="flex flex-1 items-center gap-x-2 sm:flex-initial"> <li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://github.com/LokiWager" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:github">   <symbol id="ai:mdi:github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5c.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34c-.46-1.16-1.11-1.47-1.11-1.47c-.91-.62.07-.6.07-.6c1 .07 1.53 1.03 1.53 1.03c.87 1.52 2.34 1.07 2.91.83c.09-.65.35-1.09.63-1.34c-2.22-.25-4.55-1.11-4.55-4.92c0-1.11.38-2 1.03-2.71c-.1-.25-.45-1.29.1-2.64c0 0 .84-.27 2.75 1.02c.79-.22 1.65-.33 2.5-.33s1.71.11 2.5.33c1.91-1.29 2.75-1.02 2.75-1.02c.55 1.35.2 2.39.1 2.64c.65.71 1.03 1.6 1.03 2.71c0 3.82-2.34 4.66-4.57 4.91c.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2"/></symbol><use href="#ai:mdi:github"></use>  </svg> <span class="sr-only">Github</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://twitter.com/loki66118227" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:twitter">   <symbol id="ai:mdi:twitter" viewBox="0 0 24 24"><path fill="currentColor" d="M22.46 6c-.77.35-1.6.58-2.46.69c.88-.53 1.56-1.37 1.88-2.38c-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29c0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15c0 1.49.75 2.81 1.91 3.56c-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.2 4.2 0 0 1-1.93.07a4.28 4.28 0 0 0 4 2.98a8.52 8.52 0 0 1-5.33 1.84q-.51 0-1.02-.06C3.44 20.29 5.7 21 8.12 21C16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56c.84-.6 1.56-1.36 2.14-2.23"/></symbol><use href="#ai:mdi:twitter"></use>  </svg> <span class="sr-only">Twitter</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="mailto:lokitingyi@gmail.com" target="_blank" rel="noopener noreferrer me authn"> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:email">   <symbol id="ai:mdi:email" viewBox="0 0 24 24"><path fill="currentColor" d="m20 8l-8 5l-8-5V6l8 5l8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"/></symbol><use href="#ai:mdi:email"></use>  </svg> <span class="sr-only">email</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://space.bilibili.com/4810234" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="ri:bilibili-fill">   <symbol id="ai:ri:bilibili-fill" viewBox="0 0 24 24"><path fill="currentColor" d="M18.223 3.086a1.25 1.25 0 0 1 0 1.768L17.08 5.996h1.17A3.75 3.75 0 0 1 22 9.747v7.5a3.75 3.75 0 0 1-3.75 3.75H5.75A3.75 3.75 0 0 1 2 17.247v-7.5a3.75 3.75 0 0 1 3.75-3.75h1.166L5.775 4.855a1.25 1.25 0 0 1 1.767-1.768l2.652 2.652q.119.119.198.257h3.213q.08-.14.199-.258l2.651-2.652a1.25 1.25 0 0 1 1.768 0m.027 5.42H5.75a1.25 1.25 0 0 0-1.247 1.157l-.003.094v7.5c0 .659.51 1.198 1.157 1.246l.093.004h12.5a1.25 1.25 0 0 0 1.247-1.157l.003-.093v-7.5c0-.69-.56-1.25-1.25-1.25m-10 2.5c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25m7.5 0c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25"/></symbol><use href="#ai:ri:bilibili-fill"></use>  </svg> <span class="sr-only">Bilibili</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://www.instagram.com/lokiwager/" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:instagram">   <symbol id="ai:mdi:instagram" viewBox="0 0 24 24"><path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4zm9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3"/></symbol><use href="#ai:mdi:instagram"></use>  </svg> <span class="sr-only">Instagram</span> </a> </li> </ul> </div> </nav> </footer> </body></html> <script type="module">const e=document.getElementById("to-top-btn"),n=document.getElementById("blog-hero");function c(t){t.forEach(o=>{e.dataset.show=(!o.isIntersecting).toString()})}e.addEventListener("click",()=>{document.documentElement.scrollTo({top:0,behavior:"smooth"})});const r=new IntersectionObserver(c);r.observe(n);</script>
