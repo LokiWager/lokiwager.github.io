@@ -11,7 +11,6 @@ I learned this lesson the hard way when I was still a student. I once published 
 
 Once a service is running, logs and traces alone are not enough. We need a small set of meaningful signals that tells us whether the system is healthy, whether capacity is drifting, and whether user-facing entrypoints are starting to fail. Structured logs, tracing, and metrics all matter, but more signals are not automatically better. Every metric costs storage, every alert can create noise, and a noisy system makes real failures harder to see. Choosing the right metrics, and the right alerts on top of them, is one of the more demanding parts of SRE work.
 
-
 ## Chapter Goal
 
 By the end of Part 11, the runtime has four new properties:
@@ -139,25 +138,25 @@ The `/api/v1/health` payload now includes fields like:
 
 ```json
 {
-  "kubernetesConnected": true,
-  "nodeCount": 3,
-  "readyNodeCount": 3,
-  "totalGPUCapacity": 12,
-  "totalGPUAllocatable": 10,
-  "nvidiaMetricsConnected": true,
-  "gpuDeviceCount": 8,
-  "totalGpuMemoryMiB": 393216,
-  "usedGpuMemoryMiB": 126000,
-  "freeGpuMemoryMiB": 267216,
-  "averageGpuUtilizationPercent": 41.5,
-  "gpuProducts": [
-    {
-      "product": "NVIDIA-L40S",
-      "nodeCount": 2,
-      "capacity": 8,
-      "allocatable": 6
-    }
-  ]
+	"kubernetesConnected": true,
+	"nodeCount": 3,
+	"readyNodeCount": 3,
+	"totalGPUCapacity": 12,
+	"totalGPUAllocatable": 10,
+	"nvidiaMetricsConnected": true,
+	"gpuDeviceCount": 8,
+	"totalGpuMemoryMiB": 393216,
+	"usedGpuMemoryMiB": 126000,
+	"freeGpuMemoryMiB": 267216,
+	"averageGpuUtilizationPercent": 41.5,
+	"gpuProducts": [
+		{
+			"product": "NVIDIA-L40S",
+			"nodeCount": 2,
+			"capacity": 8,
+			"allocatable": 6
+		}
+	]
 }
 ```
 
