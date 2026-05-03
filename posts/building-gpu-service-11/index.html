@@ -286,7 +286,7 @@ Instead, the manager now registers a Prometheus collector on the existing contro
 <p>That is a much stronger boundary than “the Pod is running, so it must be fine.”</p>
 <p>A production control plane should not only create workloads. It should also defend them and explain their state.</p>
 <h2 id="next-chapter-preview">Next Chapter Preview</h2>
-<p>Part 12 will move one layer higher and start building the control channels around the runtime plane: sidecar communication paths for NATS, Kafka, and SSH-oriented workflows, along with the first serverless-oriented pieces of the architecture.</p>
+<p>Part 12 will pause the serverless control-path work for a moment and focus on a lower-level prerequisite: cold start. Large GPU images are expensive to pull and unpack, so the next chapter explains how OverlayBD changes the startup path and adds a small offline image-acceleration tool around the official userspace convertor.</p>
 <h2 id="repository">Repository</h2>
 <p>Code for this chapter:</p>
 <ul>
