@@ -332,7 +332,7 @@ A production control plane should not only create workloads. It should also defe
 
 ## Next Chapter Preview
 
-Part 12 will move one layer higher and start building the control channels around the runtime plane: sidecar communication paths for NATS, Kafka, and SSH-oriented workflows, along with the first serverless-oriented pieces of the architecture.
+Part 12 will pause the serverless control-path work for a moment and focus on a lower-level prerequisite: cold start. Large GPU images are expensive to pull and unpack, so the next chapter explains how OverlayBD changes the startup path and adds a small offline image-acceleration tool around the official userspace convertor.
 
 ## Repository
 
