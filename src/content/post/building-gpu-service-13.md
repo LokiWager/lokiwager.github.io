@@ -1,6 +1,6 @@
 ---
 title: "Building a GPU SaaS Platform - Queue-First Ingress"
-publishDate: "3 May 2026"
+publishDate: "10 May 2026"
 description: "Part 13: record the runtime-side serverless contract on GPU units and enqueue invocations durably through NATS JetStream before any worker executes them."
 tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator", "Serverless", "NATS"]
 ---
