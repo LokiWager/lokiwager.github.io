@@ -2,7 +2,7 @@
 title: "Building a GPU SaaS Platform - Queue-First Ingress"
 publishDate: "3 May 2026"
 description: "Part 13: record the runtime-side serverless contract on GPU units and enqueue invocations durably through NATS JetStream before any worker executes them."
-tags: [ "GPU", "SaaS", "Kubernetes", "Golang", "Operator", "Serverless", "NATS" ]
+tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator", "Serverless", "NATS"]
 ---
 
 In Part 12, we dealt with cold start at the image level. That gave us a better startup path for large GPU images, but it still did not answer a more
@@ -138,11 +138,11 @@ A simplified request looks like this:
 
 ```json
 {
-  "serverlessRequestID": "sd-webui",
-  "mode": "sync",
-  "payload": {
-    "prompt": "draw a robot"
-  }
+	"serverlessRequestID": "sd-webui",
+	"mode": "sync",
+	"payload": {
+		"prompt": "draw a robot"
+	}
 }
 ```
 
