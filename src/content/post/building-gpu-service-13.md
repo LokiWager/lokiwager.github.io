@@ -58,7 +58,9 @@ The end-to-end path is supposed to look like this:
 3. the control plane forwards the validated request into the platform's internal request path
 4. the internal runtime-facing layer forwards the invocation to the runtime manager or operator API
 5. the runtime manager persists the invocation into NATS JetStream
-6. a later activator service consumes that durable request, decides whether to reuse or create a worker, and only then dispatches execution
+6. a later activator service consumes that durable request, decides whether to reuse or create a worker, and publishes a worker-targeted dispatch message
+7. the worker sidecar consumes that dispatch message, calls the local worker framework over an internal protocol, and keeps NATS credentials away from the user workload
+8. the worker sidecar publishes the result, sync reply, and metrics paths back into NATS
 
 This chapter implements step 5.
 
@@ -127,8 +129,8 @@ runtime.serverless.result.<requestID>
 runtime.serverless.metrics.<requestID>
 ```
 
-Only the invocation publish path is used today, but the result and metrics subjects are already part of the shared contract so that the activator and
-worker sidecar can reuse the same identity in the next chapter.
+Only the invocation publish path is used today, but the result and metrics subjects are already part of the shared contract so that the activator,
+worker sidecar, and local framework boundary can reuse the same identity in the next chapter.
 
 ## The Shared Invocation Contract
 
@@ -291,8 +293,9 @@ instead of inventing request identity and queue semantics from scratch.
 
 ## Next Chapter Preview
 
-Part 14 will add the dedicated activator service. That chapter will consume the invocation subjects, decide when to create or reuse `GPUUnit` workers,
-and connect the durable ingress path to real worker execution.
+Part 14 will add the dedicated activator service and the worker-dispatch boundary. That chapter will consume the invocation subjects, decide when to
+create or reuse `GPUUnit` workers, publish worker-targeted dispatch messages, and define how the worker sidecar and local framework split
+responsibilities.
 
 ## Repository
 
