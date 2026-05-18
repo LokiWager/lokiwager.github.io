@@ -88,7 +88,9 @@ directly, and does <strong>not</strong> call the runtime manager directly.</p>
 <li>the control plane forwards the validated request into the platform’s internal request path</li>
 <li>the internal runtime-facing layer forwards the invocation to the runtime manager or operator API</li>
 <li>the runtime manager persists the invocation into NATS JetStream</li>
-<li>a later activator service consumes that durable request, decides whether to reuse or create a worker, and only then dispatches execution</li>
+<li>a later activator service consumes that durable request, decides whether to reuse or create a worker, and publishes a worker-targeted dispatch message</li>
+<li>the worker sidecar consumes that dispatch message, calls the local worker framework over an internal protocol, and keeps NATS credentials away from the user workload</li>
+<li>the worker sidecar publishes the result, sync reply, and metrics paths back into NATS</li>
 </ol>
 <p>This chapter implements step 5.</p>
 <p>That is why the public request URL is <strong>not</strong> part of this repository, and why the endpoint added here:</p>
@@ -130,8 +132,8 @@ so duplicate publishes can be detected by the stream.</p>
 <pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="text"><code><span class="line"><span>runtime.serverless.invoke.&#x3C;requestID></span></span>
 <span class="line"><span>runtime.serverless.result.&#x3C;requestID></span></span>
 <span class="line"><span>runtime.serverless.metrics.&#x3C;requestID></span></span></code></pre>
-<p>Only the invocation publish path is used today, but the result and metrics subjects are already part of the shared contract so that the activator and
-worker sidecar can reuse the same identity in the next chapter.</p>
+<p>Only the invocation publish path is used today, but the result and metrics subjects are already part of the shared contract so that the activator,
+worker sidecar, and local framework boundary can reuse the same identity in the next chapter.</p>
 <h2 id="the-shared-invocation-contract">The Shared Invocation Contract</h2>
 <p>The new ingress endpoint uses one invocation envelope for both synchronous and asynchronous calls.</p>
 <p>A simplified request looks like this:</p>
@@ -244,8 +246,9 @@ happens. In the full platform, that enqueue happens only after the control plane
 internal runtime path. That gives the next chapter a clean starting point: the activator can focus on worker selection and lifecycle management
 instead of inventing request identity and queue semantics from scratch.</p>
 <h2 id="next-chapter-preview">Next Chapter Preview</h2>
-<p>Part 14 will add the dedicated activator service. That chapter will consume the invocation subjects, decide when to create or reuse <code>GPUUnit</code> workers,
-and connect the durable ingress path to real worker execution.</p>
+<p>Part 14 will add the dedicated activator service and the worker-dispatch boundary. That chapter will consume the invocation subjects, decide when to
+create or reuse <code>GPUUnit</code> workers, publish worker-targeted dispatch messages, and define how the worker sidecar and local framework split
+responsibilities.</p>
 <h2 id="repository">Repository</h2>
 <p>Code for this chapter:</p>
 <ul>
