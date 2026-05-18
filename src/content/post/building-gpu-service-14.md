@@ -2,7 +2,7 @@
 title: "Building a GPU SaaS Platform - Activator Dispatch"
 publishDate: "17 May 2026"
 description: "Part 14: add a dedicated activator that consumes ingress invocations, selects or creates GPUUnit workers, and publishes worker-targeted dispatch messages."
-tags: [ "GPU", "SaaS", "Kubernetes", "Golang", "Operator", "Serverless", "NATS" ]
+tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator", "Serverless", "NATS"]
 ---
 
 In Part 13, we finally gave serverless requests a durable entrypoint. Every invocation now enters NATS JetStream before any worker executes it.
