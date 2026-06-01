@@ -7,9 +7,9 @@ tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator", "Serverless", "NATS"]
 
 In Part 14, the activator finally knew how to turn one ingress invocation into one worker-targeted dispatch message.
 
-这一章，我们要将 side-car 这边开发完整，并定义好 framework 的数据结构。当请求进入到 Nats 时，会被 activator 接收， 然后会根据情况决定是否启动 worker 还是复用已有的 worker。
-当 worker 存在时，请求会被 dispatch 给相应的 worker。我们的 worker 是由 side-car 和 framework container 组成。side-car 负责验证和接受请求，因为我们不能让 Nats 的凭证，存储
-到用户的 container 中，这样不安全。然后让 side-car 和 main container 通过 uds 通信，不仅效率比较好，而且更安全。
+In this chapter, we finish the worker-side path and define the framework data contract. Once a request enters NATS, the activator receives it and decides whether to start a worker or reuse one that is already available.
+
+When a worker exists, the request is dispatched to that worker. Each worker Pod is made of a sidecar and a framework container. The sidecar validates and accepts the request because we do not want NATS credentials stored inside the user container. The sidecar and the main container then communicate over UDS, which is both more efficient and more secure.
 
 ## Chapter Goal
 
