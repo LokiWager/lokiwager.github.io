@@ -115,25 +115,25 @@ The sidecar sends one JSON payload like this:
 
 ```json
 {
-  "version": "v1",
-  "invocationID": "inv-1234",
-  "serverlessRequestID": "sd-webui",
-  "workerName": "unit-sd-webui-a",
-  "workerNamespace": "runtime-instance",
-  "mode": "sync",
-  "contentType": "application/json",
-  "headers": {
-    "x-request-id": "abc"
-  },
-  "attributes": {
-    "path": "/generate",
-    "method": "POST"
-  },
-  "payload": {
-    "prompt": "draw a robot"
-  },
-  "timeoutSeconds": 30,
-  "dispatchedAt": "2026-05-18T10:00:00Z"
+	"version": "v1",
+	"invocationID": "inv-1234",
+	"serverlessRequestID": "sd-webui",
+	"workerName": "unit-sd-webui-a",
+	"workerNamespace": "runtime-instance",
+	"mode": "sync",
+	"contentType": "application/json",
+	"headers": {
+		"x-request-id": "abc"
+	},
+	"attributes": {
+		"path": "/generate",
+		"method": "POST"
+	},
+	"payload": {
+		"prompt": "draw a robot"
+	},
+	"timeoutSeconds": 30,
+	"dispatchedAt": "2026-05-18T10:00:00Z"
 }
 ```
 
@@ -141,14 +141,14 @@ And the framework returns one JSON envelope like this:
 
 ```json
 {
-  "statusCode": 200,
-  "contentType": "application/json",
-  "headers": {
-    "x-model": "demo"
-  },
-  "body": {
-    "imageURL": "s3://bucket/out.png"
-  }
+	"statusCode": 200,
+	"contentType": "application/json",
+	"headers": {
+		"x-model": "demo"
+	},
+	"body": {
+		"imageURL": "s3://bucket/out.png"
+	}
 }
 ```
 
