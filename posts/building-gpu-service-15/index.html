@@ -1,0 +1,464 @@
+<!DOCTYPE html><html lang="en-GB"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Building a GPU SaaS Platform - Worker Sidecar • Loki&#39;s Wager</title><link rel="icon" href="/logo.png" sizes="any"><!--<link rel="icon" href="/icon.svg" type="image/svg+xml" />--><!--<link rel="apple-touch-icon" href="/apple-touch-icon.png" />--><!--<link rel="manifest" href="/manifest.webmanifest" />--><!--<link rel="canonical" href={canonicalURL} />--><meta name="title" content="Building a GPU SaaS Platform - Worker Sidecar • Loki's Wager"><meta name="description" content="Part 15: add a serverless worker sidecar, define a UDS framework contract, and return results and metrics through NATS."><meta name="author" content="Loki's Wager"><meta name="theme-color" content=""><meta property="og:type" content="article"><meta property="og:title" content="Building a GPU SaaS Platform - Worker Sidecar"><meta property="og:description" content="Part 15: add a serverless worker sidecar, define a UDS framework contract, and return results and metrics through NATS."><meta property="og:url" content="https://lokiwager.app/posts/building-gpu-service-15/"><meta property="og:site_name" content="Loki's Wager"><meta property="og:locale" content="en_GB"><meta property="og:image" content="https://lokiwager.app/og-image/building-gpu-service-15.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="article:author" content="Loki's Wager"><meta property="article:published_time" content="2026-05-31T00:00:00.000Z"><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://lokiwager.app/posts/building-gpu-service-15/"><meta property="twitter:title" content="Building a GPU SaaS Platform - Worker Sidecar"><meta property="twitter:description" content="Part 15: add a serverless worker sidecar, define a UDS framework contract, and return results and metrics through NATS."><meta property="twitter:image" content="https://lokiwager.app/og-image/building-gpu-service-15.png"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="Loki's Wager" href="/rss.xml"><link rel="webmention" href="https://webmention.io/lokiwager.github.io/webmention"><meta name="generator" content="Astro v6.0.4"><link rel="stylesheet" href="/_astro/Base.BJw5bl6Q.css"><script type="module" src="/_astro/page.DHhHZKgE.js"></script></head> <body> <script>
+	function getUserPref() {
+		const storedTheme = typeof localStorage !== "undefined" && localStorage.getItem("theme");
+		return (
+			storedTheme || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+		);
+	}
+
+	function setTheme(newTheme) {
+		if (!newTheme || (newTheme !== "light" && newTheme !== "dark")) {
+			return console.warn(
+				`Incorrect theme value received. Expected 'light' or 'dark', received ${newTheme}`,
+			);
+		}
+
+		const root = document.documentElement;
+
+		// class already set to newTheme, exit early
+		if (
+			(newTheme === "dark" && root.classList.contains("dark")) ||
+			(newTheme === "light" && !root.classList.contains("dark"))
+		) {
+			return;
+		}
+
+		const colorThemeMetaTag = document.querySelector("meta[name='theme-color']");
+		document.documentElement.classList.toggle("dark", newTheme === "dark");
+		const bgColour = getComputedStyle(document.body).getPropertyValue("--theme-bg");
+
+		colorThemeMetaTag.setAttribute("content", `hsl(${bgColour})`);
+		if (typeof localStorage !== "undefined") {
+			localStorage.setItem("theme", newTheme);
+		}
+	}
+
+	// initial setup
+	setTheme(getUserPref());
+
+	// View Transitions hook to restore theme
+	document.addEventListener("astro:after-swap", () => setTheme(getUserPref()));
+
+	// listen for theme-change custom event, fired in src/components/ThemeToggle.astro
+	document.addEventListener("theme-change", (e) => {
+		setTheme(e.detail.theme);
+	});
+</script> <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:start-1 focus:top-1.5">skip to content
+</a> <header id="main-header" class="group relative mb-2 flex items-start px-8 lg:px-0"> <div class="flex items-start gap-4 sm:gap-6"> <a href="/" class="inline-flex shrink-0 grayscale hover:filter-none" aria-current="false"> <img src="/_astro/logo.BGWHXvnm_Z1DWcL4.png" alt="logo" loading="lazy" decoding="async" width="824" height="1115" class="w-8 sm:w-12"> </a> <div class="flex flex-col items-start"> <a href="/" class="inline-flex items-center" aria-current="false"> <span class="text-xl font-bold sm:text-2xl">Loki's Wager</span> </a> <nav id="navigation-menu" class="absolute -inset-x-4 top-14 hidden flex-col items-start gap-y-4 rounded-md bg-bgColor/[.85] py-4 text-accent shadow backdrop-blur group-[.menu-open]:z-50 group-[.menu-open]:flex sm:static sm:inset-auto sm:mt-1 sm:flex sm:flex-row sm:items-center sm:divide-x sm:divide-dashed sm:divide-accent sm:rounded-none sm:bg-transparent sm:py-0 sm:shadow-none sm:backdrop-blur-none" aria-label="Main menu"> <a href="/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:pl-0 sm:pr-4" aria-current="false" data-astro-prefetch> Home </a><a href="/about/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:px-4" aria-current="false" data-astro-prefetch> About </a><a href="/resume/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:px-4" aria-current="false" data-astro-prefetch> Resume </a><a href="/posts/" class="px-4 py-4 sm:py-0 sm:hover:underline sm:pl-4 sm:pr-0" aria-current="false" data-astro-prefetch> Blog </a> </nav> </div> </div> <div class="ms-auto flex items-center"> <site-search id="search" data-astro-cid-otpdt6jm="true"> <button data-open-modal disabled class="flex h-9 w-9 items-center justify-center rounded-md ring-zinc-400 transition-all hover:ring-2" data-astro-cid-otpdt6jm> <svg aria-label="search" class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" data-astro-cid-otpdt6jm> <path stroke="none" d="M0 0h24v24H0z" data-astro-cid-otpdt6jm></path> <path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" data-astro-cid-otpdt6jm></path> </svg> </button> <dialog aria-label="search" class="h-full max-h-full w-full max-w-full border border-zinc-400 bg-bgColor shadow backdrop:backdrop-blur sm:mx-auto sm:mb-auto sm:mt-16 sm:h-max sm:max-h-[calc(100%-8rem)] sm:min-h-[15rem] sm:w-5/6 sm:max-w-[48rem] sm:rounded-md" data-astro-cid-otpdt6jm> <div class="dialog-frame flex flex-col gap-4 p-6 pt-12 sm:pt-6" data-astro-cid-otpdt6jm> <button data-close-modal class="ms-auto cursor-pointer rounded-md bg-zinc-200 p-2 font-semibold dark:bg-zinc-700" data-astro-cid-otpdt6jm>Close</button> <div class="search-container" data-astro-cid-otpdt6jm> <div id="cactus__search" data-astro-cid-otpdt6jm></div> </div> </div> </dialog> </site-search> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.Cr3prLuB.js"></script>  <theme-toggle class="ms-2 sm:ms-4"> <button type="button" id="toggle-theme" class="relative h-9 w-9 rounded-md p-2 ring-zinc-400 transition-all hover:ring-2" aria-label="Toggle Dark Mode"> <svg id="sun-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-100 opacity-100 transition-all dark:scale-0 dark:opacity-0" aria-hidden="true" focusable="false" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg id="moon-svg" class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100" aria-hidden="true" focusable="false" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path> <path d="M19 11h2m-1 -1v2"></path> </svg> </button> </theme-toggle> <script type="module" src="/_astro/ThemeToggle.astro_astro_type_script_index_0_lang.BeM4B2Da.js"></script> <mobile-button> <button id="toggle-navigation-menu" class="group relative ms-4 h-7 w-7 sm:invisible sm:hidden" type="button" aria-label="Open main menu" aria-expanded="false" aria-haspopup="menu"> <svg id="line-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transition-all group-aria-expanded:scale-0 group-aria-expanded:opacity-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"></path> </svg> <svg id="cross-svg" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 text-accent opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path> </svg> </button> </mobile-button> </div> </header> <script type="module" src="/_astro/Header.astro_astro_type_script_index_0_lang.DcNQI66r.js"></script> <main id="main" class="mt-8 px-8 sm:mt-10 lg:px-0">  <div class="grid w-full max-w-none gap-x-10 lg:grid-cols-[5fr_1.4fr] lg:items-start"> <article class="min-w-0 break-words" data-pagefind-body> <div id="blog-hero"><h1 class="title mb-3 sm:mb-1"> Building a GPU SaaS Platform - Worker Sidecar </h1> <div class="flex flex-wrap items-center gap-x-3 gap-y-2"> <p class="font-semibold"> <time datetime="2026-05-31T00:00:00.000Z"> 31 May 2026 </time> /  8 min read </p>  </div> <div class="mt-3"> <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" class="me-1 inline-block h-6 w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z"></path> <path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116"></path> <path d="M6 9h-.01"></path> </svg>  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag gpu" href="/tags/gpu/" data-pagefind-filter="tag"> gpu </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag saas" href="/tags/saas/" data-pagefind-filter="tag"> saas </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag kubernetes" href="/tags/kubernetes/" data-pagefind-filter="tag"> kubernetes </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag golang" href="/tags/golang/" data-pagefind-filter="tag"> golang </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag operator" href="/tags/operator/" data-pagefind-filter="tag"> operator </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag serverless" href="/tags/serverless/" data-pagefind-filter="tag"> serverless </a> ,  <a class="cactus-link inline-block before:content-['#']" aria-label="View more blogs with the tag nats" href="/tags/nats/" data-pagefind-filter="tag"> nats </a>  </div></div> <div class="prose prose-sm prose-cactus mt-12 max-w-none prose-headings:font-semibold prose-headings:text-accent-2 prose-th:before:content-none">  <p>In Part 14, the activator finally knew how to turn one ingress invocation into one worker-targeted dispatch message.</p>
+<p>这一章，我们要将 side-car 这边开发完整，并定义好 framework 的数据结构。当请求进入到 Nats 时，会被 activator 接收， 然后会根据情况决定是否启动 worker 还是复用已有的 worker。
+当 worker 存在时，请求会被 dispatch 给相应的 worker。我们的 worker 是由 side-car 和 framework container 组成。side-car 负责验证和接受请求，因为我们不能让 Nats 的凭证，存储
+到用户的 container 中，这样不安全。然后让 side-car 和 main container 通过 uds 通信，不仅效率比较好，而且更安全。</p>
+<h2 id="chapter-goal">Chapter Goal</h2>
+<p>By the end of Part 15, the project has six new properties:</p>
+<ol>
+<li>serverless-enabled <code>GPUUnit</code> Pods now get a dedicated <code>serverless-sidecar</code></li>
+<li>that sidecar runs as a restartable init sidecar, just like the SSH path we introduced earlier</li>
+<li>the worker framework now has a concrete UDS-backed HTTP contract: <code>GET /healthz</code> and <code>POST /invoke</code></li>
+<li>the sidecar consumes <code>runtime.serverless.dispatch.&#x3C;requestID>.&#x3C;workerName></code></li>
+<li>the sidecar calls the local framework and then publishes results, sync replies, and metrics back into NATS</li>
+<li><code>GPUUnit.status.serverless</code> and <code>ServerlessReady</code> now expose the worker-side queue boundary in status</li>
+</ol>
+<h2 id="why-the-sidecar-owns-nats">Why The Sidecar Owns NATS</h2>
+<p>At this point, the trust split is no longer theoretical:</p>
+<ul>
+<li>the activator publishes a worker-targeted dispatch subject</li>
+<li>the sidecar consumes that subject</li>
+<li>the framework only serves a local UDS-backed HTTP API</li>
+<li>the user handler only runs behind the framework</li>
+</ul>
+<p>That means the only component that ever sees:</p>
+<ul>
+<li>NATS credentials</li>
+<li>durable subject names</li>
+<li>reply-subject wiring</li>
+<li>result or metrics publication</li>
+</ul>
+<p>is the sidecar.</p>
+<p>The framework never gets that power.</p>
+<p>That is important because the framework is still user-controlled code. Even if it is packaged as a “framework image”, it still sits much closer to user logic than to platform transport.</p>
+<p>So the platform boundary inside the Pod becomes:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="text"><code><span class="line"><span>dispatch subject</span></span>
+<span class="line"><span>  -> sidecar</span></span>
+<span class="line"><span>  -> local UDS contract</span></span>
+<span class="line"><span>  -> framework</span></span>
+<span class="line"><span>  -> user handler</span></span>
+<span class="line"><span>  -> framework</span></span>
+<span class="line"><span>  -> sidecar</span></span>
+<span class="line"><span>  -> result / reply / metrics subjects</span></span></code></pre>
+<p>That is the first worker design in this series that gives the platform a real transport boundary inside the Pod instead of only outside it.</p>
+<h2 id="why-the-framework-contract-lives-in-the-unit-spec">Why The Framework Contract Lives In The Unit Spec</h2>
+<p>The sidecar image is platform configuration.</p>
+<p>The local framework contract is workload configuration.</p>
+<p>Those are different things.</p>
+<p>The operator knows which sidecar image to inject because that belongs to the platform rollout. That is why the manager YAML now carries <code>serverlessWorker.image</code>, heartbeat cadence, and sidecar health-port defaults.</p>
+<p>But the framework’s local contract belongs to the worker itself.</p>
+<p>That is why <code>GPUUnit.spec.serverless</code> now grows a <code>framework</code> block:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#8BE9FD">serverless</span><span style="color:#FF79C6">:</span></span>
+<span class="line"><span style="color:#8BE9FD">  enabled</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> true</span></span>
+<span class="line"><span style="color:#8BE9FD">  requestID</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> sd-webui</span></span>
+<span class="line"><span style="color:#8BE9FD">  minAvailableCount</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 1</span></span>
+<span class="line"><span style="color:#8BE9FD">  idleTimeoutSeconds</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 300</span></span>
+<span class="line"><span style="color:#8BE9FD">  minRequestCount</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 0</span></span>
+<span class="line"><span style="color:#8BE9FD">  framework</span><span style="color:#FF79C6">:</span></span>
+<span class="line"><span style="color:#8BE9FD">    socketPath</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> /tmp/serverless-framework/framework.sock</span></span>
+<span class="line"><span style="color:#8BE9FD">    invokePath</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> /invoke</span></span>
+<span class="line"><span style="color:#8BE9FD">    healthPath</span><span style="color:#FF79C6">:</span><span style="color:#F1FA8C"> /healthz</span></span></code></pre>
+<p>This keeps the right ownership split:</p>
+<ul>
+<li>control plane chooses the serverless policy and request pool</li>
+<li>workload contract chooses the local framework endpoint</li>
+<li>operator injects the sidecar around that workload contract</li>
+</ul>
+<p>In other words, the operator is not inventing the framework surface. It is consuming and enforcing the worker contract already recorded on the unit.</p>
+<h2 id="the-local-framework-contract">The Local Framework Contract</h2>
+<p>The local protocol is intentionally narrow.</p>
+<p>The sidecar expects two HTTP endpoints over one shared unix domain socket:</p>
+<ul>
+<li><code>GET /healthz</code></li>
+<li><code>POST /invoke</code></li>
+</ul>
+<p>By default, that socket path is:</p>
+<ul>
+<li><code>/tmp/serverless-framework/framework.sock</code></li>
+</ul>
+<p>The <code>healthz</code> endpoint is only there so the sidecar can block startup until the framework is actually ready.</p>
+<p>The interesting part is the <code>invoke</code> envelope.</p>
+<p>The sidecar sends one JSON payload like this:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#F8F8F2">{</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">version</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">v1</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">invocationID</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">inv-1234</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">serverlessRequestID</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">sd-webui</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">workerName</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">unit-sd-webui-a</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">workerNamespace</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">runtime-instance</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">mode</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">sync</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">contentType</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">application/json</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">headers</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#8BE9FE">		"</span><span style="color:#8BE9FD">x-request-id</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">abc</span><span style="color:#E9F284">"</span></span>
+<span class="line"><span style="color:#F8F8F2">	},</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">attributes</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#8BE9FE">		"</span><span style="color:#8BE9FD">path</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">/generate</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">		"</span><span style="color:#8BE9FD">method</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">POST</span><span style="color:#E9F284">"</span></span>
+<span class="line"><span style="color:#F8F8F2">	},</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">payload</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#8BE9FE">		"</span><span style="color:#8BE9FD">prompt</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">draw a robot</span><span style="color:#E9F284">"</span></span>
+<span class="line"><span style="color:#F8F8F2">	},</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">timeoutSeconds</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 30</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">dispatchedAt</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">2026-05-18T10:00:00Z</span><span style="color:#E9F284">"</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>And the framework returns one JSON envelope like this:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#F8F8F2">{</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">statusCode</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#BD93F9"> 200</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">contentType</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">application/json</span><span style="color:#E9F284">"</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">headers</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#8BE9FE">		"</span><span style="color:#8BE9FD">x-model</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">demo</span><span style="color:#E9F284">"</span></span>
+<span class="line"><span style="color:#F8F8F2">	},</span></span>
+<span class="line"><span style="color:#8BE9FE">	"</span><span style="color:#8BE9FD">body</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#8BE9FE">		"</span><span style="color:#8BE9FD">imageURL</span><span style="color:#8BE9FE">"</span><span style="color:#FF79C6">:</span><span style="color:#E9F284"> "</span><span style="color:#F1FA8C">s3://bucket/out.png</span><span style="color:#E9F284">"</span></span>
+<span class="line"><span style="color:#F8F8F2">	}</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>That is an important design choice.</p>
+<p>The sidecar is not proxying raw HTTP from the public edge into the user container.
+It is sending a normalized invocation envelope.</p>
+<p>That means:</p>
+<ul>
+<li>the public ingress contract can evolve independently</li>
+<li>the worker contract stays stable even if the control plane changes</li>
+<li>metrics and result publication stay attached to one invocation ID</li>
+<li>retries remain a sidecar decision, not a user-handler decision</li>
+</ul>
+<h2 id="the-framework-helper-package">The Framework Helper Package</h2>
+<p>For this chapter, I wanted something more concrete than “you can imagine a local framework.”</p>
+<p>So the repo now includes a small helper package under:</p>
+<ul>
+<li><code>pkg/framework</code></li>
+</ul>
+<p>That package provides:</p>
+<ul>
+<li><code>NewHTTPHandler(...)</code> to build the local <code>/healthz</code> and <code>/invoke</code> endpoints</li>
+<li><code>ServeUnix(...)</code> to serve that handler over a shared unix domain socket</li>
+</ul>
+<p>The point is not to declare that every user workload must be written in Go.</p>
+<p>The point is to make the contract executable and explicit.</p>
+<p>If the user workload is written in Go, it can import the helper directly.
+If it is written in another language, it can still implement exactly the same wire contract.</p>
+<p>For local verification, the repo now also includes:</p>
+<ul>
+<li><code>cmd/framework-echo</code></li>
+</ul>
+<p>That binary is not meant to be the production framework.
+It is just a minimal worker-local implementation that echoes the invocation envelope back as JSON so the sidecar loop can be tested end to end.</p>
+<h2 id="the-worker-sidecar-loop">The Worker Sidecar Loop</h2>
+<p>The new sidecar binary lives at:</p>
+<ul>
+<li><code>cmd/serverless-sidecar</code></li>
+</ul>
+<p>and its core runtime logic lives at:</p>
+<ul>
+<li><code>pkg/workersidecar</code></li>
+</ul>
+<p>The loop is deliberately small:</p>
+<ol>
+<li>load worker identity and NATS config from injected env vars</li>
+<li>wait until the local framework health endpoint returns <code>200</code></li>
+<li>publish a <code>registered</code> worker metric event</li>
+<li>consume one concrete dispatch subject for one worker</li>
+<li>translate the dispatch message into the local framework invocation envelope</li>
+<li>call <code>POST /invoke</code> over the shared unix domain socket</li>
+<li>publish one durable invocation result</li>
+<li>publish one sync reply if the original invocation asked for <code>mode: "sync"</code></li>
+<li>publish lifecycle and execution events to the metrics subject</li>
+</ol>
+<p>That means the worker Pod now has a real execution loop instead of just a conceptual boundary.</p>
+<h2 id="why-the-sidecar-is-injected-as-a-restartable-init-sidecar">Why The Sidecar Is Injected As A Restartable Init Sidecar</h2>
+<p>We already used the restartable init-sidecar pattern for SSH.</p>
+<p>It also fits the serverless worker path well.</p>
+<p>The sidecar is not “the application” in the same sense as the user handler, but it must:</p>
+<ul>
+<li>start before the worker is considered meaningfully ready</li>
+<li>remain alive for the whole Pod lifetime</li>
+<li>be visible in container failure status</li>
+</ul>
+<p>That is exactly the same shape as the SSH sidecars.</p>
+<p>So the controller now injects <code>serverless-sidecar</code> as a restartable init sidecar when:</p>
+<ul>
+<li>the unit is an instance unit</li>
+<li><code>spec.serverless</code> is enabled</li>
+</ul>
+<p>The controller also injects framework contract env vars into the runtime container:</p>
+<ul>
+<li><code>SERVERLESS_REQUEST_ID</code></li>
+<li><code>SERVERLESS_WORKER_NAME</code></li>
+<li><code>SERVERLESS_WORKER_NAMESPACE</code></li>
+<li><code>SERVERLESS_FRAMEWORK_SOCKET_PATH</code></li>
+<li><code>SERVERLESS_FRAMEWORK_INVOKE_PATH</code></li>
+<li><code>SERVERLESS_FRAMEWORK_HEALTH_PATH</code></li>
+</ul>
+<p>That makes the local framework contract explicit on both sides of the boundary:</p>
+<ul>
+<li>the sidecar knows where to call</li>
+<li>the framework container knows what endpoint it is expected to expose</li>
+</ul>
+<h2 id="the-new-status-surface">The New Status Surface</h2>
+<p>This chapter also extends <code>GPUUnit.status</code>.</p>
+<p>There is now a dedicated:</p>
+<ul>
+<li><code>status.serverless</code></li>
+<li><code>ServerlessReady</code> condition</li>
+</ul>
+<p>The status includes:</p>
+<ul>
+<li><code>phase</code></li>
+<li><code>dispatchSubject</code></li>
+<li><code>socketPath</code></li>
+<li><code>invokePath</code></li>
+<li><code>healthPath</code></li>
+</ul>
+<p>This is useful for two reasons.</p>
+<p>First, it lets us debug the worker-side boundary without dropping straight into Pod logs.</p>
+<p>Second, it gives the next lifecycle chapter one stable place to attach readiness and lifecycle semantics.</p>
+<p>The worker lifecycle manager should not infer everything from Pod phase forever.
+It should have one explicit serverless status surface to build on.</p>
+<h2 id="one-quiet-but-important-network-policy-change">One Quiet But Important Network Policy Change</h2>
+<p>There is one more change here that is easy to miss.</p>
+<p>By default, this project blocks several private CIDR ranges from worker egress.</p>
+<p>That is a good security default, but it would also accidentally block the sidecar from reaching an in-cluster NATS Service.</p>
+<p>So the network-policy helper now adds one explicit exception when:</p>
+<ul>
+<li>serverless is enabled</li>
+<li>the configured NATS URL points at a Kubernetes <code>*.svc</code> DNS name</li>
+<li>the manager config also provides <code>serverless.networkPolicyTarget.namespace</code> and <code>podLabels</code></li>
+</ul>
+<p>In that case the generated <code>NetworkPolicy</code> does <strong>not</strong> open a whole CIDR range.
+It creates one egress peer with:</p>
+<ul>
+<li>a <code>namespaceSelector</code> for the NATS namespace</li>
+<li>a <code>podSelector</code> for the NATS Pods</li>
+<li>one TCP port rule derived from the NATS URL</li>
+</ul>
+<p>That keeps the secure default, but still lets the worker Pod reach exactly one trusted platform dependency.</p>
+<p>If <code>serverless.url</code> points at a cluster Service but <code>networkPolicyTarget</code> is missing, the runtime now treats that as a configuration error instead of silently creating a worker that cannot reach NATS.</p>
+<h2 id="verification">Verification</h2>
+<p>There are two useful verification layers for this chapter.</p>
+<h3 id="1-cluster-side-injection">1. Cluster-side injection</h3>
+<p>Create one serverless-enabled <code>GPUUnit</code>:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/gpu-units</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{</span></span>
+<span class="line"><span style="color:#F1FA8C">    "operationID":"unit-sd-webui-001",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "name":"sd-webui-template",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "specName":"g1.1",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "image":"python:3.12",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "template":{</span></span>
+<span class="line"><span style="color:#F1FA8C">      "ports":[{"name":"http","port":8080}]</span></span>
+<span class="line"><span style="color:#F1FA8C">    },</span></span>
+<span class="line"><span style="color:#F1FA8C">    "access":{</span></span>
+<span class="line"><span style="color:#F1FA8C">      "primaryPort":"http",</span></span>
+<span class="line"><span style="color:#F1FA8C">      "scheme":"http"</span></span>
+<span class="line"><span style="color:#F1FA8C">    },</span></span>
+<span class="line"><span style="color:#F1FA8C">    "serverless":{</span></span>
+<span class="line"><span style="color:#F1FA8C">      "requestID":"sd-webui",</span></span>
+<span class="line"><span style="color:#F1FA8C">      "framework":{</span></span>
+<span class="line"><span style="color:#F1FA8C">        "socketPath":"/tmp/serverless-framework/framework.sock",</span></span>
+<span class="line"><span style="color:#F1FA8C">        "invokePath":"/invoke",</span></span>
+<span class="line"><span style="color:#F1FA8C">        "healthPath":"/healthz"</span></span>
+<span class="line"><span style="color:#F1FA8C">      }</span></span>
+<span class="line"><span style="color:#F1FA8C">    }</span></span>
+<span class="line"><span style="color:#F1FA8C">  }</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>Then inspect the generated Deployment:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">kubectl</span><span style="color:#F1FA8C"> get</span><span style="color:#F1FA8C"> deploy</span><span style="color:#BD93F9"> -n</span><span style="color:#F1FA8C"> runtime-instance</span><span style="color:#F1FA8C"> sd-webui-template</span><span style="color:#BD93F9"> -o</span><span style="color:#F1FA8C"> yaml</span></span></code></pre>
+<p>You should see:</p>
+<ul>
+<li>one restartable init sidecar named <code>serverless-sidecar</code></li>
+<li>framework env vars injected into the runtime container</li>
+<li><code>status.serverless.dispatchSubject</code> on the <code>GPUUnit</code></li>
+</ul>
+<h3 id="2-local-worker-loop-verification">2. Local worker-loop verification</h3>
+<p>Start NATS:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">nats-server</span><span style="color:#BD93F9"> -js</span></span></code></pre>
+<p>Start the manager:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#BD93F9">GOTOOLCHAIN</span><span style="color:#FF79C6">=</span><span style="color:#F1FA8C">go1.26.0</span><span style="color:#50FA7B"> go</span><span style="color:#F1FA8C"> run</span><span style="color:#F1FA8C"> ./cmd/main.go</span><span style="color:#BD93F9"> --config</span><span style="color:#F1FA8C"> config/local/runtime-manager.yaml</span></span></code></pre>
+<p>Start the activator:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#BD93F9">GOTOOLCHAIN</span><span style="color:#FF79C6">=</span><span style="color:#F1FA8C">go1.26.0</span><span style="color:#50FA7B"> go</span><span style="color:#F1FA8C"> run</span><span style="color:#F1FA8C"> ./cmd/activator</span><span style="color:#BD93F9"> --config</span><span style="color:#F1FA8C"> config/local/activator.yaml</span></span></code></pre>
+<p>Start the example local framework:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#BD93F9">SERVERLESS_FRAMEWORK_SOCKET_PATH</span><span style="color:#FF79C6">=</span><span style="color:#F1FA8C">/tmp/serverless-framework/framework.sock</span><span style="color:#50FA7B"> \</span></span>
+<span class="line"><span style="color:#F8F8F2">GOTOOLCHAIN=go1.26.0 </span><span style="color:#F1FA8C">go</span><span style="color:#F1FA8C"> run</span><span style="color:#F1FA8C"> ./cmd/framework-echo</span></span></code></pre>
+<p>Start the worker sidecar:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#BD93F9">SERVERLESS_NATS_URL</span><span style="color:#FF79C6">=</span><span style="color:#F1FA8C">nats://127.0.0.1:4222</span><span style="color:#50FA7B"> \</span></span>
+<span class="line"><span style="color:#F8F8F2">SERVERLESS_SUBJECT_PREFIX=runtime.serverless </span><span style="color:#FF79C6">\</span></span>
+<span class="line"><span style="color:#F8F8F2">SERVERLESS_STREAM_NAME=RUNTIME_SERVERLESS </span><span style="color:#FF79C6">\</span></span>
+<span class="line"><span style="color:#F8F8F2">SERVERLESS_WORKER_NAME=sd-webui-template </span><span style="color:#FF79C6">\</span></span>
+<span class="line"><span style="color:#F8F8F2">SERVERLESS_WORKER_NAMESPACE=runtime-instance </span><span style="color:#FF79C6">\</span></span>
+<span class="line"><span style="color:#F8F8F2">SERVERLESS_REQUEST_ID=sd-webui </span><span style="color:#FF79C6">\</span></span>
+<span class="line"><span style="color:#F8F8F2">SERVERLESS_FRAMEWORK_SOCKET_PATH=/tmp/serverless-framework/framework.sock </span><span style="color:#FF79C6">\</span></span>
+<span class="line"><span style="color:#F8F8F2">SERVERLESS_FRAMEWORK_INVOKE_PATH=/invoke </span><span style="color:#FF79C6">\</span></span>
+<span class="line"><span style="color:#F8F8F2">SERVERLESS_FRAMEWORK_HEALTH_PATH=/healthz </span><span style="color:#FF79C6">\</span></span>
+<span class="line"><span style="color:#F8F8F2">GOTOOLCHAIN=go1.26.0 </span><span style="color:#F1FA8C">go</span><span style="color:#F1FA8C"> run</span><span style="color:#F1FA8C"> ./cmd/serverless-sidecar</span></span></code></pre>
+<p>Then issue one sync invocation:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#50FA7B">curl</span><span style="color:#BD93F9"> -s</span><span style="color:#BD93F9"> -X</span><span style="color:#F1FA8C"> POST</span><span style="color:#F1FA8C"> http://127.0.0.1:8080/api/v1/serverless/invocations</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -H</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">Content-Type: application/json</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> \</span></span>
+<span class="line"><span style="color:#BD93F9">  -d</span><span style="color:#E9F284"> '</span><span style="color:#F1FA8C">{</span></span>
+<span class="line"><span style="color:#F1FA8C">    "serverlessRequestID":"sd-webui",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "mode":"sync",</span></span>
+<span class="line"><span style="color:#F1FA8C">    "attributes":{</span></span>
+<span class="line"><span style="color:#F1FA8C">      "path":"/generate",</span></span>
+<span class="line"><span style="color:#F1FA8C">      "method":"POST"</span></span>
+<span class="line"><span style="color:#F1FA8C">    },</span></span>
+<span class="line"><span style="color:#F1FA8C">    "payload":{</span></span>
+<span class="line"><span style="color:#F1FA8C">      "prompt":"draw a robot"</span></span>
+<span class="line"><span style="color:#F1FA8C">    }</span></span>
+<span class="line"><span style="color:#F1FA8C">  }</span><span style="color:#E9F284">'</span><span style="color:#FF79C6"> |</span><span style="color:#50FA7B"> jq</span></span></code></pre>
+<p>At this point the sync path should no longer stop at activator dispatch.
+It should return a worker-side result envelope generated by the example framework.</p>
+<h2 id="summary">Summary</h2>
+<p>Part 15 is where the worker Pod stops being only a deployment target and starts becoming a trusted execution boundary.</p>
+<p>We now have:</p>
+<ul>
+<li>a real worker sidecar process</li>
+<li>a concrete unix domain socket framework contract</li>
+<li>controller-side injection of that sidecar into serverless <code>GPUUnit</code> Pods</li>
+<li>worker-side result, sync reply, and metrics publication</li>
+<li><code>status.serverless</code> and <code>ServerlessReady</code> for the Pod-local queue boundary</li>
+</ul>
+<p>That is the missing half of the design we sketched in Part 14.</p>
+<p>The activator can now publish a worker-targeted dispatch subject, and the worker Pod actually knows how to consume it without ever handing NATS directly to user code.</p>
+<h2 id="next-chapter-preview">Next Chapter Preview</h2>
+<p>Part 16 will build on these worker-side metrics and lifecycle signals to handle prewarm pools, idle scale-down, and more complete async result handling.</p>
+<h2 id="repository">Repository</h2>
+<p>Code for this chapter:</p>
+<ul>
+<li><a href="https://github.com/LokiWager/gpu-operator-runtime" rel="nofollow noopener noreferrer" target="_blank">gpu-operator-runtime</a></li>
+</ul>  <section class="not-prose mt-16" aria-labelledby="comments-heading"><hr class="border-solid"><div class="mt-10 space-y-5"><div class="space-y-2"><h2 id="comments-heading" class="text-xl font-semibold text-accent-2">
+Comments
+</h2><p class="text-sm text-textColor/80">
+Join the discussion with your GitHub account. Powered by <a href="https://giscus.app" target="_blank" rel="noreferrer">
+giscus
+</a>
+.
+</p></div><div class="rounded-2xl border border-zinc-300/70 bg-bgColor/40 p-3 dark:border-zinc-700/80"><giscus-comments class="block"><div class="giscus"></div></giscus-comments><noscript><p class="px-3 py-2 text-sm text-textColor/80">
+Enable JavaScript to load the comment thread.
+</p></noscript></div></div></section><script>(function(){const giscusConfig = {"repo":"LokiWager/lokiwager.github.io","repoId":"R_kgDOK5t_Dg","category":"Announcements","categoryId":"DIC_kwDOK5t_Ds4C4eyH","mapping":"pathname","strict":"0","reactionsEnabled":"1","emitMetadata":"0","inputPosition":"top","lang":"en","loading":"lazy","theme":{"light":"light","dark":"dark_dimmed"}};
+
+	class GiscusComments extends HTMLElement {
+		container = null;
+
+		handleThemeChange = (event) => {
+			const nextTheme =
+				event instanceof CustomEvent && typeof event.detail?.theme === "string"
+					? event.detail.theme
+					: undefined;
+			this.syncTheme(nextTheme);
+		};
+
+		connectedCallback() {
+			this.container = this.querySelector(".giscus");
+			this.loadWidget();
+			document.addEventListener("theme-change", this.handleThemeChange);
+		}
+
+		disconnectedCallback() {
+			document.removeEventListener("theme-change", this.handleThemeChange);
+		}
+
+		loadWidget() {
+			if (!giscusConfig || !this.container || this.container.dataset.loaded === "true") {
+				return;
+			}
+
+			const script = document.createElement("script");
+			script.src = "https://giscus.app/client.js";
+			script.async = true;
+			script.crossOrigin = "anonymous";
+			script.dataset.giscusScript = "true";
+			script.setAttribute("data-repo", giscusConfig.repo);
+			script.setAttribute("data-repo-id", giscusConfig.repoId);
+			script.setAttribute("data-category", giscusConfig.category);
+			script.setAttribute("data-category-id", giscusConfig.categoryId);
+			script.setAttribute("data-mapping", giscusConfig.mapping);
+			script.setAttribute("data-strict", giscusConfig.strict);
+			script.setAttribute("data-reactions-enabled", giscusConfig.reactionsEnabled);
+			script.setAttribute("data-emit-metadata", giscusConfig.emitMetadata);
+			script.setAttribute("data-input-position", giscusConfig.inputPosition);
+			script.setAttribute("data-lang", giscusConfig.lang);
+			script.setAttribute("data-loading", giscusConfig.loading);
+			script.setAttribute("data-theme", this.resolveTheme());
+
+			if (giscusConfig.term) {
+				script.setAttribute("data-term", giscusConfig.term);
+			}
+
+			this.container.append(script);
+			this.container.dataset.loaded = "true";
+		}
+
+		resolveTheme(theme) {
+			const activeTheme =
+				theme ?? (document.documentElement.classList.contains("dark") ? "dark" : "light");
+			return activeTheme === "dark" ? giscusConfig.theme.dark : giscusConfig.theme.light;
+		}
+
+		syncTheme(theme) {
+			const iframe = this.container?.querySelector("iframe.giscus-frame");
+
+			if (!iframe?.contentWindow) {
+				return;
+			}
+
+			// giscus updates live through a postMessage bridge after the iframe has mounted.
+			iframe.contentWindow.postMessage(
+				{
+					giscus: {
+						setConfig: {
+							theme: this.resolveTheme(theme),
+						},
+					},
+				},
+				"https://giscus.app",
+			);
+		}
+	}
+
+	if (!customElements.get("giscus-comments")) {
+		customElements.define("giscus-comments", GiscusComments);
+	}
+})();</script>  </div> </article> <aside class="sticky top-20 order-2 hidden lg:block"> <h2 class="font-semibold">Table of Contents</h2> <ul class="mt-4 text-sm"> <li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#chapter-goal" aria-label="Scroll to section: Chapter Goal">Chapter Goal</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#why-the-sidecar-owns-nats" aria-label="Scroll to section: Why The Sidecar Owns NATS">Why The Sidecar Owns NATS</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#why-the-framework-contract-lives-in-the-unit-spec" aria-label="Scroll to section: Why The Framework Contract Lives In The Unit Spec">Why The Framework Contract Lives In The Unit Spec</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#the-local-framework-contract" aria-label="Scroll to section: The Local Framework Contract">The Local Framework Contract</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#the-framework-helper-package" aria-label="Scroll to section: The Framework Helper Package">The Framework Helper Package</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#the-worker-sidecar-loop" aria-label="Scroll to section: The Worker Sidecar Loop">The Worker Sidecar Loop</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#why-the-sidecar-is-injected-as-a-restartable-init-sidecar" aria-label="Scroll to section: Why The Sidecar Is Injected As A Restartable Init Sidecar">Why The Sidecar Is Injected As A Restartable Init Sidecar</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#the-new-status-surface" aria-label="Scroll to section: The New Status Surface">The New Status Surface</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#one-quiet-but-important-network-policy-change" aria-label="Scroll to section: One Quiet But Important Network Policy Change">One Quiet But Important Network Policy Change</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#verification" aria-label="Scroll to section: Verification">Verification</a> <ul> <li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#1-cluster-side-injection" aria-label="Scroll to section: 1. Cluster-side injection">1. Cluster-side injection</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#2-local-worker-loop-verification" aria-label="Scroll to section: 2. Local worker-loop verification">2. Local worker-loop verification</a>  </li> </ul> </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#summary" aria-label="Scroll to section: Summary">Summary</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#next-chapter-preview" aria-label="Scroll to section: Next Chapter Preview">Next Chapter Preview</a>  </li><li> <a class="mt-3 line-clamp-2 block hover:text-accent" href="#repository" aria-label="Scroll to section: Repository">Repository</a>  </li> </ul> </aside> </div> <button id="to-top-btn" class="z-90 fixed bottom-8 end-4 flex h-10 w-10 translate-y-28 items-center justify-center rounded-full border-2 border-transparent bg-zinc-200 text-3xl opacity-0 transition-all duration-300 hover:border-zinc-400 data-[show=true]:translate-y-0 data-[show=true]:opacity-100 dark:bg-zinc-700 sm:end-8 sm:h-12 sm:w-12" aria-label="Back to Top" data-show="false"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6"> <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path> </svg> </button>  </main> <footer class="mt-auto flex w-full flex-col items-center justify-center gap-y-2 px-8 pb-4 pt-20 text-center align-top font-semibold text-gray-600 dark:text-gray-400 sm:flex-row sm:justify-between sm:text-xs lg:px-0"> <div class="me-0 sm:me-4">
+Copyright &copy; 2026  Loki&#39;s Wager </div> <nav aria-label="More on this site" class="flex gap-x-2 sm:gap-x-0 sm:divide-x sm:divide-gray-500"> <!--{--> <!--	menuLinks.map((link) => (--> <!--		<a--> <!--			href={link.path}--> <!--			class="px-4 py-2 sm:px-2 sm:py-0 sm:hover:text-textColor sm:hover:underline"--> <!--		>--> <!--			{link.title}--> <!--		</a>--> <!--	))--> <!--}--> <div class="flex flex-wrap items-end gap-x-4"> <!--<p>Find me on</p>--> <ul class="flex flex-1 items-center gap-x-2 sm:flex-initial"> <li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://github.com/LokiWager" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:github">   <symbol id="ai:mdi:github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5c.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34c-.46-1.16-1.11-1.47-1.11-1.47c-.91-.62.07-.6.07-.6c1 .07 1.53 1.03 1.53 1.03c.87 1.52 2.34 1.07 2.91.83c.09-.65.35-1.09.63-1.34c-2.22-.25-4.55-1.11-4.55-4.92c0-1.11.38-2 1.03-2.71c-.1-.25-.45-1.29.1-2.64c0 0 .84-.27 2.75 1.02c.79-.22 1.65-.33 2.5-.33s1.71.11 2.5.33c1.91-1.29 2.75-1.02 2.75-1.02c.55 1.35.2 2.39.1 2.64c.65.71 1.03 1.6 1.03 2.71c0 3.82-2.34 4.66-4.57 4.91c.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2"/></symbol><use href="#ai:mdi:github"></use>  </svg> <span class="sr-only">Github</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://twitter.com/loki66118227" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:twitter">   <symbol id="ai:mdi:twitter" viewBox="0 0 24 24"><path fill="currentColor" d="M22.46 6c-.77.35-1.6.58-2.46.69c.88-.53 1.56-1.37 1.88-2.38c-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29c0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15c0 1.49.75 2.81 1.91 3.56c-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.2 4.2 0 0 1-1.93.07a4.28 4.28 0 0 0 4 2.98a8.52 8.52 0 0 1-5.33 1.84q-.51 0-1.02-.06C3.44 20.29 5.7 21 8.12 21C16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56c.84-.6 1.56-1.36 2.14-2.23"/></symbol><use href="#ai:mdi:twitter"></use>  </svg> <span class="sr-only">Twitter</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="mailto:lokitingyi@gmail.com" target="_blank" rel="noopener noreferrer me authn"> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:email">   <symbol id="ai:mdi:email" viewBox="0 0 24 24"><path fill="currentColor" d="m20 8l-8 5l-8-5V6l8 5l8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"/></symbol><use href="#ai:mdi:email"></use>  </svg> <span class="sr-only">email</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://space.bilibili.com/4810234" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="ri:bilibili-fill">   <symbol id="ai:ri:bilibili-fill" viewBox="0 0 24 24"><path fill="currentColor" d="M18.223 3.086a1.25 1.25 0 0 1 0 1.768L17.08 5.996h1.17A3.75 3.75 0 0 1 22 9.747v7.5a3.75 3.75 0 0 1-3.75 3.75H5.75A3.75 3.75 0 0 1 2 17.247v-7.5a3.75 3.75 0 0 1 3.75-3.75h1.166L5.775 4.855a1.25 1.25 0 0 1 1.767-1.768l2.652 2.652q.119.119.198.257h3.213q.08-.14.199-.258l2.651-2.652a1.25 1.25 0 0 1 1.768 0m.027 5.42H5.75a1.25 1.25 0 0 0-1.247 1.157l-.003.094v7.5c0 .659.51 1.198 1.157 1.246l.093.004h12.5a1.25 1.25 0 0 0 1.247-1.157l.003-.093v-7.5c0-.69-.56-1.25-1.25-1.25m-10 2.5c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25m7.5 0c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 1 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25"/></symbol><use href="#ai:ri:bilibili-fill"></use>  </svg> <span class="sr-only">Bilibili</span> </a> </li><li class="flex"> <a class="inline-block p-1 sm:hover:text-link" href="https://www.instagram.com/lokiwager/" target="_blank" rel="noopener noreferrer "> <svg width="1em" height="1em" class="h-6 w-6" aria-hidden="true" focusable="false" data-icon="mdi:instagram">   <symbol id="ai:mdi:instagram" viewBox="0 0 24 24"><path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4zm9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3"/></symbol><use href="#ai:mdi:instagram"></use>  </svg> <span class="sr-only">Instagram</span> </a> </li> </ul> </div> </nav> </footer> </body></html> <script type="module">const e=document.getElementById("to-top-btn"),n=document.getElementById("blog-hero");function c(t){t.forEach(o=>{e.dataset.show=(!o.isIntersecting).toString()})}e.addEventListener("click",()=>{document.documentElement.scrollTo({top:0,behavior:"smooth"})});const r=new IntersectionObserver(c);r.observe(n);</script>
