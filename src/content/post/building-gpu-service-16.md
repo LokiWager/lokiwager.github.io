@@ -1,6 +1,6 @@
 ---
 title: "Building a GPU SaaS Platform - Worker Lifecycle"
-publishDate: "01 Jun 2026"
+publishDate: "08 Jun 2026"
 description: "Part 16: add activator-owned worker lifecycle management, prewarm pools, idle scale-down, and metrics-driven worker state."
 tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator", "Serverless", "NATS"]
 ---
