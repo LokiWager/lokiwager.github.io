@@ -1,6 +1,6 @@
 ---
 title: "Building a GPU SaaS Platform - Runtime Control Plane Split"
-publishDate: "14 Jun 2026"
+publishDate: "15 Jun 2026"
 description: "Part 18: split the runtime into a reconciler-only controller manager and a separate runtime API server."
 tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator", "Control Plane"]
 ---
