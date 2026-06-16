@@ -148,3 +148,9 @@ That keeps the serverless runtime modular.
 Each loop can scale, fail, and evolve independently.
 
 The next step is reliability and performance engineering: retry policy, dead-letter handling, result retention, backpressure, and the metrics we need to operate this path under real load.
+
+## Repository
+
+Code for this chapter:
+
+- [gpu-operator-runtime](https://github.com/LokiWager/gpu-operator-runtime)
