@@ -1,6 +1,6 @@
 ---
 title: "Building a GPU SaaS Platform - DRA Package Allocation"
-publishDate: "17 Jun 2026"
+publishDate: "29 Jun 2026"
 description: "Part 19: replace runtime-side GPU counting with DRA-backed package allocation, ResourceClaim status, and controlled runtime packages."
 tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator", "DRA"]
 ---
