@@ -1,6 +1,6 @@
 ---
 title: "Building a GPU SaaS Platform - Reliable Serverless Execution"
-publishDate: "2 July 2026"
+publishDate: "6 July 2026"
 description: "Part 21: add queue retry policy, dead-letter handling, execution state classification, and runtime behavior changes for serverless GPU execution."
 tags: ["GPU", "SaaS", "Kubernetes", "Golang", "Operator", "Serverless", "NATS", "ScyllaDB"]
 ---
